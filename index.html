@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TimePilot - AI時間管理パーソナルコーチ</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #161f30;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --accent-neon: #00f2fe;
+            --accent-purple: #4facfe;
+            --accent-green: #00ff87;
+            --border-color: #23324d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-bottom: 60px;
+        }
+
+        header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(180deg, rgba(22,31,48,0.5) 0%, rgba(11,15,25,0) 100%);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            background: linear-gradient(45deg, var(--accent-neon), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+        }
+
+        .hero h1 {
+            font-size: 22px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .hero p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--accent-neon);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, input[type="text"]:focus {
+            border-color: var(--accent-neon);
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(45deg, var(--accent-purple), var(--accent-neon));
+            color: #fff;
+            border: none;
+            padding: 15px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+            margin-top: 10px;
+        }
+
+        .btn-submit:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        /* 出力結果セクション */
+        #result-section {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10s); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .ai-coach-box {
+            background: linear-gradient(135deg, rgba(79,172,254,0.1) 0%, rgba(0,242,254,0.1) 100%);
+            border-left: 4px solid var(--accent-neon);
+            padding: 15px;
+            border-radius: 0 12px 12px 0;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .ai-avatar {
+            font-weight: bold;
+            color: var(--accent-neon);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .timeline {
+            position: relative;
+            margin-left: 10px;
+            padding-left: 20px;
+            border-left: 2px solid var(--border-color);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 4px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--border-color);
+            border: 2px solid var(--bg-color);
+        }
+
+        .timeline-item.active::before {
+            background-color: var(--accent-neon);
+            box-shadow: 0 0 8px var(--accent-neon);
+        }
+
+        .timeline-time {
+            font-size: 12px;
+            color: var(--accent-purple);
+            font-weight: bold;
+        }
+
+        .timeline-title {
+            font-size: 15px;
+            font-weight: bold;
+            margin: 2px 0;
+        }
+
+        .timeline-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .share-box {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255,255,255,0.05);
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            font-size: 11px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            margin-top: 5px;
+        }
+
+        .feedback-link {
+            color: var(--accent-neon);
+            text-decoration: none;
+            display: block;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">✦ TimePilot</div>
+    </header>
+
+    <div class="container">
+        
+        <section class="hero">
+            <h1>スマホに奪われた時間を、自分の未来に変える。</h1>
+            <p>あなた専用のパーソナルAIタイムコーチ</p>
+        </section>
+
+        <!-- 入力フォーム -->
+        <section class="card" id="form-section">
+            <div class="card-title">🤖 AIスケジュール診断</div>
+            
+            <div class="form-group">
+                <label for="user-type">あなたの属性</label>
+                <select id="user-type">
+                    <option value="高校生">高校生</option>
+                    <option value="大学生">大学生</option>
+                    <option value="若手社会人">若手社会人</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="goal">今日の最も重要な目標</label>
+                <select id="goal">
+                    <option value="定期テスト・試験勉強">定期テスト・試験勉強</option>
+                    <option value="資格取得・スキルアップ">資格取得・スキルアップ</option>
+                    <option value="読書・趣味の充実">読書・趣味の充実</option>
+                    <option value="睡眠・生活リズム改善">睡眠・生活リズム改善</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="fixed-schedule">外せない予定（例: 学校、バイト、仕事など）</label>
+                <select id="fixed-schedule">
+                    <option value="day_free">今日は1日フリー（休み）</option>
+                    <option value="standard_day">日中に学校や仕事がある（9:00〜16:00）</option>
+                    <option value="busy_day">学校/仕事＋夕方にバイト等がある（9:00〜21:00）</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="smartphone-trap">ついスマホを無駄に見がちな時間帯</label>
+                <select id="smartphone-trap">
+                    <option value="morning">朝、起きてすぐ</option>
+                    <option value="commute">通学・通勤の移動中</option>
+                    <option value="arrival">帰宅してからのダラダラ時間</option>
+                    <option value="bed">ベッドに入ってから寝るまで</option>
+                </select>
+            </div>
+
+            <button class="btn-submit" onclick="generateAISchedule()">AIにスケジュールを作ってもらう</button>
+        </section>
+
+        <!-- AI出力結果画面 -->
+        <section class="card" id="result-section">
+            <div class="card-title">✨ 今日のAI最適化プラン</div>
+            
+            <div class="ai-coach-box">
+                <div class="ai-avatar">✨ AIライフコーチからの助言</div>
+                <div id="ai-message">分析中...</div>
+            </div>
+
+            <div class="timeline" id="timeline-container">
+                <!-- ここにJavaScriptでタイムラインが動的に生成されます -->
+            </div>
+
+            <div class="share-box">
+                <button class="btn-secondary" onclick="resetForm()">もう一度診断する</button>
+            </div>
+        </section>
+
+        <footer>
+            <a href="#" class="feedback-link">💡 試作品へのフィードバックを送信（1秒アンケート）</a>
+            <p>© 2026 TimePilot Project. All rights reserved.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        function generateAISchedule() {
+            const userType = document.getElementById('user-type').value;
+            const goal = document.getElementById('goal').value;
+            const fixedSchedule = document.getElementById('fixed-schedule').value;
+            const trap = document.getElementById('smartphone-trap').value;
+
+            // AIメッセージの疑似生成
+            let aiMessage = "";
+            let timelineData = [];
+
+            // ユーザータイプや課題に応じた動的ロジック
+            if (trap === "arrival") {
+                aiMessage = `帰宅直後は最も脳が疲れていてスマホの誘惑に負けやすい魔の時間帯です。${userType}のあなたにとって、ここを「30分の全力リフレッシュ」に変えるだけで、今日の『${goal}』の目標達成率は【85%】まで跳ね上がります！`;
+            } else if (trap === "bed") {
+                aiMessage = `就寝前のスマホは睡眠の質を破壊し、明日の生産性を下げてしまいます。今日はベッドの半径1.5m以内にスマホを置かないルールにしましょう。${goal}のために、夜は早めのオフラインが吉です。`;
+            } else {
+                aiMessage = `素晴らしい意識ですね！${userType}の生活リズムと『${goal}』の目標に合わせて、無駄なスキマ時間を極小化するタイムラインを設計しました。`;
+            }
+
+            // タイムラインの構築
+            if (fixedSchedule === "standard_day") {
+                timelineData = [
+                    { time: "07:30 - 08:30", title: "朝のブーストタイム", desc: "スマホをカバンに仕舞い、今日の目標タスクを頭の中で整理。", active: false },
+                    { time: "09:00 - 16:00", title: "学校 / 本業集中", desc: "目の前の作業に全力投球。SNSの通知は完全オフへ。", active: false },
+                    { time: "16:30 - 17:00", title: "限定スマホ許可タイム 📱", desc: "帰宅後のこの30分だけチェック！タイマーが鳴ったら即終了。", active: true },
+                    { time: "17:00 - 19:00", title: "極大集中ゾーン 🔥", desc: `今が一番エネルギーがあります。『${goal}』に直行しましょう！`, active: true },
+                    { time: "19:00 - 21:00", title: "夕食・リラックス", desc: "自分へのご褒美時間。ただし動画の自動再生はオフに。", active: false },
+                    { time: "22:30 ~", title: "デジタルデトックス・睡眠 😴", desc: "スマホの画面を伏せて脳を休める。明日最高のスタートを切るために。", active: false }
+                ];
+            } else if (fixedSchedule === "busy_day") {
+                timelineData = [
+                    { time: "09:00 - 17:00", title: "学校 / 本業セッション", desc: "スキマ時間の5分だけ単語やタスクチェックに充てる。", active: false },
+                    { time: "17:30 - 21:00", title: "アルバイト / 予定", desc: "切り替えて集中。移動時間はスマホを見ず脳を休める。", active: false },
+                    { time: "21:30 - 22:00", title: "1日の振り返りタイム", desc: `遅い時間ですが、${goal}に向けて30分だけ超集中コミット。`, active: true },
+                    { time: "23:00 ~", title: "完全シャットダウン", desc: "スマホを遠くに置いて即就寝。お疲れ様でした！", active: false }
+                ];
+            } else { // day_free
+                timelineData = [
+                    { time: "08:00 - 09:00", title: "モーニングルーティン", desc: "起きてすぐスマホに触らないチャレンジ！", active: true },
+                    { time: "09:00 - 12:00", title: "午前中の黄金タイム 🔥", desc: `一番頭が冴えています。『${goal}』のヘビーな部分をここで終わらせる。`, active: true },
+                    { time: "13:00 - 14:00", title: "自由スマホタイム 📱", desc: "ここで1時間しっかり楽しんで、午後に引きずらないようにする。", active: false },
+                    { time: "14:00 - 17:00", title: "午後の継続セッション", desc: "場所を変える（カフェや図書館など）とさらに集中力アップ。", active: false },
+                    { time: "22:00 ~", title: "ナイトデトックス", desc: "スマホをリビングに置いて寝室へ。", active: false }
+                ];
+            }
+
+            // HTMLへの描画
+            document.getElementById('ai-message').innerText = aiMessage;
+            const container = document.getElementById('timeline-container');
+            container.innerHTML = ""; // 初期化
+
+            timelineData.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `timeline-item ${item.active ? 'active' : ''}`;
+                itemDiv.innerHTML = `
+                    <div class="timeline-time">${item.time}</div>
+                    <div class="timeline-title">${item.title}</div>
+                    <div class="timeline-desc">${item.desc}</div>
+                `;
+                container.appendChild(itemDiv);
+            });
+
+            // 画面の切り替え
+            document.getElementById('form-section').style.display = 'none';
+            const resultSection = document.getElementById('result-section');
+            resultSection.style.display = 'block';
+            window.scrollTo({ top: resultSection.offsetTop - 20, behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            document.getElementById('result-section').style.display = 'none';
+            document.getElementById('form-section').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
