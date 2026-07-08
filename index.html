@@ -247,8 +247,8 @@
         }
 
         .api-key-box {
-            background-color: #1a1625;
-            border: 1px solid #4a2b6d;
+            background-color: #171426;
+            border: 1px solid #45296b;
             border-radius: 8px;
             padding: 12px;
             margin-bottom: 20px;
@@ -257,7 +257,7 @@
 
         .api-key-box p {
             margin-bottom: 6px;
-            color: #d6bbf2;
+            color: #d1b5f5;
         }
 
         footer {
@@ -284,12 +284,12 @@
         </section>
 
         <section class="card" id="form-section">
-            <div class="card-title">🤖 AIスケジュール診断</div>
+            <div class="card-title">🤖 AIスケジュール診断 (Groq版)</div>
 
             <div class="api-key-box">
-                <p>🔑 【デモ用設定】本物のAIで分析を行うにはGemini APIキーを入力してください：</p>
-                <input type="text" id="api-key" placeholder="AIzaSy..." style="padding: 8px; font-size: 12px;">
-                <span style="color: var(--text-muted); font-size: 10px; display:block; margin-top:4px;">※キーはサーバーに送信されず、あなたのブラウザ上でのみ直接AI通信に使用されます。未入力の場合は、従来通りの模擬シミュレーションが動作します。</span>
+                <p>⚡ 【爆速デモ】本物のAIで分析を行うにはGroq APIキーを入力してください：</p>
+                <input type="text" id="api-key" placeholder="gsk_..." style="padding: 8px; font-size: 12px;">
+                <span style="color: var(--text-muted); font-size: 10px; display:block; margin-top:4px;">※キーはブラウザ上でのみ直接Groq社との安全な通信に使用されます。未入力時は模擬デモが動作します。</span>
             </div>
             
             <div class="form-group">
@@ -359,7 +359,6 @@
     </div>
 
     <script>
-        // 「その他」を選んだときに自由記述欄を出す制御
         function toggleCustomInput(selectId, customId) {
             const selectEl = document.getElementById(selectId);
             const customEl = document.getElementById(customId);
@@ -372,26 +371,35 @@
             }
         }
 
-        // スケジュール生成メインロジック
-        async class AIService {
-            static async fetchFromGemini(apiKey, prompt) {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        // Groq API呼び出し用サービス
+        class GroqService {
+            static async fetchFromGroq(apiKey, prompt) {
+                const url = 'https://api.groq.com/openai/v1/chat/completions';
                 const response = await fetch(url, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }],
-                        generationConfig: { responseMimeType: "application/json" }
+                        model: "llama-3.1-8b-instant", // 高速かつ高品質な軽量モデルを選択
+                        messages: [
+                            { role: "user", content: prompt }
+                        ],
+                        response_format: { type: "json_object" }, // JSONで返却させる設定
+                        temperature: 0.7
                     })
                 });
-                if (!response.ok) throw new Error('API通信に失敗しました。キーが正しいか確認してください。');
+                
+                if (!response.ok) {
+                    throw new Error('Groq APIとの通信に失敗しました。キーが正しいか確認してください。');
+                }
                 const data = await response.json();
-                return JSON.parse(data.candidates[0].content.parts[0].text);
+                return JSON.parse(data.choices[0].message.content);
             }
         }
 
         async function generateAISchedule() {
-            // 値の取得
             let userType = document.getElementById('user-type').value;
             if (userType === 'その他') userType = document.getElementById('user-type-custom').value;
 
@@ -404,16 +412,14 @@
 
             const submitBtn = document.getElementById('submit-btn');
             submitBtn.disabled = true;
-            submitBtn.innerText = "AIが思考中...";
+            submitBtn.innerText = "Groq AIが超高速で思考中...";
 
-            // 結果画面の準備表示
             document.getElementById('form-section').style.display = 'none';
             document.getElementById('result-section').style.display = 'block';
-            document.getElementById('ai-message').innerText = "あなたの生活習慣と目標を分析し、最適なスケジュールを20秒ほどで構築しています...";
+            document.getElementById('ai-message').innerText = "Groqの超高速AIエンジンが最適なタイムラインを生成しています...";
             document.getElementById('timeline-container').innerHTML = "";
 
             if (apiKey) {
-                // ④ 実際のAI（Gemini API）を呼び出す処理
                 const systemPrompt = `
                 あなたは15〜25歳の若者に寄り添う優秀なAIタイムコーチ「TimePilot」です。
                 ユーザーから与えられた情報をもとに、スマホの無駄な時間を削減しつつ、目標を達成するための「1日の最適スケジュール」と「コーチの助言」を必ず以下の【指定のJSON形式のみ】で出力してください。
@@ -425,7 +431,7 @@
                 - スマホの誘惑に負けがちな時間帯: ${trap}
 
                 【条件】
-                1. 予定に合わせて、スマホの利用を制限・管理する「スマホコントロール時間（📱）」や、目標に集中する「極大集中タイム（🔥）」をスケジュールの中に自然に組み込んでください。
+                1. ユーザーの予定に合わせて、スマホの利用を制限・管理する「スマホコントロール時間（📱）」や、目標に集中する「極大集中タイム（🔥）」をスケジュールの中に自然に組み込んでください。
                 2. coachMessageは、若者の心に響く、優しくも的確な150文字程度のアドバイスにしてください。
                 3. timeline配列の中の各オブジェクトは、time, title, desc, active(重要な時間ならtrue)の4つのキーを正確に持たせてください。
 
@@ -440,14 +446,13 @@
                 `;
 
                 try {
-                    const result = await AIService.fetchFromGemini(apiKey, systemPrompt);
+                    const result = await GroqService.fetchFromGroq(apiKey, systemPrompt);
                     renderResult(result.coachMessage, result.timeline);
                 } catch (error) {
-                    alert("リアルAIの呼び出しに失敗しました。モックデータに切り替えます。エラー原因: " + error.message);
+                    alert("Groq AIの呼び出しに失敗しました。デモモードに切り替えます。原因: " + error.message);
                     generateMockSchedule(userType, goal, fixedSchedule, trap);
                 }
             } else {
-                // APIキーがない場合は、すぐ動く高精度なシミュレーションを実行
                 setTimeout(() => {
                     generateMockSchedule(userType, goal, fixedSchedule, trap);
                 }, 1000);
@@ -457,13 +462,12 @@
             submitBtn.innerText = "AIにスケジュールを作ってもらう";
         }
 
-        // 模擬（モック）生成ロジック
         function generateMockSchedule(userType, goal, fixedSchedule, trap) {
             const coachMessage = `【デモモード】${userType}のあなたへ。つい「${trap}」にスマホを触ってしまう癖をAIが先回りしてブロックします。今日の重要目標である『${goal}』と、お聞きした固定予定【${fixedSchedule}】のバランスを考慮し、スマホを触る暇を与えない最適タイムラインを組みました。`;
             
             const timeline = [
                 { time: "08:00 - 08:30", title: "朝のスマホコントロール 📱", desc: `「${trap}」の誘惑に勝つため、最初の30分は通知をミュートに。`, active: false },
-                { time: "各固定予定の時間", title: "外せない予定の消化", desc: `入力された予定【${fixedSchedule}】を確実にこなす時間。`, active: false },
+                { time: "予定の時間帯", title: "外せない予定の消化", desc: `入力された予定【${fixedSchedule}】を確実にこなす時間。`, active: false },
                 { time: "18:00 - 20:00", title: "TimePilot 極大集中ゾーン 🔥", desc: `ここが今日の一番の勝負どころ。『${goal}』に全エネルギーを注ぎましょう！`, active: true },
                 { time: "22:00 - 22:30", title: "自由スマホ許可タイム", desc: "1日頑張ったご褒美。アラームをセットしてダラダラ防止。", active: false }
             ];
@@ -471,8 +475,8 @@
             renderResult(coachMessage, timeline);
         }
 
-        // 画面への描画
         function renderResult(coachMessage, timeline) {
+            document.getElementById('api-key').value.trim();
             document.getElementById('ai-message').innerText = coachMessage;
             const container = document.getElementById('timeline-container');
             container.innerHTML = "";
