@@ -100,7 +100,7 @@
             font-weight: 600;
         }
 
-        select, input[type="text"] {
+        select, input[type="text"], textarea {
             width: 100%;
             background-color: var(--bg-color);
             border: 1px solid var(--border-color);
@@ -112,8 +112,20 @@
             transition: border-color 0.3s;
         }
 
-        select:focus, input[type="text"]:focus {
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+            font-family: inherit;
+        }
+
+        select:focus, input[type="text"]:focus, textarea:focus {
             border-color: var(--accent-neon);
+        }
+
+        .sub-input {
+            margin-top: 10px;
+            display: none;
+            animation: fadeIn 0.3s ease-in-out forwards;
         }
 
         .btn-submit {
@@ -136,14 +148,20 @@
             opacity: 0.9;
         }
 
-        /* 出力結果セクション */
+        .btn-submit:disabled {
+            background: #3a4b6e;
+            color: var(--text-muted);
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
         #result-section {
             display: none;
             animation: fadeIn 0.5s ease-in-out forwards;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10s); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -154,6 +172,7 @@
             border-radius: 0 12px 12px 0;
             margin-bottom: 20px;
             font-size: 14px;
+            white-space: pre-wrap;
         }
 
         .ai-avatar {
@@ -209,6 +228,7 @@
         .timeline-desc {
             font-size: 13px;
             color: var(--text-muted);
+            white-space: pre-wrap;
         }
 
         .share-box {
@@ -224,11 +244,20 @@
             border-radius: 20px;
             font-size: 13px;
             cursor: pointer;
-            transition: background-color 0.3s;
         }
 
-        .btn-secondary:hover {
-            background-color: rgba(255,255,255,0.05);
+        .api-key-box {
+            background-color: #1a1625;
+            border: 1px solid #4a2b6d;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 12px;
+        }
+
+        .api-key-box p {
+            margin-bottom: 6px;
+            color: #d6bbf2;
         }
 
         footer {
@@ -237,14 +266,7 @@
             font-size: 11px;
             color: var(--text-muted);
             border-top: 1px solid var(--border-color);
-            margin-top: 5px;
-        }
-
-        .feedback-link {
-            color: var(--accent-neon);
-            text-decoration: none;
-            display: block;
-            margin-bottom: 10px;
+            margin-top: 25px;
         }
     </style>
 </head>
@@ -261,63 +283,69 @@
             <p>あなた専用のパーソナルAIタイムコーチ</p>
         </section>
 
-        <!-- 入力フォーム -->
         <section class="card" id="form-section">
             <div class="card-title">🤖 AIスケジュール診断</div>
+
+            <div class="api-key-box">
+                <p>🔑 【デモ用設定】本物のAIで分析を行うにはGemini APIキーを入力してください：</p>
+                <input type="text" id="api-key" placeholder="AIzaSy..." style="padding: 8px; font-size: 12px;">
+                <span style="color: var(--text-muted); font-size: 10px; display:block; margin-top:4px;">※キーはサーバーに送信されず、あなたのブラウザ上でのみ直接AI通信に使用されます。未入力の場合は、従来通りの模擬シミュレーションが動作します。</span>
+            </div>
             
             <div class="form-group">
                 <label for="user-type">あなたの属性</label>
-                <select id="user-type">
+                <select id="user-type" onchange="toggleCustomInput('user-type', 'user-type-custom')">
                     <option value="高校生">高校生</option>
                     <option value="大学生">大学生</option>
                     <option value="若手社会人">若手社会人</option>
+                    <option value="中学生">中学生</option>
+                    <option value="その他">その他（自由記述）</option>
                 </select>
+                <input type="text" id="user-type-custom" class="sub-input" placeholder="例：受験生、フリーランス、部活生など">
             </div>
 
             <div class="form-group">
                 <label for="goal">今日の最も重要な目標</label>
-                <select id="goal">
+                <select id="goal" onchange="toggleCustomInput('goal', 'goal-custom')">
                     <option value="定期テスト・試験勉強">定期テスト・試験勉強</option>
                     <option value="資格取得・スキルアップ">資格取得・スキルアップ</option>
+                    <option value="部活動・スポーツの自主練">部活動・スポーツの自主練</option>
                     <option value="読書・趣味の充実">読書・趣味の充実</option>
+                    <option value="ダイエット・ボディメイク">ダイエット・ボディメイク</option>
                     <option value="睡眠・生活リズム改善">睡眠・生活リズム改善</option>
+                    <option value="その他">その他（自由記述）</option>
                 </select>
+                <input type="text" id="goal-custom" class="sub-input" placeholder="例：イラストの練習、プログラミング、部屋の片付けなど">
             </div>
 
             <div class="form-group">
-                <label for="fixed-schedule">外せない予定（例: 学校、バイト、仕事など）</label>
-                <select id="fixed-schedule">
-                    <option value="day_free">今日は1日フリー（休み）</option>
-                    <option value="standard_day">日中に学校や仕事がある（9:00〜16:00）</option>
-                    <option value="busy_day">学校/仕事＋夕方にバイト等がある（9:00〜21:00）</option>
-                </select>
+                <label for="fixed-schedule">今日の外せない予定（時間と内容を自由に入力してください）</label>
+                <textarea id="fixed-schedule" placeholder="例：&#13;9:00〜16:00 学校&#13;17:30〜20:00 バイト"></textarea>
             </div>
 
             <div class="form-group">
                 <label for="smartphone-trap">ついスマホを無駄に見がちな時間帯</label>
                 <select id="smartphone-trap">
-                    <option value="morning">朝、起きてすぐ</option>
-                    <option value="commute">通学・通勤の移動中</option>
-                    <option value="arrival">帰宅してからのダラダラ時間</option>
-                    <option value="bed">ベッドに入ってから寝るまで</option>
+                    <option value="朝、起きてすぐ">朝、起きてすぐ</option>
+                    <option value="通学・通勤の移動中">通学・通勤の移動中</option>
+                    <option value="帰宅してからのダラダラ時間">帰宅してからのダラダラ時間</option>
+                    <option value="ベッドに入ってから寝るまで">ベッドに入ってから寝るまで</option>
                 </select>
             </div>
 
-            <button class="btn-submit" onclick="generateAISchedule()">AIにスケジュールを作ってもらう</button>
+            <button class="btn-submit" id="submit-btn" onclick="generateAISchedule()">AIにスケジュールを作ってもらう</button>
         </section>
 
-        <!-- AI出力結果画面 -->
         <section class="card" id="result-section">
             <div class="card-title">✨ 今日のAI最適化プラン</div>
             
             <div class="ai-coach-box">
                 <div class="ai-avatar">✨ AIライフコーチからの助言</div>
-                <div id="ai-message">分析中...</div>
+                <div id="ai-message">AIがあなたのスケジュールを最適化中...</div>
             </div>
 
             <div class="timeline" id="timeline-container">
-                <!-- ここにJavaScriptでタイムラインが動的に生成されます -->
-            </div>
+                </div>
 
             <div class="share-box">
                 <button class="btn-secondary" onclick="resetForm()">もう一度診断する</button>
@@ -325,65 +353,131 @@
         </section>
 
         <footer>
-            <a href="#" class="feedback-link">💡 試作品へのフィードバックを送信（1秒アンケート）</a>
             <p>© 2026 TimePilot Project. All rights reserved.</p>
         </footer>
 
     </div>
 
     <script>
-        function generateAISchedule() {
-            const userType = document.getElementById('user-type').value;
-            const goal = document.getElementById('goal').value;
-            const fixedSchedule = document.getElementById('fixed-schedule').value;
-            const trap = document.getElementById('smartphone-trap').value;
-
-            // AIメッセージの疑似生成
-            let aiMessage = "";
-            let timelineData = [];
-
-            // ユーザータイプや課題に応じた動的ロジック
-            if (trap === "arrival") {
-                aiMessage = `帰宅直後は最も脳が疲れていてスマホの誘惑に負けやすい魔の時間帯です。${userType}のあなたにとって、ここを「30分の全力リフレッシュ」に変えるだけで、今日の『${goal}』の目標達成率は【85%】まで跳ね上がります！`;
-            } else if (trap === "bed") {
-                aiMessage = `就寝前のスマホは睡眠の質を破壊し、明日の生産性を下げてしまいます。今日はベッドの半径1.5m以内にスマホを置かないルールにしましょう。${goal}のために、夜は早めのオフラインが吉です。`;
+        // 「その他」を選んだときに自由記述欄を出す制御
+        function toggleCustomInput(selectId, customId) {
+            const selectEl = document.getElementById(selectId);
+            const customEl = document.getElementById(customId);
+            if (selectEl.value === 'その他') {
+                customEl.style.display = 'block';
+                customEl.required = true;
             } else {
-                aiMessage = `素晴らしい意識ですね！${userType}の生活リズムと『${goal}』の目標に合わせて、無駄なスキマ時間を極小化するタイムラインを設計しました。`;
+                customEl.style.display = 'none';
+                customEl.required = false;
+            }
+        }
+
+        // スケジュール生成メインロジック
+        async class AIService {
+            static async fetchFromGemini(apiKey, prompt) {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: { responseMimeType: "application/json" }
+                    })
+                });
+                if (!response.ok) throw new Error('API通信に失敗しました。キーが正しいか確認してください。');
+                const data = await response.json();
+                return JSON.parse(data.candidates[0].content.parts[0].text);
+            }
+        }
+
+        async function generateAISchedule() {
+            // 値の取得
+            let userType = document.getElementById('user-type').value;
+            if (userType === 'その他') userType = document.getElementById('user-type-custom').value;
+
+            let goal = document.getElementById('goal').value;
+            if (goal === 'その他') goal = document.getElementById('goal-custom').value;
+
+            const fixedSchedule = document.getElementById('fixed-schedule').value || "特になし";
+            const trap = document.getElementById('smartphone-trap').value;
+            const apiKey = document.getElementById('api-key').value.trim();
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerText = "AIが思考中...";
+
+            // 結果画面の準備表示
+            document.getElementById('form-section').style.display = 'none';
+            document.getElementById('result-section').style.display = 'block';
+            document.getElementById('ai-message').innerText = "あなたの生活習慣と目標を分析し、最適なスケジュールを20秒ほどで構築しています...";
+            document.getElementById('timeline-container').innerHTML = "";
+
+            if (apiKey) {
+                // ④ 実際のAI（Gemini API）を呼び出す処理
+                const systemPrompt = `
+                あなたは15〜25歳の若者に寄り添う優秀なAIタイムコーチ「TimePilot」です。
+                ユーザーから与えられた情報をもとに、スマホの無駄な時間を削減しつつ、目標を達成するための「1日の最適スケジュール」と「コーチの助言」を必ず以下の【指定のJSON形式のみ】で出力してください。
+
+                【ユーザー情報】
+                - 属性: ${userType}
+                - 今日の目標: ${goal}
+                - 外せない予定: ${fixedSchedule}
+                - スマホの誘惑に負けがちな時間帯: ${trap}
+
+                【条件】
+                1. 予定に合わせて、スマホの利用を制限・管理する「スマホコントロール時間（📱）」や、目標に集中する「極大集中タイム（🔥）」をスケジュールの中に自然に組み込んでください。
+                2. coachMessageは、若者の心に響く、優しくも的確な150文字程度のアドバイスにしてください。
+                3. timeline配列の中の各オブジェクトは、time, title, desc, active(重要な時間ならtrue)の4つのキーを正確に持たせてください。
+
+                【出力するJSONフォーマット】
+                {
+                  "coachMessage": "AIコーチからの励ましやスマホ対策のアドバイス",
+                  "timeline": [
+                    { "time": "時間帯(例: 17:00-18:00)", "title": "予定タイトル", "desc": "具体的な行動内容やスマホ対策の指示", "active": true },
+                    { "time": "時間帯(例: 18:00-19:30)", "title": "予定タイトル", "desc": "行動内容", "active": false }
+                  ]
+                }
+                `;
+
+                try {
+                    const result = await AIService.fetchFromGemini(apiKey, systemPrompt);
+                    renderResult(result.coachMessage, result.timeline);
+                } catch (error) {
+                    alert("リアルAIの呼び出しに失敗しました。モックデータに切り替えます。エラー原因: " + error.message);
+                    generateMockSchedule(userType, goal, fixedSchedule, trap);
+                }
+            } else {
+                // APIキーがない場合は、すぐ動く高精度なシミュレーションを実行
+                setTimeout(() => {
+                    generateMockSchedule(userType, goal, fixedSchedule, trap);
+                }, 1000);
             }
 
-            // タイムラインの構築
-            if (fixedSchedule === "standard_day") {
-                timelineData = [
-                    { time: "07:30 - 08:30", title: "朝のブーストタイム", desc: "スマホをカバンに仕舞い、今日の目標タスクを頭の中で整理。", active: false },
-                    { time: "09:00 - 16:00", title: "学校 / 本業集中", desc: "目の前の作業に全力投球。SNSの通知は完全オフへ。", active: false },
-                    { time: "16:30 - 17:00", title: "限定スマホ許可タイム 📱", desc: "帰宅後のこの30分だけチェック！タイマーが鳴ったら即終了。", active: true },
-                    { time: "17:00 - 19:00", title: "極大集中ゾーン 🔥", desc: `今が一番エネルギーがあります。『${goal}』に直行しましょう！`, active: true },
-                    { time: "19:00 - 21:00", title: "夕食・リラックス", desc: "自分へのご褒美時間。ただし動画の自動再生はオフに。", active: false },
-                    { time: "22:30 ~", title: "デジタルデトックス・睡眠 😴", desc: "スマホの画面を伏せて脳を休める。明日最高のスタートを切るために。", active: false }
-                ];
-            } else if (fixedSchedule === "busy_day") {
-                timelineData = [
-                    { time: "09:00 - 17:00", title: "学校 / 本業セッション", desc: "スキマ時間の5分だけ単語やタスクチェックに充てる。", active: false },
-                    { time: "17:30 - 21:00", title: "アルバイト / 予定", desc: "切り替えて集中。移動時間はスマホを見ず脳を休める。", active: false },
-                    { time: "21:30 - 22:00", title: "1日の振り返りタイム", desc: `遅い時間ですが、${goal}に向けて30分だけ超集中コミット。`, active: true },
-                    { time: "23:00 ~", title: "完全シャットダウン", desc: "スマホを遠くに置いて即就寝。お疲れ様でした！", active: false }
-                ];
-            } else { // day_free
-                timelineData = [
-                    { time: "08:00 - 09:00", title: "モーニングルーティン", desc: "起きてすぐスマホに触らないチャレンジ！", active: true },
-                    { time: "09:00 - 12:00", title: "午前中の黄金タイム 🔥", desc: `一番頭が冴えています。『${goal}』のヘビーな部分をここで終わらせる。`, active: true },
-                    { time: "13:00 - 14:00", title: "自由スマホタイム 📱", desc: "ここで1時間しっかり楽しんで、午後に引きずらないようにする。", active: false },
-                    { time: "14:00 - 17:00", title: "午後の継続セッション", desc: "場所を変える（カフェや図書館など）とさらに集中力アップ。", active: false },
-                    { time: "22:00 ~", title: "ナイトデトックス", desc: "スマホをリビングに置いて寝室へ。", active: false }
-                ];
-            }
+            submitBtn.disabled = false;
+            submitBtn.innerText = "AIにスケジュールを作ってもらう";
+        }
 
-            // HTMLへの描画
-            document.getElementById('ai-message').innerText = aiMessage;
+        // 模擬（モック）生成ロジック
+        function generateMockSchedule(userType, goal, fixedSchedule, trap) {
+            const coachMessage = `【デモモード】${userType}のあなたへ。つい「${trap}」にスマホを触ってしまう癖をAIが先回りしてブロックします。今日の重要目標である『${goal}』と、お聞きした固定予定【${fixedSchedule}】のバランスを考慮し、スマホを触る暇を与えない最適タイムラインを組みました。`;
+            
+            const timeline = [
+                { time: "08:00 - 08:30", title: "朝のスマホコントロール 📱", desc: `「${trap}」の誘惑に勝つため、最初の30分は通知をミュートに。`, active: false },
+                { time: "各固定予定の時間", title: "外せない予定の消化", desc: `入力された予定【${fixedSchedule}】を確実にこなす時間。`, active: false },
+                { time: "18:00 - 20:00", title: "TimePilot 極大集中ゾーン 🔥", desc: `ここが今日の一番の勝負どころ。『${goal}』に全エネルギーを注ぎましょう！`, active: true },
+                { time: "22:00 - 22:30", title: "自由スマホ許可タイム", desc: "1日頑張ったご褒美。アラームをセットしてダラダラ防止。", active: false }
+            ];
+
+            renderResult(coachMessage, timeline);
+        }
+
+        // 画面への描画
+        function renderResult(coachMessage, timeline) {
+            document.getElementById('ai-message').innerText = coachMessage;
             const container = document.getElementById('timeline-container');
-            container.innerHTML = ""; // 初期化
+            container.innerHTML = "";
 
-            timelineData.forEach(item => {
+            timeline.forEach(item => {
                 const itemDiv = document.createElement('div');
                 itemDiv.className = `timeline-item ${item.active ? 'active' : ''}`;
                 itemDiv.innerHTML = `
@@ -393,12 +487,6 @@
                 `;
                 container.appendChild(itemDiv);
             });
-
-            // 画面の切り替え
-            document.getElementById('form-section').style.display = 'none';
-            const resultSection = document.getElementById('result-section');
-            resultSection.style.display = 'block';
-            window.scrollTo({ top: resultSection.offsetTop - 20, behavior: 'smooth' });
         }
 
         function resetForm() {
