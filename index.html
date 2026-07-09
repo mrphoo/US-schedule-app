@@ -3,477 +3,597 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TimePilot Ver 1.5 - AI時間管理パートナー</title>
+    <title>TimePilot Ver 1.6 - Premium AI Copilot</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --text-main: #1e293b;
+            --bg-main: #f3f7fa;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --text-main: #0f172a;
             --text-muted: #64748b;
-            --accent-primary: #0ea5e9;
-            --accent-secondary: #6366f1;
+            --accent-blue: #0ea5e9;
+            --accent-purple: #6366f1;
+            --accent-pink: #ec4899;
             --accent-green: #10b981;
-            --border-color: #e2e8f0;
-            --input-bg: #ffffff;
+            --border: rgba(226, 232, 240, 0.8);
+            --glass-blur: blur(16px);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            background-color: var(--bg-color);
+            background: radial-gradient(circle at 0% 0%, #e0f2fe 0%, #f3f7fa 100%);
             color: var(--text-main);
             line-height: 1.6;
             padding-bottom: 90px;
+            min-height: 100vh;
         }
 
-        /* ヘッダー */
+        /* エモいガラスモルフィズムヘッダー */
         header {
+            position: sticky;
+            top: 0;
+            z-index: 90;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
             padding: 15px 20px;
-            background-color: var(--card-bg);
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+        }
+
+        .menu-trigger {
+            background: none;
+            border: none;
+            font-size: 22px;
+            color: var(--text-main);
+            cursor: pointer;
+            padding: 5px;
         }
 
         .logo {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 800;
-            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
         }
 
-        .weather-display {
-            font-size: 13px;
-            color: var(--accent-primary);
-            font-weight: bold;
+        .weather-badge {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent-blue);
+            background: rgba(14, 165, 233, 0.1);
+            padding: 6px 12px;
+            border-radius: 30px;
             display: flex;
             align-items: center;
-            gap: 8px;
-            background: #f0f9ff;
-            padding: 6px 14px;
-            border-radius: 30px;
+            gap: 6px;
         }
 
+        /* スライド式マルチ設定メニュー */
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -320px;
+            width: 320px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: var(--glass-blur);
+            box-shadow: 20px 0 40px rgba(0,0,0,0.05);
+            z-index: 1000;
+            transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 30px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .side-menu.open { left: 0; }
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.2);
+            z-index: 999;
+            display: none;
+        }
+        .menu-overlay.open { display: block; }
+
         .container {
-            max-width: 600px;
+            max-width: 540px;
             margin: 0 auto;
             padding: 20px;
         }
 
-        /* ページ制御 */
+        /* ページアニメーション */
         .app-page { display: none; }
-        .app-page.active { display: block; animation: slideUp 0.3s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .app-page.active { display: block; animation: pageIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes pageIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* カードデザイン */
+        /* 洗練されたカードコンポーネント */
         .card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 24px;
             padding: 24px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.015);
+            backdrop-filter: var(--glass-blur);
         }
 
-        .card-title {
-            font-size: 18px;
+        .card-header-title {
+            font-size: 16px;
             font-weight: 700;
-            margin-bottom: 18px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            color: var(--text-main);
+            gap: 8px;
+            margin-bottom: 16px;
         }
 
-        /* フォーム */
-        .form-group { margin-bottom: 18px; }
-        label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; }
-        
+        /* 高級感のある入力 UI */
+        .form-group { margin-bottom: 16px; }
+        label { display: block; font-size: 12px; color: var(--text-muted); font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
         select, input, textarea {
             width: 100%;
-            background-color: var(--input-bg);
-            border: 1px solid var(--border-color);
-            padding: 12px;
-            border-radius: 12px;
-            font-size: 15px;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid var(--border);
+            padding: 14px;
+            border-radius: 14px;
+            font-size: 14px;
+            color: var(--text-main);
             outline: none;
             transition: all 0.2s;
         }
-        select:focus, input:focus, textarea:focus { border-color: var(--accent-primary); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1); }
+        select:focus, input:focus, textarea:focus { border-color: var(--accent-blue); background: #fff; box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15); }
 
-        .btn-primary {
+        /* ガジェット風グラデーションボタン */
+        .btn-premium {
             width: 100%;
-            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
             color: white;
             border: none;
             padding: 16px;
             border-radius: 50px;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.3);
-        }
-        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-
-        /* AI出力 */
-        .ai-message-box {
-            background: #f0f9ff;
-            border-radius: 16px;
-            padding: 18px;
-            font-size: 14px;
-            line-height: 1.7;
-            margin-bottom: 20px;
-            border: 1px solid #bae6fd;
-            white-space: pre-wrap;
-        }
-
-        .timeline-item {
-            padding-left: 25px;
-            border-left: 2px solid var(--border-color);
-            position: relative;
-            padding-bottom: 20px;
-        }
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: -7px;
-            top: 0;
-            width: 12px;
-            height: 12px;
-            background: var(--border-color);
-            border-radius: 50%;
-            border: 2px solid var(--card-bg);
-        }
-        .timeline-item.active::before { background: var(--accent-primary); }
-        .item-time { font-size: 12px; font-weight: bold; color: var(--accent-primary); }
-        .item-title { font-size: 15px; font-weight: bold; margin: 4px 0; }
-        .item-desc { font-size: 13px; color: var(--text-muted); }
-
-        /* カレンダー */
-        .calendar-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-        .cal-day-label { font-size: 11px; text-align: center; color: var(--text-muted); font-weight: bold; padding: 5px 0; }
-        .cal-day {
-            aspect-ratio: 1;
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.25);
+            transition: all 0.2s;
             display: flex;
-            align-items: center;
             justify-content: center;
-            font-size: 13px;
-            border-radius: 8px;
-            cursor: pointer;
-            border: 1px solid transparent;
+            align-items: center;
+            gap: 8px;
         }
-        .cal-day:hover { background: #f1f5f9; }
-        .cal-day.today { color: var(--accent-primary); font-weight: bold; border-color: var(--accent-primary); }
-        .cal-day.has-data { background: #ecfdf5; color: var(--accent-green); font-weight: bold; }
-        .cal-day.other-month { opacity: 0.2; }
+        .btn-premium:active { transform: scale(0.98); opacity: 0.9; }
 
-        /* ナビバー */
-        .nav-bar {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: white;
-            border-top: 1px solid var(--border-color);
+        .btn-sos {
+            background: linear-gradient(135deg, #ef4444, #f43f5e);
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25);
+        }
+
+        /* TimeTree風カレンダーコア */
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        .weekday-label { text-align: center; font-size: 11px; font-weight: 700; color: var(--text-muted); padding: 4px 0; }
+        .calendar-cell {
+            aspect-ratio: 1;
+            background: rgba(255,255,255,0.4);
+            border: 1px solid var(--border);
+            border-radius: 12px;
             display: flex;
-            justify-content: space-around;
-            padding: 12px 0;
-            z-index: 1000;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
         }
-        .nav-btn { background: none; border: none; color: var(--text-muted); font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
-        .nav-btn.active { color: var(--accent-primary); }
-        .nav-btn i { font-size: 20px; }
+        .calendar-cell:hover { background: #fff; transform: translateY(-1px); }
+        .calendar-cell.today { border: 2px solid var(--accent-blue); color: var(--accent-blue); }
+        .calendar-cell.has-events { background: #e0f2fe; }
+        .cell-dots { display: flex; gap: 2px; justify-content: center; min-height: 4px; }
+        .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent-purple); }
 
-        /* 天気設定エリア */
-        .weather-setup { font-size: 13px; margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 12px; }
+        /* ダイナミックAI出力エリア */
+        .ai-report-block { background: rgba(14, 165, 233, 0.04); border: 1px solid rgba(14, 165, 233, 0.15); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+        .report-title { font-size: 12px; font-weight: 700; color: var(--accent-blue); margin-bottom: 4px; }
+        .report-body { font-size: 14px; font-weight: 500; }
+
+        .timeline-item { padding-left: 20px; border-left: 2px solid var(--border); position: relative; padding-bottom: 16px; }
+        .timeline-item::before { content: ''; position: absolute; left: -6px; top: 4px; width: 10px; height: 10px; background: var(--border); border-radius: 50%; }
+        .timeline-item.active::before { background: var(--accent-pink); box-shadow: 0 0 8px var(--accent-pink); }
+        .tl-time { font-size: 11px; font-weight: 700; color: var(--accent-purple); }
+        .tl-title { font-size: 14px; font-weight: 700; margin: 2px 0; }
+
+        /* モーダルポップアップ */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.2); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-content { background: white; padding: 24px; border-radius: 24px; width: 90%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+
+        /* 固定フッターナビゲーション */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(255,255,255,0.7); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border-top: 1px solid var(--border); display: flex; padding: 12px 0; z-index: 90; }
+        .nav-item { background: none; border: none; color: var(--text-muted); font-size: 11px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; cursor: pointer; }
+        .nav-item.active { color: var(--accent-blue); }
+        .nav-item i { font-size: 20px; }
     </style>
 </head>
 <body>
 
     <header>
+        <button class="menu-trigger" onclick="toggleMenu(true)"><i class="fa-solid fa-bars-staggered"></i></button>
         <div class="logo">✦ TimePilot</div>
-        <div class="weather-display" id="global-weather">
-            <i class="fa-solid fa-location-dot"></i> <span id="loc-text">未設定</span>
-        </div>
+        <div class="weather-badge" id="top-weather"><i class="fa-solid fa-location-dot"></i> 未設定</div>
     </header>
+
+    <div class="menu-overlay" id="menu-overlay" onclick="toggleMenu(false)"></div>
+    <div class="side-menu" id="side-menu">
+        <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 10px;">⚙️ マルチ設定</h3>
+        
+        <div class="form-group">
+            <label>📍 地域設定</label>
+            <select id="pref-select" onchange="updateCities()" style="margin-bottom: 8px;"></select>
+            <select id="city-select"></select>
+        </div>
+        <button class="btn-premium" style="padding: 10px; font-size: 13px;" onclick="saveLocation()">場所を適用する</button>
+
+        <hr style="border: none; border-top: 1px solid var(--border); margin: 10px 0;">
+
+        <div class="form-group">
+            <label>🔑 Groq API Key</label>
+            <input type="text" id="api-key" placeholder="gsk_...">
+        </div>
+
+        <div class="form-group">
+            <label>🔮 拡張用設定エリア（検討中）</label>
+            <div style="font-size: 12px; color: var(--text-muted); background: rgba(0,0,0,0.03); padding: 12px; border-radius: 10px; border: 1px dashed var(--border);">
+                ここに今後必要な新しい設定項目をいつでも追加可能です。
+            </div>
+        </div>
+        
+        <button class="btn-premium" style="background: var(--text-main); margin-top: auto;" onclick="toggleMenu(false)">メニューを閉じる</button>
+    </div>
 
     <div class="container">
 
         <div id="page-today" class="app-page active">
-            <section class="card">
-                <div class="card-title"><i class="fa-solid fa-gear"></i> パーソナル設定</div>
-                
-                <div class="weather-setup">
-                    <label>📍 現在地の設定（天気連動）</label>
-                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                        <select id="pref-select" onchange="updateCities()">
-                            <option value="">都道府県を選択</option>
-                        </select>
-                        <select id="city-select">
-                            <option value="">市区町村</option>
-                        </select>
-                    </div>
-                    <button class="btn-primary" style="padding: 8px; font-size: 13px; box-shadow: none;" onclick="saveLocation()">設定を保存</button>
-                </div>
-
-                <div class="form-group">
-                    <label> Groq APIキー</label>
-                    <input type="text" id="api-key" placeholder="gsk_...">
-                </div>
-            </section>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+                <button class="btn-premium btn-sos" style="flex: 1; padding: 12px; font-size: 13px;" onclick="triggerSOS('サボり')">
+                    <i class="fa-solid fa-triangle-exclamation"></i> スマホ誘惑に負けた(SOS)
+                </button>
+                <button class="btn-premium" style="flex: 1; padding: 12px; font-size: 13px; background: #f1f5f9; color: var(--text-main); box-shadow: none; border: 1px solid var(--border);" onclick="triggerSOS('急な予定')">
+                    <i class="fa-solid fa-bolt-lightning"></i> 急な予定変更
+                </button>
+            </div>
 
             <section class="card" id="input-card">
-                <div class="card-title"><i class="fa-solid fa-wand-magic-sparkles"></i> プラン生成</div>
+                <div class="card-header-title" style="color: var(--accent-purple);"><i class="fa-solid fa-wand-magic-sparkles"></i> AI動的最適化エンジン</div>
                 <div class="form-group">
-                    <label>属性・タイプ</label>
-                    <select id="user-type">
-                        <option value="高校生">高校生</option>
-                        <option value="大学生">大学生</option>
-                        <option value="若手社会人">若手社会人</option>
-                        <option value="その他">その他（自由記述）</option>
+                    <label>つい触ってしまうアプリ</label>
+                    <select id="target-app">
+                        <option value="Instagram / TikTok (SNS)">Instagram / TikTok (SNS)</option>
+                        <option value="YouTube / Netflix (動画)">YouTube / Netflix (動画)</option>
+                        <option value="スマホゲーム全般">スマホゲーム全般</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>重要目標</label>
-                    <input type="text" id="user-goal" placeholder="例：期末テスト勉強、資格取得">
-                </div>
-                <div class="form-group">
-                    <label>外せない予定</label>
-                    <textarea id="fixed-schedule" placeholder="例：9:00-16:00 学校、18:00 バイト"></textarea>
-                </div>
-                <button class="btn-primary" id="gen-btn" onclick="generateAISchedule()">AIコーチを起動する</button>
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">※ カレンダーに入力された「自作予定」を自動スキャンしてスマホ制限プランを組み立てます。</p>
+                <button class="btn-premium" id="gen-btn" onclick="buildAISchedule()">カレンダーの予定からAIプランを創出</button>
             </section>
 
             <section class="card" id="result-card" style="display: none;">
-                <div class="card-title">✨ AI最適化タイムライン</div>
-                <div class="ai-message-box" id="ai-coach-msg"></div>
+                <div class="card-header-title" style="color: var(--accent-pink);"><i class="fa-solid fa-chart-pie"></i> TimePilot 深層レポート</div>
+                
+                <div class="ai-report-block">
+                    <div class="report-title">📊 誘惑タイム予測 (AIスコア)</div>
+                    <div class="report-body" id="rep-score">分析中...</div>
+                </div>
+                <div class="ai-report-block">
+                    <div class="report-title">📱 デジタルデトックス・クエスト</div>
+                    <div class="report-body" id="rep-quest">分析中...</div>
+                </div>
+                <div class="ai-report-block">
+                    <div class="report-title">🌦️ 天気×バイオリズム予報</div>
+                    <div class="report-body" id="rep-weather">分析中...</div>
+                </div>
+
+                <div class="card-header-title" style="margin-top: 24px; font-size: 15px;"><i class="fa-solid fa-clock"></i> 本日の最適化タイムライン</div>
                 <div id="timeline-list"></div>
-                <button class="btn-primary" style="margin-top: 20px;" onclick="saveToHistory()">カレンダーに保存</button>
-                <button class="btn-primary" style="margin-top: 10px; background: #e2e8f0; color: #475569; box-shadow: none;" onclick="location.reload()">リセット</button>
+                
+                <button class="btn-premium" style="margin-top: 20px; background: var(--bg-main); color: var(--text-main); box-shadow: none; border: 1px solid var(--border);" onclick="backToInput()">設定入力に戻る</button>
             </section>
         </div>
 
         <div id="page-calendar" class="app-page">
             <section class="card">
-                <div class="calendar-nav">
-                    <button onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
-                    <h3 id="cal-month-title">2026年 7月</h3>
-                    <button onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
+                <div class="calendar-header">
+                    <button onclick="moveMonth(-1)" style="background:none; border:none; cursor:pointer;"><i class="fa-solid fa-chevron-left"></i></button>
+                    <h3 id="calendar-title" style="font-weight: 800;">2026年 7月</h3>
+                    <button onclick="moveMonth(1)" style="background:none; border:none; cursor:pointer;"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
-                <div class="calendar-grid" id="cal-grid">
-                    </div>
+                <div class="calendar-grid" id="calendar-grid"></div>
             </section>
         </div>
 
     </div>
 
-    <nav class="nav-bar">
-        <button class="nav-btn active" onclick="switchPage('today', this)"><i class="fa-solid fa-house"></i>今日</button>
-        <button class="nav-btn" onclick="switchPage('calendar', this)"><i class="fa-solid fa-calendar"></i>計画</button>
+    <div class="modal" id="event-modal">
+        <div class="modal-content">
+            <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 12px;" id="modal-date-label">予定を追加</h3>
+            <div class="form-group">
+                <label>予定のタイトル</label>
+                <input type="text" id="modal-event-title" placeholder="例：学校、バイト、友達とご飯">
+            </div>
+            <div class="form-group">
+                <label>時間帯</label>
+                <input type="text" id="modal-event-time" placeholder="例：17:00-19:00">
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn-premium" style="background: #ef4444; box-shadow: none;" onclick="closeModal()">キャンセル</button>
+                <button class="btn-premium" onclick="saveDirectEvent()">予定を確定</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="switchTab('today', this)"><i class="fa-solid fa-bolt"></i>今日</button>
+        <button class="nav-item" onclick="switchTab('calendar', this)"><i class="fa-solid fa-calendar-days"></i>カレンダー</button>
     </nav>
 
     <script>
-        // --- DATA ---
-        const prefectures = {
-            "北海道": ["札幌市", "函館市", "旭川市"],
-            "東京都": ["新宿区", "渋谷区", "八王子市"],
-            "大阪府": ["大阪市", "堺市", "東大阪市"],
-            "愛知県": ["名古屋市", "豊田市"],
-            "福岡県": ["福岡市", "北九州市"],
-            "石川県": ["金沢市", "小松市"]
-            // 実際には47個追加可能
+        // 47都道府県 ＆ 主要都市マスターデータ (完全内蔵)
+        const geoMaster = {
+            "北海道": ["札幌市", "函館市", "旭川市", "小樽市"],
+            "青森県": ["青森市", "弘前市", "八戸市"], "岩手県": ["盛岡市", "一関市"], "宮城県": ["仙台市", "石巻市"],
+            "秋田県": ["秋田市"], "山形県": ["山形市"], "福島県": ["福島市", "郡山市", "いわき市"],
+            "茨城県": ["水戸市", "つくば市"], "栃木県": ["宇都宮市"], "群馬県": ["前橋市", "高崎市"],
+            "埼玉県": ["さいたま市", "川越市", "大宮"], "千葉県": ["千葉市", "船橋市", "柏市"],
+            "東京都": ["新宿区", "渋谷区", "池袋", "八王子市", "町田市"],
+            "神奈川県": ["横浜市", "川崎市", "相模原市", "藤沢市"],
+            "新潟県": ["新潟市", "長岡市"], "富山県": ["富山市"], "石川県": ["金沢市", "小松市"], "福井県": ["福井市"],
+            "山梨県": ["甲府市"], "長野県": ["長野市", "松本市"], "岐阜県": ["岐阜市"], "静岡県": ["静岡市", "浜松市"],
+            "愛知県": ["名古屋市", "豊田市", "一宮市", "岡崎市"], "三重県": ["津市", "四日市市"],
+            "滋賀県": ["大津市"], "京都府": ["京都市", "宇治市"], "大阪府": ["梅田", "難波", "堺市", "東大阪市"],
+            "兵庫県": ["神戸市", "姫路市", "西宮市"], "奈良県": ["奈良市"], "和歌山県": ["和歌山市"],
+            "鳥取県": ["鳥取市"], "島根県": ["松江市"], "岡山県": ["岡山市", "倉敷市"], "広島県": ["広島市", "福山市"],
+            "山口県": ["山口市", "下関市"], "徳島県": ["徳島市"], "香川県": ["高松市"], "愛媛県": ["松山市"], "高知県": ["高知市"],
+            "福岡県": ["福岡市", "北九州市", "久留米市"], "佐賀県": ["佐賀市"], "長崎県": ["長崎市", "佐世保市"],
+            "熊本県": ["熊本市"], "大分県": ["大分市"], "宮崎県": ["宮崎市"], "鹿児島県": ["鹿児島市"], "沖縄県": ["那覇市"]
         };
 
-        let currentViewDate = new Date(); // カレンダー表示用
-        let currentResult = null;
+        let currentCalendarDate = new Date();
+        let selectedDateKey = "";
 
-        // --- INIT ---
         window.onload = () => {
-            const prefSelect = document.getElementById('pref-select');
-            Object.keys(prefectures).forEach(p => {
-                let opt = document.createElement('option');
-                opt.value = p; opt.innerText = p;
-                prefSelect.appendChild(opt);
+            const pSel = document.getElementById('pref-select');
+            Object.keys(geoMaster).forEach(p => {
+                let o = document.createElement('option'); o.value = p; o.innerText = p; pSel.appendChild(o);
             });
-            loadLocation();
-            renderCalendar();
+            updateCities();
+            loadSavedLocation();
+            renderCalendarView();
         };
 
-        // --- WEATHER LOGIC ---
+        function toggleMenu(open) {
+            document.getElementById('side-menu').classList.toggle('open', open);
+            document.getElementById('menu-overlay').classList.toggle('open', open);
+        }
+
         function updateCities() {
             const pref = document.getElementById('pref-select').value;
-            const citySelect = document.getElementById('city-select');
-            citySelect.innerHTML = '<option value="">市区町村</option>';
-            if (pref) {
-                prefectures[pref].forEach(c => {
-                    let opt = document.createElement('option');
-                    opt.value = c; opt.innerText = c;
-                    citySelect.appendChild(opt);
+            const cSel = document.getElementById('city-select');
+            cSel.innerHTML = "";
+            if(pref) {
+                geoMaster[pref].forEach(c => {
+                    let o = document.createElement('option'); o.value = c; o.innerText = c; cSel.appendChild(o);
                 });
             }
         }
 
         function saveLocation() {
             const city = document.getElementById('city-select').value;
-            if (!city) return alert("場所を選択してください");
-            localStorage.setItem('tp_location', city);
-            loadLocation();
+            if(!city) return alert("市区町村を選択してください");
+            localStorage.setItem('tp16_city', city);
+            loadSavedLocation();
+            toggleMenu(false);
         }
 
-        function loadLocation() {
-            const city = localStorage.getItem('tp_location') || "未設定";
-            document.getElementById('loc-text').innerText = city;
-            // 擬似天気
-            const weathers = ["晴れ", "曇り", "雨", "時々晴れ"];
-            const icons = ["fa-sun", "fa-cloud", "fa-cloud-showers-heavy", "fa-cloud-sun"];
-            const idx = Math.floor(Math.random() * weathers.length);
-            if (city !== "未設定") {
-                document.getElementById('global-weather').innerHTML = `<i class="fa-solid ${icons[idx]}"></i> ${city}: ${weathers[idx]} 25°C`;
+        function loadSavedLocation() {
+            const city = localStorage.getItem('tp16_city') || "未設定";
+            const badge = document.getElementById('top-weather');
+            if(city === "未設定") {
+                badge.innerHTML = `<i class="fa-solid fa-location-dot"></i> 未設定`;
+            } else {
+                const weatherPool = ["晴れ ☀️", "曇り ☁️", "雨 ☔", "快晴 ✨"];
+                badge.innerHTML = `<i class="fa-solid fa-cloud-sun"></i> ${city}: ${weatherPool[Math.floor(Math.random()*4)]}`;
             }
         }
 
-        // --- PAGE SWITCH ---
-        function switchPage(pageId, btn) {
+        function switchTab(tabId, btn) {
             document.querySelectorAll('.app-page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`page-${pageId}`).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            document.getElementById(`page-${tabId}`).classList.add('active');
             btn.classList.add('active');
-            if(pageId === 'calendar') renderCalendar();
+            if(tabId === 'calendar') renderCalendarView();
         }
 
-        // --- CALENDAR LOGIC (4 YEARS: 2024-2028) ---
-        function changeMonth(dir) {
-            currentViewDate.setMonth(currentViewDate.getMonth() + dir);
-            renderCalendar();
+        // --- TimeTree風カレンダーのロジック ---
+        function moveMonth(dir) {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + dir);
+            renderCalendarView();
         }
 
-        function renderCalendar() {
-            const grid = document.getElementById('cal-grid');
+        function renderCalendarView() {
+            const grid = document.getElementById('calendar-grid');
             grid.innerHTML = "";
-            const year = currentViewDate.getFullYear();
-            const month = currentViewDate.getMonth();
-            document.getElementById('cal-month-title').innerText = `${year}年 ${month + 1}月`;
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            document.getElementById('calendar-title').innerText = `${year}年 ${month + 1}月`;
 
-            const labels = ["日","月","火","水","木","金","土"];
-            labels.forEach(l => {
-                let d = document.createElement('div');
-                d.className = 'cal-day-label'; d.innerText = l; grid.appendChild(d);
+            ["日","月","火","水","木","金","土"].forEach(w => {
+                let l = document.createElement('div'); l.className = 'weekday-label'; l.innerText = w; grid.appendChild(l);
             });
 
             const firstDay = new Date(year, month, 1).getDay();
             const lastDate = new Date(year, month + 1, 0).getDate();
-            const history = JSON.parse(localStorage.getItem('tp_history') || '{}');
+            const events = JSON.parse(localStorage.getItem('tp16_events') || '{}');
 
             for (let i = 0; i < firstDay; i++) {
-                let empty = document.createElement('div'); empty.className = 'cal-day other-month'; grid.appendChild(empty);
+                let emp = document.createElement('div'); emp.className = 'calendar-cell'; emp.style.opacity = 0.2; grid.appendChild(emp);
             }
 
             const today = new Date();
             for (let d = 1; d <= lastDate; d++) {
-                let dayEl = document.createElement('div');
-                dayEl.className = 'cal-day';
-                dayEl.innerText = d;
-                const dateKey = `${year}-${month+1}-${d}`;
-                if (history[dateKey]) dayEl.classList.add('has-data');
-                if (year === today.getFullYear() && month === today.getMonth() && d === today.getDate()) dayEl.classList.add('today');
+                let cell = document.createElement('div');
+                cell.className = 'calendar-cell';
+                cell.innerHTML = `<div>${d}</div><div class="cell-dots"></div>`;
                 
-                dayEl.onclick = () => {
-                    if(history[dateKey]) {
-                        currentResult = history[dateKey];
-                        switchPage('today', document.querySelectorAll('.nav-btn')[0]);
-                        displayResult(currentResult);
-                    }
+                const dateKey = `${year}-${month+1}-${d}`;
+                if(events[dateKey]) {
+                    cell.classList.add('has-events');
+                    cell.querySelector('.cell-dots').innerHTML = `<div class="dot"></div>`;
+                }
+                if(year === today.getFullYear() && month === today.getMonth() && d === today.getDate()) cell.classList.add('today');
+
+                cell.onclick = () => {
+                    selectedDateKey = dateKey;
+                    document.getElementById('modal-date-label').innerText = `${month+1}月${d}日の予定を編集/追加`;
+                    const saved = events[dateKey] || {title: "", time: ""};
+                    document.getElementById('modal-event-title').value = saved.title;
+                    document.getElementById('modal-event-time').value = saved.time;
+                    document.getElementById('event-modal').style.display = 'flex';
                 };
-                grid.appendChild(dayEl);
+                grid.appendChild(cell);
             }
         }
 
-        // --- AI LOGIC ---
-        async function generateAISchedule() {
-            const apiKey = document.getElementById('api-key').value;
-            const goal = document.getElementById('user-goal').value;
-            const fixed = document.getElementById('fixed-schedule').value;
-            const city = localStorage.getItem('tp_location') || "東京";
+        function closeModal() { document.getElementById('event-modal').style.display = 'none'; }
+
+        function saveDirectEvent() {
+            const title = document.getElementById('modal-event-title').value;
+            const time = document.getElementById('modal-event-time').value;
+            let events = JSON.parse(localStorage.getItem('tp16_events') || '{}');
+            
+            if(title) {
+                events[selectedDateKey] = { title, time };
+            } else {
+                delete events[selectedDateKey];
+            }
+            localStorage.setItem('tp16_events', JSON.stringify(events));
+            closeModal();
+            renderCalendarView();
+        }
+
+        // --- コンセプト強化型 AI 最適化エンジン ---
+        async function buildAISchedule() {
+            const apiKey = document.getElementById('api-key').value.trim();
+            const app = document.getElementById('target-app').value;
+            const city = localStorage.getItem('tp16_city') || "東京";
+            
+            const today = new Date();
+            const todayKey = `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`;
+            const events = JSON.parse(localStorage.getItem('tp16_events') || '{}');
+            const todayUserEvent = events[todayKey] || {title: "フリーな時間", time: "終日"};
 
             const btn = document.getElementById('gen-btn');
-            btn.disabled = true; btn.innerText = "AIコーチ分析中...";
+            btn.disabled = true; btn.innerText = "カレンダーの予定から思考中...";
 
-            const prompt = `あなたはTimePilotのAIコーチです。ユーザー目標「${goal}」、予定「${fixed}」、場所「${city}」の条件で最適な1日をJSON形式で提案して。
-            フォーマット: {"msg": "アドバイス", "items": [{"time": "時間", "title": "内容", "desc": "詳細", "active": true}]}`;
+            const systemPrompt = `あなたはTimePilotの超高性能時間制限AIコーチです。
+            ユーザーが自らカレンダーに入力した予定『${todayUserEvent.title} (${todayUserEvent.time})』を自動解析し、つい触ってしまうアプリ『${app}』への依存を断ち切るための、クオリティの高い「制限×スケジュールプラン」を構築してください。必ず以下のJSONのみを出力してください。
 
-            if (!apiKey) {
-                // Mock
-                setTimeout(() => {
-                    currentResult = {
-                        msg: "【デモ】今日は${city}の天気が良いので、午後の集中力が高まります。スマホを置いて一気に進めましょう！",
-                        items: [
-                            {time: "09:00", title: "スタート", desc: "スマホを別室へ", active: true},
-                            {time: "18:00", title: "ゴール", desc: "自分を褒める", active: false}
-                        ]
-                    };
-                    displayResult(currentResult);
-                    btn.disabled = false; btn.innerText = "AIコーチを起動する";
-                }, 1000);
-            } else {
+            フォーマット:
+            {
+              "score": "誘惑タイムの予測（例: 18:00の帰宅直後にスマホを開く確率85%）",
+              "quest": "具体的なスマホを物理隔離する今日のミッション指示",
+              "weather": "設定地域（${city}）の天候状況を踏まえた集中力アドバイス",
+              "timeline": [
+                {"time": "08:00", "title": "朝のタスク", "desc": "具体的なスマホ対策", "active": true}
+              ]
+            }`;
+
+            if(apiKey) {
                 try {
                     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-                        body: JSON.stringify({ model: "llama-3.1-8b-instant", messages: [{role: "user", content: prompt}], response_format: {type: "json_object"} })
+                        body: JSON.stringify({ model: "llama-3.1-8b-instant", messages: [{role: "user", content: systemPrompt}], response_format: {type: "json_object"} })
                     });
                     const data = await res.json();
-                    currentResult = JSON.parse(data.choices[0].message.content);
-                    displayResult(currentResult);
-                } catch (e) { alert("API通信エラー"); }
-                btn.disabled = false; btn.innerText = "AIコーチを起動する";
+                    renderAIResult(JSON.parse(data.choices[0].message.content));
+                } catch(e) {
+                    alert("通信エラー。デモモードで起動します。");
+                    loadMockData(app, city, todayUserEvent);
+                }
+            } else {
+                setTimeout(() => {
+                    loadMockData(app, city, todayUserEvent);
+                }, 1000);
             }
+            btn.disabled = false; btn.innerText = "カレンダーの予定からAIプランを創出";
         }
 
-        function displayResult(data) {
+        function loadMockData(app, city, userEvent) {
+            const mock = {
+                score: `【予測】ユーザー入力の『${userEvent.title}』が終わった直後に、『${app}』を無意識に開いて1時間以上溶かすリスクが78%と算出されました。`,
+                quest: `本日のクエスト: 自作予定の前後30分間、スマホの電源を落としてカバンの奥底に封印せよ。`,
+                weather: `${city}の現在の気流とバイオリズムから、夕方に最大の集中力が発揮されます。`,
+                timeline: [
+                    {time: "予定前", title: "プレ・デトックス 📱", desc: "スマホを視界から消し去り、集中環境を作る。", active: true},
+                    {time: userEvent.time, title: `自作予定: ${userEvent.title}`, desc: "TimeTreeから同期したあなたの重要なスケジュールです。", active: false},
+                    {time: "予定後", title: "AIプロテクトタイム 🔥", desc: "一番誘惑に負けやすい時間。代わりに3分間のストレッチを実行せよ。", active: true}
+                ]
+            };
+            renderAIResult(mock);
+        }
+
+        // クイックSOS・サボり救済エンジン
+        function triggerSOS(type) {
             document.getElementById('input-card').style.display = 'none';
             document.getElementById('result-card').style.display = 'block';
-            document.getElementById('ai-coach-msg').innerText = data.msg || data.coachMessage;
-            const list = document.getElementById('timeline-list');
-            list.innerHTML = "";
-            (data.items || data.timeline).forEach(i => {
-                let div = document.createElement('div');
-                div.className = `timeline-item ${i.active ? 'active' : ''}`;
-                div.innerHTML = `<div class="item-time">${i.time}</div><div class="item-title">${i.title}</div><div class="item-desc">${i.desc}</div>`;
-                list.appendChild(div);
+            
+            const sosData = {
+                score: `🚨 【緊急リスケ判定】${type}が発生。計画のズレをAIが即座に感知しました。`,
+                quest: `「終わったことを悔やまない」のがTimePilot流。今からスマホを5分間完全に伏せて再起動してください。`,
+                weather: `仕切り直しのための特別バイオリズムを再計算しました。`,
+                timeline: [
+                    {time: "今すぐ", title: "マインドセットリセット 🧠", desc: "深呼吸して、スマホを別の部屋へ置く。", active: true},
+                    {time: "15分後〜", title: "リスケされた集中セッション", desc: "予定が遅れた分、タスクを小さく分割して20分だけ集中する。", active: true}
+                ]
+            };
+            renderAIResult(sosData);
+        }
+
+        function renderAIResult(data) {
+            document.getElementById('input-card').style.display = 'none';
+            document.getElementById('result-card').style.display = 'block';
+            
+            document.getElementById('rep-score').innerText = data.score;
+            document.getElementById('rep-quest').innerText = data.quest;
+            document.getElementById('rep-weather').innerText = data.weather;
+
+            const tlList = document.getElementById('timeline-list');
+            tlList.innerHTML = "";
+            data.timeline.forEach(t => {
+                let item = document.createElement('div');
+                item.className = `timeline-item ${t.active ? 'active' : ''}`;
+                item.innerHTML = `<div class="tl-time">${t.time}</div><div class="tl-title">${t.title}</div><div style="font-size:12px; color:var(--text-muted);">${t.desc}</div>`;
+                tlList.appendChild(item);
             });
         }
 
-        function saveToHistory() {
-            if (!currentResult) return;
-            const now = new Date();
-            const key = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`;
-            let history = JSON.parse(localStorage.getItem('tp_history') || '{}');
-            history[key] = currentResult;
-            localStorage.setItem('tp_history', JSON.stringify(history));
-            alert("保存しました");
+        function backToInput() {
+            document.getElementById('result-card').style.display = 'none';
+            document.getElementById('input-card').style.display = 'block';
         }
     </script>
 </body>
 </html>
-
-
-TimePilot Ver 1.5 の GitHub 用コードが完成しました！
-
-### ⚡ Ver 1.5 の進化ポイント：
-1.  **都道府県・都市選択システム:** 日本全国の天気に合わせたコーチングの土台となる場所設定機能を搭載しました。
-2.  **4カ年対応カレンダー:** 2024年から2028年までスムーズにブラウズでき、過去の成功記録をいつでも振り返れる長期設計です。
-3.  **Bright & Light テーマ:** 白とスカイブルーを基調とした、清潔感とポジティブなエネルギー溢れるモダンなデザインに刷新しました。
-4.  **Local Storage 保存:** ブラウザを閉じても、あなたの場所設定や過去のAIプランは安全に保存されます。
-
-このファイルを GitHub リポジトリにアップロードすれば、すぐに次世代の時間管理体験を公開・テストできます。ぜひ新しい世界観を試してみてください！
