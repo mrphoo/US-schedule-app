@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TimePilot</title>
+    <title>TimePilot Prototype</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
@@ -17,6 +17,8 @@
             --success: #10b981;
             --danger: #ef4444;
             --input-bg: #f1f5f9;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
         }
 
         body.dark-theme {
@@ -24,10 +26,12 @@
             --bg-card: #131926;
             --border-color: #222c3f;
             --text-main: #f1f5f9;
-            --text-muted: #64748b;
+            --text-muted: #94a3b8;
             --brand-color: #3b82f6;
-            --brand-light: rgba(59, 130, 246, 0.08);
+            --brand-light: rgba(59, 130, 246, 0.12);
             --input-bg: #1e293b;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.5);
         }
 
         * {
@@ -35,74 +39,109 @@
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             background-color: var(--bg-primary);
             color: var(--text-main);
             min-height: 100vh;
-            padding-bottom: 100px;
+            padding-bottom: 90px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
 
         /* HEADER */
         header {
             width: 100%;
-            max-width: 540px;
-            padding: 20px 24px;
+            max-width: 560px;
+            padding: 18px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border-color);
             background: var(--bg-card);
+            position: sticky;
+            top: 0;
+            z-index: 500;
+            box-shadow: var(--shadow-sm);
         }
 
         .brand-logo {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 800;
             letter-spacing: -0.5px;
             color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        .brand-logo span {
+        .brand-logo span.highlight {
             color: var(--brand-color);
+        }
+
+        .brand-logo span.badge-proto {
+            font-size: 10px;
+            background: var(--input-bg);
+            color: var(--text-muted);
+            padding: 2px 8px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
 
         .theme-toggle-btn {
             background: var(--input-bg);
             border: 1px solid var(--border-color);
             color: var(--text-main);
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 11px;
+            font-weight: 700;
             padding: 8px 14px;
             border-radius: 20px;
             cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .theme-toggle-btn:hover {
+            border-color: var(--brand-color);
         }
 
         /* CONTAINER & PAGE MANAGEMENT */
         .app-container {
             width: 100%;
-            max-width: 540px;
-            padding: 24px;
+            max-width: 560px;
+            padding: 24px 20px;
         }
 
         .app-page {
             display: none;
+            animation: fadeIn 0.25s ease-out;
         }
 
         .app-page.active-page {
             display: block;
         }
 
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         /* TYPOGRAPHY & CARDS */
         .section-title {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 700;
             color: var(--text-muted);
-            letter-spacing: 1px;
-            margin: 24px 0 14px 0;
+            letter-spacing: 1.2px;
+            margin: 24px 0 12px 4px;
             text-transform: uppercase;
         }
 
@@ -110,16 +149,17 @@
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 16px;
-            padding: 20px;
+            padding: 22px;
             margin-bottom: 20px;
+            box-shadow: var(--shadow-sm);
         }
 
-        /* HOME SCREEN INPUT FORMS (JAPANESE LOCALIZED) */
+        /* HOME FORMS */
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            margin-bottom: 16px;
+            gap: 8px;
+            margin-bottom: 18px;
         }
 
         .form-group label {
@@ -131,7 +171,7 @@
         .form-row-twin {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 14px;
         }
 
         input, select {
@@ -144,6 +184,7 @@
             color: var(--text-main);
             outline: none;
             width: 100%;
+            transition: border-color 0.2s;
         }
 
         input:focus, select:focus {
@@ -155,16 +196,17 @@
             font-weight: 600;
             color: var(--brand-color);
             background: var(--brand-light);
-            padding: 12px;
-            border-radius: 10px;
+            padding: 14px 16px;
+            border-radius: 12px;
             margin-bottom: 20px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            border: 1px solid rgba(37, 99, 237, 0.15);
+            gap: 12px;
+            border: 1px solid rgba(37, 99, 237, 0.2);
+            line-height: 1.4;
         }
 
-        /* PRIMARY START BUTTON */
+        /* PRIMARY ACTION BUTTONS */
         .start-action-btn {
             width: 100%;
             background: var(--brand-color);
@@ -172,111 +214,161 @@
             border: none;
             padding: 16px;
             border-radius: 12px;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 700;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
             cursor: pointer;
-            margin-top: 10px;
-            box-shadow: 0 4px 12px rgba(37, 99, 237, 0.2);
+            margin-top: 8px;
+            box-shadow: var(--shadow-md);
+            transition: all 0.15s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .start-action-btn:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
         }
 
         .start-action-btn:active {
-            transform: scale(0.99);
+            transform: translateY(1px);
+            box-shadow: var(--shadow-sm);
         }
 
-        /* HIGH-DENSITY DYNAMIC TIMELINE */
+        .secondary-btn {
+            background: var(--input-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            box-shadow: none;
+        }
+
+        /* DYNAMIC TIMELINE */
         .timeline-container {
             position: relative;
-            padding-left: 24px;
+            padding-left: 28px;
             border-left: 2px solid var(--border-color);
-            margin-left: 10px;
-            margin-top: 15px;
+            margin-left: 12px;
+            margin-top: 16px;
         }
 
         .timeline-node {
             position: relative;
-            padding-bottom: 30px;
+            padding-bottom: 28px;
+        }
+
+        .timeline-node:last-child {
+            padding-bottom: 0;
         }
 
         .timeline-marker {
             position: absolute;
-            left: -32px;
-            top: 4px;
-            width: 14px;
-            height: 14px;
+            left: -35px;
+            top: 2px;
+            width: 16px;
+            height: 16px;
             background: var(--bg-primary);
             border: 3px solid var(--border-color);
             border-radius: 50%;
             z-index: 10;
+            transition: border-color 0.3s, background-color 0.3s;
         }
 
         .timeline-node.current .timeline-marker {
             background: var(--brand-color);
             border-color: var(--brand-color);
+            box-shadow: 0 0 0 4px var(--brand-light);
         }
 
         .timeline-stamp {
             font-size: 12px;
             font-weight: 700;
             color: var(--brand-color);
-            margin-bottom: 4px;
+            margin-bottom: 6px;
+            display: inline-block;
+            background: var(--brand-light);
+            padding: 2px 8px;
+            border-radius: 6px;
         }
 
         .timeline-bubble {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
-            padding: 14px;
+            padding: 16px;
             border-radius: 12px;
+            box-shadow: var(--shadow-sm);
         }
 
         .timeline-heading {
             font-size: 15px;
             font-weight: 700;
             color: var(--text-main);
+            margin-bottom: 6px;
         }
 
         .timeline-body {
             font-size: 13px;
             color: var(--text-muted);
-            margin-top: 6px;
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
-        /* CALENDAR COMPONENT (STRICT JAPANESE PRINT) */
+        /* CALENDAR COMPONENT */
         .calendar-summary-strip {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 16px;
+            gap: 14px;
+            margin-bottom: 20px;
         }
 
         .summary-mini-tile {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
-            padding: 12px;
-            border-radius: 10px;
+            padding: 16px;
+            border-radius: 12px;
             text-align: center;
+            box-shadow: var(--shadow-sm);
         }
 
         .summary-mini-label {
             font-size: 11px;
             color: var(--text-muted);
-            font-weight: 600;
+            font-weight: 700;
+            text-transform: uppercase;
         }
 
         .summary-mini-value {
-            font-size: 20px;
-            font-weight: 700;
+            font-size: 22px;
+            font-weight: 800;
             color: var(--brand-color);
-            margin-top: 4px;
+            margin-top: 6px;
         }
 
-        .calendar-month-header {
+        .calendar-header-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 8px 16px 8px;
+        }
+
+        .calendar-month-title {
             font-size: 18px;
-            font-weight: 700;
-            text-align: center;
-            padding: 10px 0;
+            font-weight: 800;
             color: var(--text-main);
+        }
+
+        .cal-nav-btn {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
         }
 
         .calendar-weekday-bar {
@@ -286,43 +378,72 @@
             font-size: 12px;
             font-weight: 700;
             color: var(--text-muted);
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         .calendar-days-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
+            gap: 6px;
         }
 
         .calendar-day-cell {
-            aspect-ratio: 1;
+            min-height: 70px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: flex-start;
             padding: 6px;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
             background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
+            overflow: hidden;
+            transition: border-color 0.15s;
+        }
+
+        .calendar-day-cell:hover {
+            border-color: var(--brand-color);
+        }
+
+        .calendar-day-cell.other-month {
+            opacity: 0.35;
+            background: var(--input-bg);
         }
 
         .calendar-day-cell.current-today {
-            border-color: var(--brand-color);
+            border: 2px solid var(--brand-color);
             background: var(--brand-light);
         }
 
-        .calendar-day-cell .indicator-dot {
-            width: 5px;
-            height: 5px;
+        .cell-log {
+            font-size: 10px;
             background: var(--brand-color);
-            border-radius: 50%;
-            align-self: center;
+            color: #fff;
+            padding: 2px 4px;
+            border-radius: 4px;
+            margin-top: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 700;
         }
 
-        /* BOTTOM NAV BAR (STANDARD SYSTEM TABS) */
+        .cell-note {
+            font-size: 10px;
+            background: var(--input-bg);
+            color: var(--text-main);
+            padding: 2px 4px;
+            border-radius: 4px;
+            margin-top: 4px;
+            border: 1px solid var(--border-color);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* BOTTOM NAV BAR */
         .system-navigation-bar {
             position: fixed;
             bottom: 0;
@@ -332,13 +453,14 @@
             border-top: 1px solid var(--border-color);
             display: flex;
             height: 72px;
-            z-index: 1000;
             justify-content: center;
+            z-index: 1000;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
         }
 
         .nav-tab-wrapper {
             width: 100%;
-            max-width: 540px;
+            max-width: 560px;
             display: flex;
         }
 
@@ -352,47 +474,64 @@
             border: none;
             color: var(--text-muted);
             cursor: pointer;
+            transition: color 0.15s;
         }
 
         .navigation-tab i {
-            font-size: 18px;
+            font-size: 20px;
             margin-bottom: 4px;
         }
 
         .navigation-tab span {
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 700;
+            letter-spacing: 0.5px;
         }
 
         .navigation-tab.tab-active {
             color: var(--brand-color);
+        }
+
+        /* RESPONSIVE ADAPTATION */
+        @media (max-width: 480px) {
+            .app-container { padding: 16px 12px; }
+            .content-card { padding: 18px; }
+            .form-row-twin { grid-template-columns: 1fr; gap: 8px; }
+            .calendar-day-cell { min-height: 58px; padding: 4px; }
+            .cell-log, .cell-note { font-size: 9px; }
         }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="brand-logo">Time<span>Pilot</span></div>
-        <button class="theme-toggle-btn" onclick="toggleSystemTheme()" id="theme-btn-label">DARK MODE</button>
+        <div class="brand-logo">
+            Time<span class="highlight">Pilot</span>
+            <span class="badge-proto">Prototype</span>
+        </div>
+        <button class="theme-toggle-btn" onclick="toggleSystemTheme()">
+            <i class="fa-solid fa-circle-half-stroke"></i>
+            <span id="theme-btn-label">DARK MODE</span>
+        </button>
     </header>
 
     <div class="app-container">
         
         <div id="page-home" class="app-page active-page">
             <div class="live-sync-banner" id="geo-weather-status">
-                <i class="fa-solid fa-cloud-sun"></i> 地理データ読み込み中...
+                <i class="fa-solid fa-spinner fa-spin"></i> 気象・観測データ同期中...
             </div>
 
             <div class="content-card">
                 <div class="form-group">
                     <label>今日の主要タスク</label>
-                    <input type="text" id="input-task-name" placeholder="例: 数学の重要問題集を解く">
+                    <input type="text" id="input-task-name" placeholder="例: 英語の長文問題集を解き切る">
                 </div>
 
                 <div class="form-row-twin">
                     <div class="form-group">
                         <label>開始時刻</label>
-                        <input type="time" id="input-start-time" value="16:00">
+                        <input type="time" id="input-start-time" value="17:00">
                     </div>
                     <div class="form-group">
                         <label>所要時間</label>
@@ -401,6 +540,7 @@
                             <option value="60" selected>60分</option>
                             <option value="90">90分</option>
                             <option value="120">120分</option>
+                            <option value="180">180分 (ディープセッション)</option>
                         </select>
                     </div>
                 </div>
@@ -413,48 +553,56 @@
                             <option value="TikTok">TikTok</option>
                             <option value="YouTube">YouTube</option>
                             <option value="X (Twitter)">X (Twitter)</option>
+                            <option value="LINE">LINE / メッセージ</option>
                             <option value="なし">特になし</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>現在の集中度</label>
                         <select id="input-focus-level">
-                            <option value="高">高い (好調)</option>
-                            <option value="普通" selected>普通 (通常)</option>
-                            <option value="低">低い (疲労気味)</option>
+                            <option value="高">高い (好調・エネルギー充満)</option>
+                            <option value="普通" selected>普通 (通常ペース)</option>
+                            <option value="低">低い (疲労気味・少し少しずつ)</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label>メモ・補足</label>
-                    <input type="text" id="input-notes" placeholder="例: スマホは机の引き出しにしまう">
+                    <input type="text" id="input-notes" placeholder="例: スマホを机の引き出しに入れて鍵をかける">
                 </div>
 
-                <button class="start-action-btn" onclick="executeTimePilotProtocol()">START</button>
+                <button class="start-action-btn" onclick="executeTimePilotProtocol()">
+                    <i class="fa-solid fa-play"></i> START
+                </button>
             </div>
 
-            <div class="section-title">生成されたタイムライン</div>
-            <div id="timeline-console-output" style="font-size: 14px; color: var(--text-muted); line-height: 1.5; padding: 10px 0;">
-                パラメータを設定してSTARTボタンを押すと、最適化された時間計画がここに展開されます。
+            <div id="timeline-scroll-target"></div>
+            <div id="timeline-wrapper" style="display: none;">
+                <div class="section-title">生成されたタイムライン</div>
+                <div id="timeline-console-output" style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.5;"></div>
+                <div class="timeline-container" id="dynamic-timeline-list"></div>
             </div>
-            <div class="timeline-container" id="dynamic-timeline-list"></div>
         </div>
 
         <div id="page-calendar" class="app-page">
             <div class="calendar-summary-strip">
                 <div class="summary-mini-tile">
                     <div class="summary-mini-label">Total Focus Time</div>
-                    <div class="summary-mini-value">24.5 h</div>
+                    <div class="summary-mini-value" id="calc-total-time">0.0 h</div>
                 </div>
                 <div class="summary-mini-tile">
-                    <div class="summary-mini-label">Success Rate</div>
-                    <div class="summary-mini-value">88.2%</div>
+                    <div class="summary-mini-label">Total Sessions</div>
+                    <div class="summary-mini-value" id="calc-total-sessions">0</div>
                 </div>
             </div>
 
             <div class="content-card">
-                <div class="calendar-month-header">2026年 7月</div>
+                <div class="calendar-header-nav">
+                    <button class="cal-nav-btn" onclick="navigateMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                    <div class="calendar-month-title" id="calendar-month-label">2026年 7月</div>
+                    <button class="cal-nav-btn" onclick="navigateMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
                 <div class="calendar-weekday-bar">
                     <div>日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div>土</div>
                 </div>
@@ -473,15 +621,17 @@
                     <label>主要都市・観測地点</label>
                     <select id="select-city"></select>
                 </div>
-                <button class="start-action-btn" style="background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border-color); box-shadow: none;" onclick="saveLocationPreference()">設定を保存して同期</button>
+                <button class="start-action-btn secondary-btn" onclick="saveLocationPreference()">
+                    <i class="fa-solid fa-location-dot"></i> 設定を保存して天気を同期
+                </button>
             </div>
 
-            <div class="section-title">システム連携</div>
-            <div class="content-card">
-                <div class="form-group">
-                    <label>LLM APIキー (Groq / OpenRouter)</label>
-                    <input type="password" placeholder="api_key_xxxxxxxxxxxxxxxx">
-                </div>
+            <div class="section-title">プロトタイプ情報</div>
+            <div class="content-card" style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
+                <p><strong>Version:</strong> TimePilot Prototype v1.0.0 (Build 202607)</p>
+                <p><strong>Storage:</strong> LocalStorage Sync Enabled</p>
+                <p><strong>Weather API:</strong> Open-Meteo Realtime Engine</p>
+                <p style="margin-top: 10px;">当プロトタイプ版は、日々の集中セッションのログや設定をブラウザのローカルストレージに安全に保管します。</p>
             </div>
         </div>
 
@@ -489,212 +639,79 @@
 
     <nav class="system-navigation-bar">
         <div class="nav-tab-wrapper">
-            <button class="navigation-tab tab-active" onclick="switchSystemTab('home', this)"><i class="fa-solid fa-house"></i><span>HOME</span></button>
-            <button class="navigation-tab" onclick="switchSystemTab('calendar', this)"><i class="fa-solid fa-calendar-days"></i><span>Calendar</span></button>
-            <button class="navigation-tab" onclick="switchSystemTab('settings', this)"><i class="fa-solid fa-gear"></i><span>Settings</span></button>
+            <button class="navigation-tab tab-active" onclick="switchSystemTab('home', this)">
+                <i class="fa-solid fa-house"></i><span>HOME</span>
+            </button>
+            <button class="navigation-tab" onclick="switchSystemTab('calendar', this)">
+                <i class="fa-solid fa-calendar-days"></i><span>Calendar</span></button>
+            <button class="navigation-tab" onclick="switchSystemTab('settings', this)">
+                <i class="fa-solid fa-gear"></i><span>Settings</span></button>
         </div>
     </nav>
 
     <script>
-        // 【完全マスターデータ】47都道府県・470主要都市（北から南へ緯度ソート済み）
+        // 【完全マスターデータ】日本の47都道府県・主要観測都市（北から南へ緯度ソート済み）
         const masterGeoDatabase = {
-            "北海道": [
-                {name:"札幌市",lat:43.06,lon:141.35},{name:"旭川市",lat:43.77,lon:142.36},{name:"函館市",lat:41.77,lon:140.73},{name:"釧路市",lat:42.98,lon:144.38},{name:"苫小牧市",lat:42.63,lon:141.60},
-                {name:"帯広市",lat:42.92,lon:143.20},{name:"小樽市",lat:43.19,lon:141.00},{name:"北見市",lat:43.80,lon:143.89},{name:"江別市",lat:43.11,lon:141.53},{name:"室蘭市",lat:42.32,lon:140.97}
-            ],
-            "青森県": [
-                {name:"青森市",lat:40.82,lon:140.74},{name:"弘前市",lat:40.60,lon:140.46},{name:"八戸市",lat:40.51,lon:141.49},{name:"五所川原市",lat:40.81,lon:140.45},{name:"十和田市",lat:40.61,lon:141.21},
-                {name:"むつ市",lat:41.29,lon:141.19},{name:"三沢市",lat:40.68,lon:141.37},{name:"黒石市",lat:40.64,lon:140.60},{name:"つがる市",lat:40.80,lon:140.38},{name:"平川市",lat:40.58,lon:140.57}
-            ],
-            "岩手県": [
-                {name:"盛岡市",lat:39.70,lon:141.15},{name:"一関市",lat:38.93,lon:141.13},{name:"奥州市",lat:39.14,lon:141.14},{name:"花巻市",lat:39.40,lon:141.12},{name:"北上市",lat:39.29,lon:141.11},
-                {name:"宮古市",lat:39.64,lon:141.95},{name:"滝沢市",lat:39.73,lon:141.08},{name:"大船渡市",lat:39.08,lon:141.71},{name:"釜石市",lat:39.28,lon:141.88},{name:"久慈市",lat:40.19,lon:141.77}
-            ],
-            "宮城県": [
-                {name:"仙台市",lat:38.27,lon:140.87},{name:"石巻市",lat:38.43,lon:141.30},{name:"大崎市",lat:38.58,lon:140.96},{name:"登米市",lat:38.69,lon:141.19},{name:"栗原市",lat:38.73,lon:141.02},
-                {name:"名取市",lat:38.17,lon:140.89},{name:"気仙沼市",lat:38.90,lon:141.57},{name:"多賀城市",lat:38.29,lon:141.00},{name:"塩竈市",lat:38.31,lon:141.02},{name:"富谷市",lat:38.35,lon:140.89}
-            ],
-            "秋田県": [
-                {name:"秋田市",lat:39.72,lon:140.10},{name:"横手市",lat:39.31,lon:140.56},{name:"大仙市",lat:39.46,lon:140.48},{name:"由利本荘市",lat:39.38,lon:140.05},{name:"大館市",lat:40.27,lon:140.56},
-                {name:"能代市",lat:40.21,lon:140.03},{name:"湯沢市",lat:39.16,lon:140.49},{name:"鹿角市",lat:40.18,lon:140.79},{name:"潟上市",lat:39.85,lon:140.02},{name:"北秋田市",lat:40.00,lon:140.40}
-            ],
-            "山形県": [
-                {name:"山形市",lat:38.26,lon:140.34},{name:"鶴岡市",lat:38.73,lon:139.82},{name:"酒田市",lat:38.91,lon:139.84},{name:"米沢市",lat:37.92,lon:140.11},{name:"天童市",lat:38.36,lon:140.37},
-                {name:"東根市",lat:38.44,lon:140.39},{name:"寒河江市",lat:38.38,lon:140.28},{name:"新庄市",lat:38.76,lon:140.30},{name:"上山市",lat:38.15,lon:140.28},{name:"南陽市",lat:38.05,lon:140.15}
-            ],
-            "福島県": [
-                {name:"福島市",lat:37.76,lon:140.47},{name:"いわき市",lat:37.05,lon:140.89},{name:"郡山市",lat:37.40,lon:140.38},{name:"会津若松市",lat:37.50,lon:139.93},{name:"須賀川市",lat:37.29,lon:140.37},
-                {name:"南相馬市",lat:37.64,lon:140.96},{name:"伊達市",lat:37.82,lon:140.56},{name:"白河市",lat:37.13,lon:140.21},{name:"二本松市",lat:37.59,lon:140.43},{name:"喜多方市",lat:37.65,lon:139.87}
-            ],
-            "茨城県": [
-                {name:"水戸市",lat:36.37,lon:140.47},{name:"つくば市",lat:36.08,lon:140.08},{name:"日立市",lat:36.59,lon:140.66},{name:"ひたちなか市",lat:36.39,lon:140.53},{name:"土浦市",lat:36.08,lon:140.20},
-                {name:"古河市",lat:36.19,lon:139.71},{name:"取手市",lat:35.91,lon:140.06},{name:"筑西市",lat:36.31,lon:139.98},{name:"神栖市",lat:35.89,lon:140.66},{name:"牛久市",lat:35.98,lon:140.16}
-            ],
-            "栃木県": [
-                {name:"宇都宮市",lat:36.57,lon:139.88},{name:"小山市",lat:36.31,lon:139.80},{name:"栃木市",lat:36.38,lon:139.73},{name:"足利市",lat:36.34,lon:139.45},{name:"佐野市",lat:36.31,lon:139.58},
-                {name:"那須塩原市",lat:36.96,lon:140.05},{name:"鹿沼市",lat:36.57,lon:139.75},{name:"日光市",lat:36.72,lon:139.70},{name:"真岡市",lat:36.44,lon:140.01},{name:"大田原市",lat:36.87,lon:140.02}
-            ],
-            "群馬県": [
-                {name:"前橋市",lat:36.39,lon:139.06},{name:"高崎市",lat:36.32,lon:139.00},{name:"太田市",lat:36.29,lon:139.38},{name:"伊勢崎市",lat:36.32,lon:139.20},{name:"桐生市",lat:36.41,lon:139.33},
-                {name:"渋川市",lat:36.49,lon:139.01},{name:"館林市",lat:36.25,lon:139.54},{name:"藤岡市",lat:36.26,lon:139.08},{name:"安中市",lat:36.33,lon:138.89},{name:"富岡市",lat:36.26,lon:138.89}
-            ],
-            "埼玉県": [
-                {name:"さいたま市",lat:35.86,lon:139.65},{name:"川口市",lat:35.81,lon:139.72},{name:"川越市",lat:35.92,lon:139.48},{name:"所沢市",lat:35.79,lon:139.47},{name:"越谷市",lat:35.89,lon:139.79},
-                {name:"草加市",lat:35.83,lon:139.80},{name:"春日部市",lat:35.97,lon:139.75},{name:"上尾市",lat:35.98,lon:139.59},{name:"熊谷市",lat:36.15,lon:139.39},{name:"新座市",lat:35.76,lon:139.56}
-            ],
-            "千葉県": [
-                {name:"千葉市",lat:35.61,lon:140.12},{name:"船橋市",lat:35.70,lon:139.98},{name:"松戸市",lat:35.78,lon:139.90},{name:"市川市",lat:35.72,lon:139.91},{name:"柏市",lat:35.86,lon:139.97},
-                {name:"市原市",lat:35.53,lon:140.09},{name:"八千代市",lat:35.72,lon:140.10},{name:"佐倉市",lat:35.72,lon:140.23},{name:"習志野市",lat:35.69,lon:140.02},{name:"流山市",lat:35.86,lon:139.90}
-            ],
-            "東京都": [
-                {name:"新宿区",lat:35.69,lon:139.70},{name:"世田谷区",lat:35.65,lon:139.65},{name:"八王子市",lat:35.66,lon:139.34},{name:"練馬区",lat:35.74,lon:139.65},{name:"足立区",lat:35.78,lon:139.80},
-                {name:"江戸川区",lat:35.67,lon:139.87},{name:"町田市",lat:35.54,lon:139.45},{name:"府中市",lat:35.67,lon:139.48},{name:"調布市",lat:35.65,lon:139.54},{name:"大田区",lat:35.56,lon:139.72}
-            ],
-            "神奈川県": [
-                {name:"横浜市",lat:35.44,lon:139.64},{name:"川崎市",lat:35.53,lon:139.70},{name:"相模原市",lat:35.57,lon:139.37},{name:"藤沢市",lat:35.34,lon:139.49},{name:"横須賀市",lat:35.28,lon:139.67},
-                {name:"平塚市",lat:35.33,lon:139.35},{name:"茅ヶ崎市",lat:35.33,lon:139.41},{name:"大和市",lat:35.49,lon:139.46},{name:"厚木市",lat:35.44,lon:139.36},{name:"小田原市",lat:35.26,lon:139.16}
-            ],
-            "新潟県": [
-                {name:"新潟市",lat:37.92,lon:139.04},{name:"長岡市",lat:37.45,lon:138.85},{name:"上越市",lat:37.15,lon:138.24},{name:"三条市",lat:37.64,lon:138.96},{name:"新発田市",lat:37.95,lon:139.33},
-                {name:"柏崎市",lat:37.37,lon:138.56},{name:"燕市",lat:37.66,lon:138.93},{name:"村 Murakami市",lat:38.22,lon:139.48},{name:"南魚沼市",lat:37.07,lon:138.88},{name:"佐渡市",lat:38.02,lon:138.36}
-            ],
-            "富山県": [
-                {name:"富山市",lat:36.70,lon:137.21},{name:"高岡市",lat:36.75,lon:137.02},{name:"射水市",lat:36.78,lon:137.07},{name:"南砺市",lat:36.56,lon:136.92},{name:"氷見市",lat:36.85,lon:136.98},
-                {name:"砺波市",lat:36.64,lon:136.94},{name:"魚津市",lat:36.83,lon:137.41},{name:"黒部市",lat:36.87,lon:137.45},{name:"滑川市",lat:36.77,lon:137.34},{name:"小矢部市",lat:36.67,lon:136.87}
-            ],
-            "石川県": [
-                {name:"金沢市",lat:36.56,lon:136.66},{name:"白山市",lat:36.51,lon:136.57},{name:"小松市",lat:36.40,lon:136.45},{name:"加賀市",lat:36.32,lon:136.32},{name:"七尾市",lat:37.04,lon:136.96},
-                {name:"野々市市",lat:36.53,lon:136.61},{name:"能美市",lat:36.43,lon:136.49},{name:"輪島市",lat:37.39,lon:136.90},{name:"かほく市",lat:36.72,lon:136.70},{name:"羽咋市",lat:36.89,lon:136.78}
-            ],
-            "福井県": [
-                {name:"福井市",lat:36.06,lon:136.22},{name:"坂井市",lat:36.15,lon:136.23},{name:"越前市",lat:35.90,lon:136.17},{name:"敦賀市",lat:35.65,lon:136.07},{name:"鯖江市",lat:35.94,lon:136.19},
-                {name:"大野市",lat:35.98,lon:136.53},{name:"小浜市",lat:35.49,lon:135.75},{name:"あわら市",lat:36.21,lon:136.22},{name:"勝山市",lat:36.06,lon:136.50},{name:"永平寺町",lat:36.10,lon:136.35}
-            ],
-            "山梨県": [
-                {name:"甲府市",lat:35.66,lon:138.57},{name:"甲斐市",lat:35.69,lon:138.51},{name:"南アルプス市",lat:35.61,lon:138.46},{name:"笛吹市",lat:35.64,lon:138.64},{name:"富士吉田市",lat:35.49,lon:138.80},
-                {name:"北杜市",lat:35.78,lon:138.42},{name:"山梨市",lat:35.69,lon:138.69},{name:"甲州市",lat:35.70,lon:138.73},{name:"中央市",lat:35.60,lon:138.52},{name:"大月市",lat:35.61,lon:138.94}
-            ],
-            "長野県": [
-                {name:"長野市",lat:36.65,lon:138.18},{name:"松本市",lat:36.24,lon:137.97},{name:"上田市",lat:36.40,lon:138.25},{name:"飯田市",lat:35.52,lon:137.82},{name:"佐久市",lat:36.25,lon:138.48},
-                {name:"安曇野市",lat:36.30,lon:137.90},{name:"伊那市",lat:35.84,lon:137.96},{name:"塩尻市",lat:36.11,lon:137.95},{name:"千曲市",lat:36.53,lon:138.12},{name:"諏訪市",lat:36.04,lon:138.12}
-            ],
-            "岐阜県": [
-                {name:"岐阜市",lat:35.42,lon:136.76},{name:"大垣市",lat:35.36,lon:136.62},{name:"各務原市",lat:35.40,lon:136.84},{name:"多治見市",lat:35.33,lon:137.13},{name:"可児市",lat:35.43,lon:137.06},
-                {name:"高山市",lat:36.14,lon:137.26},{name:"関市",lat:35.49,lon:136.92},{name:"中津川市",lat:35.49,lon:137.50},{name:"羽島市",lat:35.32,lon:136.70},{name:"美濃加茂市",lat:35.44,lon:137.02}
-            ],
-            "静岡県": [
-                {name:"静岡市",lat:34.98,lon:138.38},{name:"浜松市",lat:34.71,lon:137.73},{name:"富士市",lat:35.16,lon:138.68},{name:"沼津市",lat:35.10,lon:138.86},{name:"磐田市",lat:34.72,lon:137.85},
-                {name:"焼津市",lat:34.87,lon:138.32},{name:"藤枝市",lat:34.87,lon:138.26},{name:"富士宮市",lat:35.22,lon:138.61},{name:"掛川市",lat:34.77,lon:138.01},{name:"三島市",lat:35.12,lon:138.91}
-            ],
-            "愛知県": [
-                {name:"名古屋市",lat:35.18,lon:136.91},{name:"豊田市",lat:35.08,lon:137.16},{name:"岡崎市",lat:34.96,lon:137.16},{name:"一宮市",lat:35.30,lon:136.80},{name:"豊橋市",lat:34.77,lon:137.38},
-                {name:"春日井市",lat:35.25,lon:136.97},{name:"安城市",lat:34.96,lon:137.09},{name:"豊川市",lat:34.82,lon:137.37},{name:"西尾市",lat:34.86,lon:137.06},{name:"刈谷市",lat:34.99,lon:137.01}
-            ],
-            "三重県": [
-                {name:"津市",lat:34.72,lon:136.51},{name:"四日市市",lat:34.97,lon:136.63},{name:"鈴鹿市",lat:34.88,lon:136.58},{name:"松阪市",lat:34.58,lon:136.53},{name:"桑名市",lat:35.07,lon:136.69},
-                {name:"伊勢市",lat:34.49,lon:136.71},{name:"伊賀市",lat:34.76,lon:136.13},{name:"名張市",lat:34.62,lon:136.10},{name:"志摩市",lat:34.33,lon:136.83},{name:"亀山市",lat:34.86,lon:136.46}
-            ],
-            "滋賀県": [
-                {name:"大津市",lat:35.02,lon:135.87},{name:"草津市",lat:35.02,lon:135.96},{name:"長浜市",lat:35.38,lon:136.27},{name:"東近江市",lat:35.11,lon:136.21},{name:"彦根市",lat:35.27,lon:136.26},
-                {name:"甲賀市",lat:34.97,lon:136.17},{name:"近江八幡市",lat:35.14,lon:136.10},{name:"守山市",lat:35.06,lon:135.96},{name:"栗東市",lat:35.03,lon:136.00},{name:"湖南市",lat:35.00,lon:136.08}
-            ],
-            "京都府": [
-                {name:"京都市",lat:35.01,lon:135.77},{name:"宇治市",lat:34.89,lon:135.80},{name:"亀岡市",lat:35.01,lon:135.58},{name:"舞鶴市",lat:35.47,lon:135.39},{name:"長岡京市",lat:34.93,lon:135.69},
-                {name:"福知山市",lat:35.30,lon:135.13},{name:"城陽市",lat:34.85,lon:135.78},{name:"木津川市",lat:34.74,lon:135.82},{name:"八幡市",lat:34.87,lon:135.70},{name:"京田辺市",lat:34.82,lon:135.77}
-            ],
-            "大阪府": [
-                {name:"大阪市",lat:34.69,lon:135.50},{name:"堺市",lat:34.57,lon:135.48},{name:"東大阪市",lat:34.68,lon:135.60},{name:"枚方市",lat:34.81,lon:135.65},{name:"豊中市",lat:34.78,lon:135.47},
-                {name:"吹田市",lat:34.76,lon:135.52},{name:"高槻市",lat:34.85,lon:135.62},{name:"茨木市",lat:34.82,lon:135.57},{name:"八尾市",lat:34.63,lon:135.60},{name:"寝屋川市",lat:34.76,lon:135.64}
-            ],
-            "兵庫県": [
-                {name:"神戸市",lat:34.69,lon:135.19},{name:"姫路市",lat:34.82,lon:134.69},{name:"西宮市",lat:34.74,lon:135.34},{name:"尼崎市",lat:34.73,lon:135.41},{name:"明石市",lat:34.64,lon:135.00},
-                {name:"加古川市",lat:34.76,lon:134.84},{name:"宝塚市",lat:34.81,lon:135.35},{name:"伊丹市",lat:34.79,lon:135.42},{name:"川西市",lat:34.83,lon:135.42},{name:"三田市",lat:34.89,lon:135.23}
-            ],
-            "奈良県": [
-                {name:"奈良市",lat:34.69,lon:135.83},{name:"橿原市",lat:34.51,lon:135.79},{name:"生駒市",lat:34.69,lon:135.70},{name:"大和郡山市",lat:34.65,lon:135.78},{name:"香芝市",lat:34.54,lon:135.70},
-                {name:"天理市",lat:34.60,lon:135.84},{name:"大和高田市",lat:34.51,lon:135.74},{name:"桜井市",lat:34.52,lon:135.85},{name:"五條市",lat:34.35,lon:135.70},{name:"宇陀市",lat:34.53,lon:135.95}
-            ],
-            "和歌山県": [
-                {name:"和歌山市",lat:34.23,lon:135.17},{name:"田辺市",lat:33.73,lon:135.38},{name:"橋本市",lat:34.35,lon:135.61},{name:"紀の川市",lat:34.26,lon:135.32},{name:"海南市",lat:34.15,lon:135.21},
-                {name:"岩出市",lat:34.26,lon:135.25},{name:"新宮市",lat:33.72,lon:135.99},{name:"有田市",lat:34.08,lon:135.12},{name:"御坊市",lat:33.89,lon:135.15},{name:"白浜町",lat:33.68,lon:135.34}
-            ],
-            "鳥取県": [
-                {name:"鳥取市",lat:35.50,lon:134.24},{name:"米子市",lat:35.43,lon:133.33},{name:"倉吉市",lat:35.43,lon:133.82},{name:"境港市",lat:35.54,lon:133.23},{name:"岩美町",lat:35.57,lon:134.30},
-                {name:"八頭町",lat:35.41,lon:134.20},{name:"琴浦町",lat:35.50,lon:133.71},{name:"大山町",lat:35.48,lon:133.48},{name:"北栄町",lat:35.50,lon:133.75},{name:"日南町",lat:35.21,lon:133.31}
-            ],
-            "島根県": [
-                {name:"松江市",lat:35.47,lon:133.05},{name:"出雲市",lat:35.37,lon:132.75},{name:"浜田市",lat:34.90,lon:132.08},{name:"益田市",lat:34.68,lon:131.84},{name:"大田市",lat:35.19,lon:132.50},
-                {name:"安来市",lat:35.43,lon:133.25},{name:"雲南市",lat:35.27,lon:132.90},{name:"隠岐の島町",lat:36.20,lon:133.33},{name:"江津市",lat:35.01,lon:132.22},{name:"吉賀町",lat:34.38,lon:131.87}
-            ],
-            "岡山県": [
-                {name:"岡山市",lat:34.66,lon:133.92},{name:"倉敷市",lat:34.58,lon:133.77},{name:"津山市",lat:35.07,lon:134.00},{name:"総社市",lat:34.67,lon:133.75},{name:"玉野市",lat:34.49,lon:133.95},
-                {name:"笠岡市",lat:34.51,lon:133.51},{name:"真庭市",lat:35.11,lon:133.76},{name:"井原市",lat:34.60,lon:133.46},{name:"赤磐市",lat:34.75,lon:134.02},{name:"瀬戸内市",lat:34.63,lon:134.10}
-            ],
-            "広島県": [
-                {name:"広島市",lat:34.39,lon:132.46},{name:"福山市",lat:34.49,lon:133.36},{name:"呉市",lat:34.25,lon:132.56},{name:"東広島市",lat:34.43,lon:132.74},{name:"尾道市",lat:34.41,lon:133.20},
-                {name:"廿日市市",lat:34.35,lon:132.33},{name:"三原市",lat:34.40,lon:133.08},{name:"三次市",lat:34.81,lon:132.85},{name:"府中市",lat:34.57,lon:133.24},{name:"安芸高田市",lat:34.67,lon:132.70}
-            ],
-            "山口県": [
-                {name:"山口市",lat:34.18,lon:131.47},{name:"下関市",lat:33.96,lon:130.94},{name:"宇部市",lat:33.95,lon:131.25},{name:"周南市",lat:34.06,lon:131.81},{name:"岩国市",lat:34.17,lon:132.22},
-                {name:"防府市",lat:34.05,lon:131.57},{name:"下松市",lat:34.01,lon:131.87},{name:"光市",lat:33.96,lon:131.94},{name:"萩市",lat:34.41,lon:131.40},{name:"長門市",lat:34.37,lon:131.19}
-            ],
-            "徳島県": [
-                {name:"徳島市",lat:34.07,lon:134.56},{name:"阿南市",lat:33.92,lon:134.66},{name:"鳴門市",lat:34.17,lon:134.61},{name:"吉野川市",lat:34.06,lon:134.27},{name:"小松島市",lat:34.00,lon:134.59},
-                {name:"阿波市",lat:34.11,lon:134.25},{name:"美馬市",lat:34.07,lon:134.16},{name:"三好市",lat:34.03,lon:133.85},{name:"藍住町",lat:34.12,lon:134.51},{name:"石井町",lat:34.05,lon:134.44}
-            ],
-            "香川県": [
-                {name:"高松市",lat:34.34,lon:134.04},{name:"丸亀市",lat:34.29,lon:133.79},{name:"三豊市",lat:34.22,lon:133.72},{name:"観音寺市",lat:34.13,lon:133.65},{name:"坂出市",lat:34.31,lon:133.86},
-                {name:"さぬき市",lat:34.31,lon:134.20},{name:"善通寺市",lat:34.23,lon:133.78},{name:"東かがわ市",lat:34.24,lon:134.36},{name:"綾川町",lat:34.22,lon:133.96},{name:"多度津町",lat:34.27,lon:133.75}
-            ],
-            "愛媛県": [
-                {name:"松山市",lat:33.84,lon:132.77},{name:"新居浜市",lat:33.96,lon:133.28},{name:"西条市",lat:33.92,lon:133.18},{name:"今治市",lat:34.07,lon:133.00},{name:"宇和島市",lat:33.22,lon:132.56},
-                {name:"大洲市",lat:33.51,lon:132.55},{name:"伊予市",lat:33.76,lon:132.70},{name:"四国中央市",lat:33.98,lon:133.55},{name:"八幡浜市",lat:33.46,lon:132.42},{name:"西予市",lat:33.34,lon:132.51}
-            ],
-            "高知県": [
-                {name:"高知市",lat:33.56,lon:133.53},{name:"南国市",lat:33.58,lon:133.65},{name:"四万十市",lat:32.99,lon:132.93},{name:"香南市",lat:33.56,lon:133.72},{name:"香美市",lat:33.62,lon:133.68},
-                {name:"土佐市",lat:33.50,lon:133.43},{name:"宿毛市",lat:32.94,lon:132.73},{name:"須崎市",lat:33.40,lon:133.29},{name:"安芸市",lat:33.50,lon:133.90},{name:"いの町",lat:33.56,lon:133.44}
-            ],
-            "福岡県": [
-                {name:"福岡市",lat:33.61,lon:130.42},{name:"北九州市",lat:33.88,lon:130.88},{name:"久留米市",lat:33.32,lon:130.51},{name:"飯塚市",lat:33.64,lon:130.69},{name:"大牟田市",lat:33.03,lon:130.45},
-                {name:"春日市",lat:33.53,lon:130.47},{name:"糸島市",lat:33.56,lon:130.20},{name:"宗像市",lat:33.81,lon:130.54},{name:"筑紫野市",lat:33.45,lon:130.52},{name:"大野城市",lat:33.54,lon:130.48}
-            ],
-            "佐賀県": [
-                {name:"佐賀市",lat:33.26,lon:130.30},{name:"唐津市",lat:33.45,lon:129.97},{name:"鳥栖市",lat:33.38,lon:130.51},{name:"伊万里市",lat:33.27,lon:129.87},{name:"武雄市",lat:33.19,lon:130.02},
-                {name:"小城市",lat:33.27,lon:130.20},{name:"神埼市",lat:33.31,lon:130.37},{name:"鹿島市",lat:33.11,lon:130.10},{name:"嬉野市",lat:33.13,lon:129.98},{name:"有田町",lat:33.19,lon:129.89}
-            ],
-            "長崎県": [
-                {name:"長崎市",lat:32.75,lon:129.88},{name:"佐世保市",lat:33.18,lon:129.72},{name:"諫早市",lat:32.85,lon:130.05},{name:"大村市",lat:32.90,lon:129.96},{name:"南島原市",lat:32.63,lon:130.22},
-                {name:"島原市",lat:32.78,lon:130.37},{name:"雲仙市",lat:32.84,lon:130.19},{name:"五島市",lat:32.70,lon:128.84},{name:"平戸市",lat:33.37,lon:129.55},{name:"対馬市",lat:34.20,lon:129.29}
-            ],
-            "熊本県": [
-                {name:"熊本市",lat:32.80,lon:130.71},{name:"八代市",lat:32.51,lon:130.60},{name:"天草市",lat:32.45,lon:130.19},{name:"玉名市",lat:32.93,lon:130.56},{name:"宇城市",lat:32.64,lon:130.68},
-                {name:"合志市",lat:32.88,lon:130.75},{name:"荒尾市",lat:33.02,lon:130.44},{name:"山鹿市",lat:33.01,lon:130.69},{name:"菊池市",lat:32.98,lon:130.81},{name:"人吉市",lat:32.21,lon:130.75}
-            ],
-            "大分県": [
-                {name:"大分市",lat:33.24,lon:131.61},{name:"別府市",lat:33.28,lon:131.49},{name:"中津市",lat:33.60,lon:131.19},{name:"佐伯市",lat:32.96,lon:131.90},{name:"日田市",lat:33.32,lon:130.94},
-                {name:"宇佐市",lat:33.53,lon:131.35},{name:"臼杵市",lat:33.12,lon:131.80},{name:"由布市",lat:33.18,lon:131.43},{name:"杵築市",lat:33.41,lon:131.62},{name:"国東市",lat:33.56,lon:131.73}
-            ],
-            "宮崎県": [
-                {name:"宮崎市",lat:31.91,lon:131.42},{name:"都城市",lat:31.72,lon:131.06},{name:"延岡市",lat:32.58,lon:131.67},{name:"日向市",lat:32.42,lon:131.62},{name:"日南市",lat:31.60,lon:131.38},
-                {name:"小林市",lat:32.00,lon:130.97},{name:"西都市",lat:32.11,lon:131.40},{name:"三股町",lat:31.72,lon:131.11},{name:"高鍋町",lat:32.13,lon:131.50},{name:"えびの市",lat:32.05,lon:130.79}
-            ],
-            "鹿児島県": [
-                {name:"鹿児島市",lat:31.56,lon:130.56},{name:"霧島市",lat:31.74,lon:130.76},{name:"鹿屋市",lat:31.38,lon:130.85},{name:"薩摩川内市",lat:31.81,lon:130.30},{name:"哀良市",lat:31.74,lon:130.64},
-                {name:"出水市",lat:32.08,lon:130.35},{name:"日置市",lat:31.63,lon:130.40},{name:"奄美市",lat:28.38,lon:129.49},{name:"指宿市",lat:31.25,lon:130.63},{name:"南九州市",lat:31.38,lon:130.42}
-            ],
-            "沖縄県": [
-                {name:"那覇市",lat:26.21,lon:127.68},{name:"沖縄市",lat:26.34,lon:127.80},{name:"うるま市",lat:26.38,lon:127.86},{name:"浦添市",lat:26.25,lon:127.72},{name:"宜野湾市",lat:26.28,lon:127.76},
-                {name:"名護市",lat:26.59,lon:127.98},{name:"糸満市",lat:26.13,lon:127.67},{name:"豊見城市",lat:26.17,lon:127.68},{name:"宮古島市",lat:24.80,lon:125.28},{name:"石垣市",lat:24.34,lon:124.16}
-            ]
+            "北海道": [{name:"札幌市",lat:43.06,lon:141.35},{name:"旭川市",lat:43.77,lon:142.36},{name:"函館市",lat:41.77,lon:140.73},{name:"釧路市",lat:42.98,lon:144.38},{name:"稚内市",lat:45.41,lon:141.67}],
+            "青森県": [{name:"青森市",lat:40.82,lon:140.74},{name:"弘前市",lat:40.60,lon:140.46},{name:"八戸市",lat:40.51,lon:141.49}],
+            "岩手県": [{name:"盛岡市",lat:39.70,lon:141.15},{name:"一関市",lat:38.93,lon:141.13},{name:"宮古市",lat:39.64,lon:141.95}],
+            "宮城県": [{name:"仙台市",lat:38.27,lon:140.87},{name:"石巻市",lat:38.43,lon:141.30},{name:"気仙沼市",lat:38.90,lon:141.57}],
+            "秋田県": [{name:"秋田市",lat:39.72,lon:140.10},{name:"横手市",lat:39.31,lon:140.56},{name:"大館市",lat:40.27,lon:140.56}],
+            "山形県": [{name:"山形市",lat:38.26,lon:140.34},{name:"鶴岡市",lat:38.73,lon:139.82},{name:"酒田市",lat:38.91,lon:139.84}],
+            "福島県": [{name:"福島市",lat:37.76,lon:140.47},{name:"いわき市",lat:37.05,lon:140.89},{name:"郡山市",lat:37.40,lon:140.38},{name:"会津若松市",lat:37.50,lon:139.93}],
+            "茨城県": [{name:"水戸市",lat:36.37,lon:140.47},{name:"つくば市",lat:36.08,lon:140.08},{name:"日立市",lat:36.59,lon:140.66}],
+            "栃木県": [{name:"宇都宮市",lat:36.57,lon:139.88},{name:"小山市",lat:36.31,lon:139.80},{name:"日光市",lat:36.72,lon:139.70}],
+            "群馬県": [{name:"前橋市",lat:36.39,lon:139.06},{name:"高崎市",lat:36.32,lon:139.00},{name:"太田市",lat:36.29,lon:139.38}],
+            "埼玉県": [{name:"さいたま市",lat:35.86,lon:139.65},{name:"川口市",lat:35.81,lon:139.72},{name:"川越市",lat:35.92,lon:139.48},{name:"所沢市",lat:35.79,lon:139.47}],
+            "千葉県": [{name:"千葉市",lat:35.61,lon:140.12},{name:"船橋市",lat:35.70,lon:139.98},{name:"柏市",lat:35.86,lon:139.97},{name:"銚子市",lat:35.73,lon:140.83}],
+            "東京都": [{name:"新宿区",lat:35.69,lon:139.70},{name:"世田谷区",lat:35.65,lon:139.65},{name:"八王子市",lat:35.66,lon:139.34},{name:"立川市",lat:35.70,lon:139.41}],
+            "神奈川県": [{name:"横浜市",lat:35.44,lon:139.64},{name:"川崎市",lat:35.53,lon:139.70},{name:"相模原市",lat:35.57,lon:139.37},{name:"藤沢市",lat:35.34,lon:139.49},{name:"小田原市",lat:35.26,lon:139.16}],
+            "新潟県": [{name:"新潟市",lat:37.92,lon:139.04},{name:"長岡市",lat:37.45,lon:138.85},{name:"上越市",lat:37.15,lon:138.24},{name:"佐渡市",lat:38.02,lon:138.36}],
+            "富山県": [{name:"富山市",lat:36.70,lon:137.21},{name:"高岡市",lat:36.75,lon:137.02},{name:"魚津市",lat:36.83,lon:137.41}],
+            "石川県": [{name:"金沢市",lat:36.56,lon:136.66},{name:"白山市",lat:36.51,lon:136.57},{name:"小松市",lat:36.40,lon:136.45},{name:"七尾市",lat:37.04,lon:136.96},{name:"輪島市",lat:37.39,lon:136.90}],
+            "福井県": [{name:"福井市",lat:36.06,lon:136.22},{name:"坂井市",lat:36.15,lon:136.23},{name:"敦賀市",lat:35.65,lon:136.07}],
+            "山梨県": [{name:"甲府市",lat:35.66,lon:138.57},{name:"富士吉田市",lat:35.49,lon:138.80},{name:"南アルプス市",lat:35.61,lon:138.46}],
+            "長野県": [{name:"長野市",lat:36.65,lon:138.18},{name:"松本市",lat:36.24,lon:137.97},{name:"上田市",lat:36.40,lon:138.25},{name:"飯田市",lat:35.52,lon:137.82}],
+            "岐阜県": [{name:"岐阜市",lat:35.42,lon:136.76},{name:"大垣市",lat:35.36,lon:136.62},{name:"高山市",lat:36.14,lon:137.26}],
+            "静岡県": [{name:"静岡市",lat:34.98,lon:138.38},{name:"浜松市",lat:34.71,lon:137.73},{name:"沼津市",lat:35.10,lon:138.86},{name:"富士宮市",lat:35.22,lon:138.61}],
+            "愛知県": [{name:"名古屋市",lat:35.18,lon:136.91},{name:"豊田市",lat:35.08,lon:137.16},{name:"岡崎市",lat:34.96,lon:137.16},{name:"豊橋市",lat:34.77,lon:137.38}],
+            "三重県": [{name:"津市",lat:34.72,lon:136.51},{name:"四日市市",lat:34.97,lon:136.63},{name:"伊勢市",lat:34.49,lon:136.71}],
+            "滋賀県": [{name:"大津市",lat:35.02,lon:135.87},{name:"草津市",lat:35.02,lon:135.96},{name:"彦根市",lat:35.27,lon:136.26}],
+            "京都府": [{name:"京都市",lat:35.01,lon:135.77},{name:"宇治市",lat:34.89,lon:135.80},{name:"舞鶴市",lat:35.47,lon:135.39}],
+            "大阪府": [{name:"大阪市",lat:34.69,lon:135.50},{name:"堺市",lat:34.57,lon:135.48},{name:"東大阪市",lat:34.68,lon:135.60},{name:"豊中市",lat:34.78,lon:135.47}],
+            "兵庫県": [{name:"神戸市",lat:34.69,lon:135.19},{name:"姫路市",lat:34.82,lon:134.69},{name:"西宮市",lat:34.74,lon:135.34},{name:"豊岡市",lat:35.55,lon:134.82}],
+            "奈良県": [{name:"奈良市",lat:34.69,lon:135.83},{name:"橿原市",lat:34.51,lon:135.79},{name:"生駒市",lat:34.69,lon:135.70}],
+            "和歌山県": [{name:"和歌山市",lat:34.23,lon:135.17},{name:"田辺市",lat:33.73,lon:135.38},{name:"新宮市",lat:33.72,lon:135.99}],
+            "鳥取県": [{name:"鳥取市",lat:35.50,lon:134.24},{name:"米子市",lat:35.43,lon:133.33},{name:"倉吉市",lat:35.43,lon:133.82}],
+            "島根県": [{name:"松江市",lat:35.47,lon:133.05},{name:"出雲市",lat:35.37,lon:132.75},{name:"浜田市",lat:34.90,lon:132.08}],
+            "岡山県": [{name:"岡山市",lat:34.66,lon:133.92},{name:"倉敷市",lat:34.58,lon:133.77},{name:"津山市",lat:35.07,lon:134.00}],
+            "広島県": [{name:"広島市",lat:34.39,lon:132.46},{name:"福山市",lat:34.49,lon:133.36},{name:"呉市",lat:34.25,lon:132.56},{name:"尾道市",lat:34.41,lon:133.20}],
+            "山口県": [{name:"山口市",lat:34.18,lon:131.47},{name:"下関市",lat:33.96,lon:130.94},{name:"宇部市",lat:33.95,lon:131.25},{name:"岩国市",lat:34.17,lon:132.22}],
+            "徳島県": [{name:"徳島市",lat:34.07,lon:134.56},{name:"阿南市",lat:33.92,lon:134.66},{name:"鳴門市",lat:34.17,lon:134.61}],
+            "香川県": [{name:"高松市",lat:34.34,lon:134.04},{name:"丸亀市",lat:34.29,lon:133.79},{name:"坂出市",lat:34.31,lon:133.86}],
+            "愛媛県": [{name:"松山市",lat:33.84,lon:132.77},{name:"今治市",lat:34.07,lon:133.00},{name:"新居浜市",lat:33.96,lon:133.28},{name:"宇和島市",lat:33.22,lon:132.56}],
+            "高知県": [{name:"高知市",lat:33.56,lon:133.53},{name:"四万十市",lat:32.99,lon:132.93},{name:"南国市",lat:33.58,lon:133.65}],
+            "福岡県": [{name:"福岡市",lat:33.61,lon:130.42},{name:"北九州市",lat:33.88,lon:130.88},{name:"久留米市",lat:33.32,lon:130.51},{name:"飯塚市",lat:33.64,lon:130.69}],
+            "佐賀県": [{name:"佐賀市",lat:33.26,lon:130.30},{name:"唐津市",lat:33.45,lon:129.97},{name:"鳥栖市",lat:33.38,lon:130.51}],
+            "長崎県": [{name:"長崎市",lat:32.75,lon:129.88},{name:"佐世保市",lat:33.18,lon:129.72},{name:"諫早市",lat:32.85,lon:130.05},{name:"対馬市",lat:34.20,lon:129.29}],
+            "熊本県": [{name:"熊本市",lat:32.80,lon:130.71},{name:"八代市",lat:32.51,lon:130.60},{name:"天草市",lat:32.45,lon:130.19}],
+            "大分県": [{name:"大分市",lat:33.24,lon:131.61},{name:"別府市",lat:33.28,lon:131.49},{name:"中津市",lat:33.60,lon:131.19}],
+            "宮崎県": [{name:"宮崎市",lat:31.91,lon:131.42},{name:"都城市",lat:31.72,lon:131.06},{name:"延岡市",lat:32.58,lon:131.67}],
+            "鹿児島県": [{name:"鹿児島市",lat:31.56,lon:130.56},{name:"霧島市",lat:31.74,lon:130.76},{name:"鹿屋市",lat:31.38,lon:130.85},{name:"奄美市",lat:28.38,lon:129.49}],
+            "沖縄県": [{name:"那覇市",lat:26.21,lon:127.68},{name:"沖縄市",lat:26.34,lon:127.80},{name:"名護市",lat:26.59,lon:127.98},{name:"宮古島市",lat:24.80,lon:125.28},{name:"石垣市",lat:24.34,lon:124.16}]
         };
 
-        let cachedWeatherInfo = { currentTemp: 20.0, locationLabel: "未設定" };
+        // グローバル状態管理
+        let cachedWeatherInfo = { currentTemp: 24.0, locationLabel: "未設定", weatherCode: 0 };
+        let calendarData = JSON.parse(localStorage.getItem('tp_proto_calendar_data')) || {};
+        let currentCalYear = 2026;
+        let currentCalMonth = 6; // 0-indexed (6 = 7月)
 
         window.onload = () => {
             initializePrefectureSelect();
-            buildCalendarDisplay();
+            renderCalendar();
             synchronizeWeatherStation();
-            if (localStorage.getItem('tp_theme') === 'dark') {
+            if (localStorage.getItem('tp_proto_theme') === 'dark') {
                 document.body.classList.add('dark-theme');
             }
             refreshThemeButtonLabel();
@@ -702,7 +719,7 @@
 
         function toggleSystemTheme() {
             document.body.classList.toggle('dark-theme');
-            localStorage.setItem('tp_theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
+            localStorage.setItem('tp_proto_theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
             refreshThemeButtonLabel();
         }
 
@@ -711,16 +728,30 @@
             document.getElementById('theme-btn-label').innerText = isDark ? "LIGHT MODE" : "DARK MODE";
         }
 
+        // 都道府県＆都市セレクトの初期化（北から南へ厳密ソート反映）
         function initializePrefectureSelect() {
             const prefSelect = document.getElementById('select-prefecture');
-            // 緯度の高い順(北から南へ)に厳密ソート
-            Object.keys(masterGeoDatabase).sort((a, b) => masterGeoDatabase[b][0].lat - masterGeoDatabase[a][0].lat).forEach(p => {
+            prefSelect.innerHTML = "";
+            const sortedPrefs = Object.keys(masterGeoDatabase).sort((a, b) => 
+                masterGeoDatabase[b][0].lat - masterGeoDatabase[a][0].lat
+            );
+
+            sortedPrefs.forEach(p => {
                 let opt = document.createElement('option');
                 opt.value = p;
                 opt.innerText = p;
                 prefSelect.appendChild(opt);
             });
+
+            // 保存された県・またはデフォルトで石川県（金沢市）を反映
+            const savedPref = localStorage.getItem('tp_proto_saved_pref') || "石川県";
+            if (masterGeoDatabase[savedPref]) prefSelect.value = savedPref;
             onPrefectureChange();
+
+            const savedCityStr = localStorage.getItem('tp_proto_saved_city');
+            if (savedCityStr) {
+                document.getElementById('select-city').value = savedCityStr;
+            }
         }
 
         function onPrefectureChange() {
@@ -735,28 +766,39 @@
             });
         }
 
+        // 【バグ修正済み】設定保存アクション
         async function saveLocationPreference() {
             const cityDataStr = document.getElementById('select-city').value;
+            const prefVal = document.getElementById('select-prefecture').value;
             if (!cityDataStr) return;
-            localStorage.setItem('tp_saved_city_node', cityDataStr);
-            localStorage.setItem('tp_saved_pref_node', document.getElementById('prefecture-select' ? 'prefecture-select' : 'select-prefecture').value);
+            
+            localStorage.setItem('tp_proto_saved_city', cityDataStr);
+            localStorage.setItem('tp_proto_saved_pref', prefVal);
+            
             await synchronizeWeatherStation();
-            alert("位置情報を更新しました。HOME画面の環境適応ロジックに反映されます。");
+            alert(`【設定保存】${prefVal}・${JSON.parse(cityDataStr).name} の観測ポイントと同期しました。`);
         }
 
+        // 気象データ同期エンジン
         async function synchronizeWeatherStation() {
-            const savedCityStr = localStorage.getItem('tp_saved_city_node');
-            const savedPref = localStorage.getItem('tp_saved_pref_node') || "北海道";
-            let activeCity = savedCityStr ? JSON.parse(savedCityStr) : masterGeoDatabase["北海道"][0];
+            const savedCityStr = localStorage.getItem('tp_proto_saved_city');
+            const savedPref = localStorage.getItem('tp_proto_saved_pref') || "石川県";
+            let activeCity = savedCityStr ? JSON.parse(savedCityStr) : masterGeoDatabase["石川県"][0];
             
             try {
                 const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${activeCity.lat}&longitude=${activeCity.lon}&current_weather=true&timezone=Asia%2FTokyo`);
                 const data = await response.json();
                 const temp = data.current_weather.temperature;
-                cachedWeatherInfo = { currentTemp: temp, locationLabel: activeCity.name };
-                document.getElementById('geo-weather-status').innerHTML = `<i class="fa-solid fa-circle-check"></i> ${savedPref}・${activeCity.name} と同期中 (気温: ${temp}°C) // 集中力補正: 最適`;
+                const code = data.current_weather.weathercode;
+                cachedWeatherInfo = { currentTemp: temp, locationLabel: activeCity.name, weatherCode: code };
+                
+                document.getElementById('geo-weather-status').innerHTML = `
+                    <i class="fa-solid fa-cloud-sun"></i> ${savedPref}・${activeCity.name} (${temp}°C) // 環境適応アルゴリズム: 稼働中
+                `;
             } catch (e) {
-                document.getElementById('geo-weather-status').innerHTML = `<i class="fa-solid fa-wifi"></i> 標準モード (オフラインデータで稼働中)`;
+                document.getElementById('geo-weather-status').innerHTML = `
+                    <i class="fa-solid fa-wifi"></i> オフラインモード (${savedPref}・${activeCity.name}) // 集中サポート最適化済み
+                `;
             }
         }
 
@@ -765,100 +807,239 @@
             document.querySelectorAll('.navigation-tab').forEach(t => t.classList.remove('tab-active'));
             document.getElementById(`page-${targetPage}`).classList.add('active-page');
             element.classList.add('tab-active');
+            if (targetPage === 'calendar') renderCalendar();
         }
 
-        function buildCalendarDisplay() {
+        // 【本格実装】実データ連動カレンダーエンジン
+        function navigateMonth(step) {
+            currentCalMonth += step;
+            if (currentCalMonth > 11) {
+                currentCalMonth = 0;
+                currentCalYear++;
+            } else if (currentCalMonth < 0) {
+                currentCalMonth = 11;
+                currentCalYear--;
+            }
+            renderCalendar();
+        }
+
+        function renderCalendar() {
             const grid = document.getElementById('system-calendar-grid');
             grid.innerHTML = "";
-            // 7月を想定した31日間シミュレーション表示
-            for (let day = 1; day <= 31; day++) {
-                let cell = document.createElement('div');
-                cell.className = 'calendar-day-cell' + (day === 9 ? ' current-today' : '');
-                cell.innerHTML = `<div>${day}</div>`;
-                if (day % 4 === 0 || day === 9) {
-                    let dot = document.createElement('div');
-                    dot.className = 'indicator-dot';
-                    cell.appendChild(dot);
+            document.getElementById('calendar-month-label').innerText = `${currentCalYear}年 ${currentCalMonth + 1}月`;
+
+            const firstDayIndex = new Date(currentCalYear, currentCalMonth, 1).getDay();
+            const daysInMonth = new Date(currentCalYear, currentCalMonth + 1, 0).getDate();
+            const daysInPrevMonth = new Date(currentCalYear, currentCalMonth, 0).getDate();
+
+            let totalMins = 0;
+            let totalSessions = 0;
+
+            // ローカルストレージ全体集計
+            Object.values(calendarData).forEach(val => {
+                if (val.minutes) {
+                    totalMins += val.minutes;
+                    totalSessions += (val.sessions || 1);
                 }
+            });
+            document.getElementById('calc-total-time').innerText = (totalMins / 60).toFixed(1) + " h";
+            document.getElementById('calc-total-sessions').innerText = totalSessions;
+
+            const now = new Date();
+            const isCurrentMonth = (now.getFullYear() === currentCalYear && now.getMonth() === currentCalMonth);
+            const todayDate = now.getDate();
+
+            // 前月の余白セル
+            for (let x = firstDayIndex - 1; x >= 0; x--) {
+                let cell = createDayCell(daysInPrevMonth - x, true, "");
+                grid.appendChild(cell);
+            }
+
+            // 当月セル
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateKey = `${currentCalYear}-${('0' + (currentCalMonth + 1)).slice(-2)}-${('0' + day).slice(-2)}`;
+                const isToday = (isCurrentMonth && day === todayDate);
+                let cell = createDayCell(day, false, dateKey, isToday);
+                grid.appendChild(cell);
+            }
+
+            // 翌月の余白セル（42マス埋め）
+            const remainingCells = 42 - grid.children.length;
+            for (let y = 1; y <= remainingCells; y++) {
+                let cell = createDayCell(y, true, "");
                 grid.appendChild(cell);
             }
         }
 
-        // STARTボタン押下時の動的高密度タイムライン展開ロジック
+        function createDayCell(dayNum, isOtherMonth, dateKey, isToday = false) {
+            let cell = document.createElement('div');
+            cell.className = 'calendar-day-cell' + (isOtherMonth ? ' other-month' : '') + (isToday ? ' current-today' : '');
+            
+            let dateVal = document.createElement('div');
+            dateVal.innerText = dayNum;
+            cell.appendChild(dateVal);
+
+            if (!isOtherMonth && dateKey && calendarData[dateKey]) {
+                const data = calendarData[dateKey];
+                if (data.minutes) {
+                    let logEl = document.createElement('div');
+                    logEl.className = 'cell-log';
+                    logEl.innerText = `${data.minutes}分 集中`;
+                    cell.appendChild(logEl);
+                }
+                if (data.note) {
+                    let noteEl = document.createElement('div');
+                    noteEl.className = 'cell-note';
+                    noteEl.innerText = data.note;
+                    cell.appendChild(noteEl);
+                }
+            }
+
+            if (!isOtherMonth && dateKey) {
+                cell.onclick = () => {
+                    const currentData = calendarData[dateKey] || {};
+                    const noteText = prompt(`${currentCalYear}年${currentCalMonth + 1}月${dayNum}日の予定や振り返りを入力してください:`, currentData.note || "");
+                    if (noteText !== null) {
+                        if (!calendarData[dateKey]) calendarData[dateKey] = {};
+                        if (noteText.trim() === "") {
+                            delete calendarData[dateKey].note;
+                            if (!calendarData[dateKey].minutes) delete calendarData[dateKey];
+                        } else {
+                            calendarData[dateKey].note = noteText.trim();
+                        }
+                        localStorage.setItem('tp_proto_calendar_data', JSON.stringify(calendarData));
+                        renderCalendar();
+                    }
+                };
+            }
+
+            return cell;
+        }
+
+        // STARTボタン押下：タイムライン生成・カレンダー反映・スムーズスクロール
         function executeTimePilotProtocol() {
-            const task = document.getElementById('input-task-name').value;
+            const task = document.getElementById('input-task-name').value.trim();
             const startTimeStr = document.getElementById('input-start-time').value;
             const duration = parseInt(document.getElementById('input-duration').value);
             const app = document.getElementById('input-restrict-app').value;
             const focus = document.getElementById('input-focus-level').value;
-            const notes = document.getElementById('input-notes').value || "特になし";
+            const notes = document.getElementById('input-notes').value.trim();
 
             if (!task) {
-                alert("タスク名を入力してください。");
+                alert("タスク名を入力してください！");
                 return;
             }
 
-            let [h, m] = startTimeStr.split(':').map(Number);
-            let timelineBaseDate = new Date();
-            timelineBaseDate.setHours(h, m, 0);
+            // 今日の日付に自動ログ記録
+            const now = new Date();
+            const todayKey = `${now.getFullYear()}-${('0' + (now.getMonth() + 1)).slice(-2)}-${('0' + now.getDate()).slice(-2)}`;
+            if (!calendarData[todayKey]) calendarData[todayKey] = {};
+            calendarData[todayKey].minutes = (calendarData[todayKey].minutes || 0) + duration;
+            calendarData[todayKey].sessions = (calendarData[todayKey].sessions || 0) + 1;
+            localStorage.setItem('tp_proto_calendar_data', JSON.stringify(calendarData));
 
-            function calcTimeOffset(offset) {
-                let d = new Date(timelineBaseDate.getTime() + offset * 60000);
+            let [h, m] = startTimeStr.split(':').map(Number);
+            let baseDate = new Date();
+            baseDate.setHours(h, m, 0);
+
+            function formatTime(offsetMins) {
+                let d = new Date(baseDate.getTime() + offsetMins * 60000);
                 return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
             }
 
+            // 環境（気温）に基づいたダイナミックアドバイス
+            let tempAdvice = "";
+            if (cachedWeatherInfo.currentTemp > 28) {
+                tempAdvice = `現在は<strong>気温が${cachedWeatherInfo.currentTemp}°Cと高い</strong>ため、集中力低下を防ぐため手元に冷たい水を置いておきましょう。`;
+            } else if (cachedWeatherInfo.currentTemp < 10) {
+                tempAdvice = `現在は<strong>気温が${cachedWeatherInfo.currentTemp}°Cと低め</strong>です。室温を快適に保ち、体を冷やさないよう配慮してください。`;
+            } else {
+                tempAdvice = `現在の<strong>気温は${cachedWeatherInfo.currentTemp}°Cで快適</strong>です。最高のパフォーマンスを発揮しやすい環境が整っています。`;
+            }
+
             document.getElementById('timeline-console-output').innerHTML = `
-                「<strong>${task}</strong>」のためのタイムラインを生成しました。<br>
-                現在の環境要因（気温: ${cachedWeatherInfo.currentTemp}°C）および自己申告の集中度（${focus}）をもとに、${app === 'なし' ? '誘惑ノイズのない' : app + 'の誘惑を遮断する'}ルートを構築しています。
+                「<strong>${task}</strong>」のための最適化タイムラインを生成しました。<br>
+                ${tempAdvice} 集中度「${focus}」に合わせて、${app === 'なし' ? 'シームレスな' : '【' + app + '】の誘惑を完全に排除した'}戦略ルートを展開しています。（本日の実績をカレンダーへ同期しました）
             `;
+
+            const step1End = Math.min(5, Math.floor(duration * 0.1));
+            const step2End = Math.floor(duration * 0.45);
+            const step3End = Math.floor(duration * 0.85);
 
             const timelineList = document.getElementById('dynamic-timeline-list');
             timelineList.innerHTML = `
                 <div class="timeline-node current">
                     <div class="timeline-marker"></div>
-                    <div class="timeline-stamp">${calcTimeOffset(0)}</div>
+                    <div class="timeline-stamp">${formatTime(0)} (スタート)</div>
                     <div class="timeline-bubble">
-                        <div class="timeline-heading">ステップ 1: 環境のクリーンアップ</div>
-                        <div class="timeline-body">タスクを阻害する【${app}】の通知を完全にオフにするか、スマートフォンを物理的に手の届かない場所に隔離します。</div>
+                        <div class="timeline-heading">フェーズ 1: 誘惑遮断とアイドリング着手</div>
+                        <div class="timeline-body">
+                            ${app === 'なし' ? '深呼吸をして姿勢を整えます。' : 'スマートフォンで<strong>【' + app + '】の通知をオフ、またはアプリを開けない状態</strong>にします。'}<br>
+                            まずは「${task}」の最も簡単な部分（テキストを開く、最初の1行を読むなど）から無条件で手を動かします。最初の3分で作業興奮を引き出します。
+                        </div>
                     </div>
                 </div>
 
                 <div class="timeline-node">
                     <div class="timeline-marker"></div>
-                    <div class="timeline-stamp">${calcTimeOffset(3)}</div>
+                    <div class="timeline-stamp">${formatTime(step1End)} ~ ${formatTime(step2End)}</div>
                     <div class="timeline-bubble">
-                        <div class="timeline-heading">ステップ 2: 初期ブースト着手</div>
-                        <div class="timeline-body">「${task}」の最初のステップ（ノートを開く、1行目を書くなど）に無条件で手を付けます。最初の3分を乗り越えることで、脳の作業興奮を引き出します。</div>
+                        <div class="timeline-heading">フェーズ 2: ディープ・フォーカス巡航</div>
+                        <div class="timeline-body">
+                            脳のエンジンが温まり、集中度が最も深まるゴールデンタイムです。他の雑念が浮かんでも一切メモせず、ただ淡々とタスクを消化し続けます。${notes ? '<br><em>設定メモ: 「' + notes + '」</em>' : ''}
+                        </div>
                     </div>
                 </div>
 
                 <div class="timeline-node">
                     <div class="timeline-marker"></div>
-                    <div class="timeline-stamp">${calcTimeOffset(Math.floor(duration / 2))}</div>
+                    <div class="timeline-stamp">${formatTime(step2End)} ~ ${formatTime(step3End)}</div>
                     <div class="timeline-bubble">
-                        <div class="timeline-heading">ステップ 3: ミドルキープセッション</div>
-                        <div class="timeline-body">最も中だるみが生じやすい時間帯です。事前に設定したメモ「${notes}」を再確認し、現在の良好なペースを落とさずに維持してください。</div>
+                        <div class="timeline-heading">フェーズ 3: 疲労コントロール＆ペース維持</div>
+                        <div class="timeline-body">
+                            中盤から後半にかけての粘り時です。集中度「${focus}」のペースを守り、もし集中が切れそうになったら20秒だけ目を閉じて深呼吸し、即座に作業へ復帰してください。
+                        </div>
                     </div>
                 </div>
 
                 <div class="timeline-node">
                     <div class="timeline-marker"></div>
-                    <div class="timeline-stamp">${calcTimeOffset(duration - 5)}</div>
+                    <div class="timeline-stamp">${formatTime(step3End)} ~ ${formatTime(duration - 5)}</div>
                     <div class="timeline-bubble">
-                        <div class="timeline-heading">ステップ 4: ラストスプリント</div>
-                        <div class="timeline-body">締め切り効果による集中力の最大化を狙います。残っている確認事項や最終調整をこの5分間で一気に片付けます。</div>
+                        <div class="timeline-heading">フェーズ 4: ラストスプリント（締め切り効果）</div>
+                        <div class="timeline-body">
+                            残り時間があとわずかになりました。ゴール直前の「締め切り効果」を活用し、今日の目標到達地点まで一気にスピードアップして駆け抜けます。
+                        </div>
                     </div>
                 </div>
 
                 <div class="timeline-node">
                     <div class="timeline-marker"></div>
-                    <div class="timeline-stamp">${calcTimeOffset(duration)}</div>
+                    <div class="timeline-stamp">${formatTime(duration)} (セッション完了)</div>
                     <div class="timeline-bubble">
-                        <div class="timeline-heading">ステップ 5: セッション完了・ログ記録</div>
-                        <div class="timeline-body">${duration}分間の集中セッションが完了しました。カレンダーに実績データが自動的に保存されます。次のステップに向けて少し脳を休ませてください。</div>
+                        <div class="timeline-heading">フェーズ 5: 完了・クールダウン</div>
+                        <div class="timeline-body">
+                            <strong>${duration}分間の「${task}」セッション完了です、お疲れ様でした！</strong><br>
+                            本日の実績ログがカレンダーに自動保存されました。脳を休めるため、ストレッチや水分補給を行ってください。
+                        </div>
                     </div>
                 </div>
             `;
+
+            document.getElementById('timeline-wrapper').style.display = 'block';
+
+            // 【バグ修正済み】生成完了後にスムーズ自動スクロール
+            setTimeout(() => {
+                const target = document.getElementById('timeline-scroll-target');
+                const headerOffset = 80;
+                const elementPosition = target.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+            }, 100);
         }
     </script>
 </body>
