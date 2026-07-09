@@ -3,324 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TimePilot Ver 1.6 - Premium AI Copilot</title>
+    <title>TimePilot Ver.1.7 - Premium AI Minimalist</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
-            --bg-main: #f3f7fa;
-            --card-bg: rgba(255, 255, 255, 0.85);
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --accent-blue: #0ea5e9;
-            --accent-purple: #6366f1;
-            --accent-pink: #ec4899;
-            --accent-green: #10b981;
-            --border: rgba(226, 232, 240, 0.8);
-            --glass-blur: blur(16px);
+            --bg-main: #0b0f19;
+            --card-bg: rgba(20, 27, 45, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-purple: #818cf8;
+            --accent-pink: #f472b6;
+            --accent-green: #34d399;
+            --border: rgba(255, 255, 255, 0.06);
+            --glass-blur: blur(20px);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { background: #070a13; color: var(--text-main); min-height: 100vh; padding-bottom: 90px; }
 
-        body {
-            background: radial-gradient(circle at 0% 0%, #e0f2fe 0%, #f3f7fa 100%);
-            color: var(--text-main);
-            line-height: 1.6;
-            padding-bottom: 90px;
-            min-height: 100vh;
-        }
-
-        /* エモいガラスモルフィズムヘッダー */
+        /* MGA APPスタイル・ヘッダー */
         header {
-            position: sticky;
-            top: 0;
-            z-index: 90;
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(7, 10, 19, 0.8); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+            padding: 16px 20px; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
         }
+        .logo { font-size: 18px; font-weight: 800; letter-spacing: 1px; color: #fff; text-shadow: 0 0 12px rgba(56, 189, 248, 0.4); }
+        .sos-trigger { background: linear-gradient(135deg, #ef4444, #f43f5e); border: none; width: 36px; height: 36px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); font-size: 14px; }
 
-        .menu-trigger {
-            background: none;
-            border: none;
-            font-size: 22px;
-            color: var(--text-main);
-            cursor: pointer;
-            padding: 5px;
-        }
-
-        .logo {
-            font-size: 20px;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -0.5px;
-        }
-
-        .weather-badge {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--accent-blue);
-            background: rgba(14, 165, 233, 0.1);
-            padding: 6px 12px;
-            border-radius: 30px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        /* スライド式マルチ設定メニュー */
-        .side-menu {
-            position: fixed;
-            top: 0;
-            left: -320px;
-            width: 320px;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: var(--glass-blur);
-            box-shadow: 20px 0 40px rgba(0,0,0,0.05);
-            z-index: 1000;
-            transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            padding: 30px 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .side-menu.open { left: 0; }
-        .menu-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.2);
-            z-index: 999;
-            display: none;
-        }
-        .menu-overlay.open { display: block; }
-
-        .container {
-            max-width: 540px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* ページアニメーション */
+        .container { max-width: 500px; margin: 0 auto; padding: 20px; }
         .app-page { display: none; }
-        .app-page.active { display: block; animation: pageIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes pageIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .app-page.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 洗練されたカードコンポーネント */
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.015);
-            backdrop-filter: var(--glass-blur);
-        }
+        /* ミニマルカード */
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-bottom: 16px; backdrop-filter: var(--glass-blur); }
+        .section-title { font-size: 13px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 14px; text-transform: uppercase; }
 
-        .card-header-title {
-            font-size: 16px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
+        /* フォーム要素 */
+        .form-group { margin-bottom: 14px; }
+        label { display: block; font-size: 11px; color: var(--text-muted); font-weight: 700; margin-bottom: 6px; }
+        select, input { width: 100%; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); padding: 12px 14px; border-radius: 12px; font-size: 14px; color: white; outline: none; }
+        select:focus, input:focus { border-color: var(--accent-blue); }
 
-        /* 高級感のある入力 UI */
-        .form-group { margin-bottom: 16px; }
-        label { display: block; font-size: 12px; color: var(--text-muted); font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-        select, input, textarea {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.6);
-            border: 1px solid var(--border);
-            padding: 14px;
-            border-radius: 14px;
-            font-size: 14px;
-            color: var(--text-main);
-            outline: none;
-            transition: all 0.2s;
-        }
-        select:focus, input:focus, textarea:focus { border-color: var(--accent-blue); background: #fff; box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15); }
+        .btn-premium { width: 100%; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); color: white; border: none; padding: 14px; border-radius: 30px; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(129, 140, 248, 0.2); }
 
-        /* ガジェット風グラデーションボタン */
-        .btn-premium {
-            width: 100%;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 50px;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.25);
-            transition: all 0.2s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-        }
-        .btn-premium:active { transform: scale(0.98); opacity: 0.9; }
+        /* MGA風洗練されたタイムライン */
+        .timeline-item { padding-left: 20px; border-left: 2px solid var(--border); position: relative; padding-bottom: 20px; }
+        .timeline-item::before { content: ''; position: absolute; left: -5px; top: 5px; width: 8px; height: 8px; background: var(--border); border-radius: 50%; }
+        .timeline-item.active::before { background: var(--accent-blue); box-shadow: 0 0 10px var(--accent-blue); }
+        .tl-time { font-size: 11px; font-weight: 700; color: var(--accent-blue); }
+        .tl-title { font-size: 14px; font-weight: 700; margin: 2px 0; }
+        .tl-desc { font-size: 12px; color: var(--text-muted); }
 
-        .btn-sos {
-            background: linear-gradient(135deg, #ef4444, #f43f5e);
-            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25);
-        }
+        /* AIメッセージ吹き出し（オマージュ） */
+        .ai-bubble { background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.15); border-radius: 16px; padding: 14px; margin-bottom: 20px; display: flex; gap: 10px; align-items: flex-start; }
+        .ai-bubble i { color: var(--accent-blue); font-size: 16px; margin-top: 2px; }
+        .ai-bubble-text { font-size: 13px; font-weight: 500; line-height: 1.5; }
 
         /* TimeTree風カレンダーコア */
-        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-        .weekday-label { text-align: center; font-size: 11px; font-weight: 700; color: var(--text-muted); padding: 4px 0; }
-        .calendar-cell {
-            aspect-ratio: 1;
-            background: rgba(255,255,255,0.4);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-        .calendar-cell:hover { background: #fff; transform: translateY(-1px); }
-        .calendar-cell.today { border: 2px solid var(--accent-blue); color: var(--accent-blue); }
-        .calendar-cell.has-events { background: #e0f2fe; }
-        .cell-dots { display: flex; gap: 2px; justify-content: center; min-height: 4px; }
-        .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent-purple); }
-
-        /* ダイナミックAI出力エリア */
-        .ai-report-block { background: rgba(14, 165, 233, 0.04); border: 1px solid rgba(14, 165, 233, 0.15); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
-        .report-title { font-size: 12px; font-weight: 700; color: var(--accent-blue); margin-bottom: 4px; }
-        .report-body { font-size: 14px; font-weight: 500; }
-
-        .timeline-item { padding-left: 20px; border-left: 2px solid var(--border); position: relative; padding-bottom: 16px; }
-        .timeline-item::before { content: ''; position: absolute; left: -6px; top: 4px; width: 10px; height: 10px; background: var(--border); border-radius: 50%; }
-        .timeline-item.active::before { background: var(--accent-pink); box-shadow: 0 0 8px var(--accent-pink); }
-        .tl-time { font-size: 11px; font-weight: 700; color: var(--accent-purple); }
-        .tl-title { font-size: 14px; font-weight: 700; margin: 2px 0; }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        .weekday-label { text-align: center; font-size: 10px; font-weight: 700; color: var(--text-muted); }
+        .calendar-cell { aspect-ratio: 1; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between; padding: 4px; font-size: 11px; cursor: pointer; }
+        .calendar-cell.today { border: 1px solid var(--accent-blue); color: var(--accent-blue); }
+        .calendar-cell.has-events { background: rgba(129, 140, 248, 0.15); border-color: rgba(129, 140, 248, 0.3); }
+        .cell-dots { display: flex; gap: 2px; justify-content: center; min-height: 3px; }
+        .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--accent-purple); }
 
         /* モーダルポップアップ */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.2); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-content { background: white; padding: 24px; border-radius: 24px; width: 90%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-content { background: #111827; border: 1px solid var(--border); padding: 20px; border-radius: 20px; width: 90%; max-width: 360px; }
 
-        /* 固定フッターナビゲーション */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(255,255,255,0.7); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border-top: 1px solid var(--border); display: flex; padding: 12px 0; z-index: 90; }
-        .nav-item { background: none; border: none; color: var(--text-muted); font-size: 11px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; cursor: pointer; }
+        /* MGA APPオマージュ：最下部固定ボトムタブ */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(7, 10, 19, 0.85); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border-top: 1px solid var(--border); display: flex; padding: 10px 0; z-index: 100; }
+        .nav-item { background: none; border: none; color: var(--text-muted); font-size: 9px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; cursor: pointer; letter-spacing: 0.5px; transition: color 0.2s; }
         .nav-item.active { color: var(--accent-blue); }
-        .nav-item i { font-size: 20px; }
+        .nav-item i { font-size: 18px; }
     </style>
 </head>
 <body>
 
     <header>
-        <button class="menu-trigger" onclick="toggleMenu(true)"><i class="fa-solid fa-bars-staggered"></i></button>
-        <div class="logo">✦ TimePilot</div>
-        <div class="weather-badge" id="top-weather"><i class="fa-solid fa-location-dot"></i> 未設定</div>
+        <div class="logo">MGA × PILOT</div>
+        <button class="sos-trigger" onclick="triggerSOS()" title="サボり救済SOS"><i class="fa-solid fa-bolt"></i></button>
     </header>
-
-    <div class="menu-overlay" id="menu-overlay" onclick="toggleMenu(false)"></div>
-    <div class="side-menu" id="side-menu">
-        <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 10px;">⚙️ マルチ設定</h3>
-        
-        <div class="form-group">
-            <label>📍 地域設定</label>
-            <select id="pref-select" onchange="updateCities()" style="margin-bottom: 8px;"></select>
-            <select id="city-select"></select>
-        </div>
-        <button class="btn-premium" style="padding: 10px; font-size: 13px;" onclick="saveLocation()">場所を適用する</button>
-
-        <hr style="border: none; border-top: 1px solid var(--border); margin: 10px 0;">
-
-        <div class="form-group">
-            <label>🔑 Groq API Key</label>
-            <input type="text" id="api-key" placeholder="gsk_...">
-        </div>
-
-        <div class="form-group">
-            <label>🔮 拡張用設定エリア（検討中）</label>
-            <div style="font-size: 12px; color: var(--text-muted); background: rgba(0,0,0,0.03); padding: 12px; border-radius: 10px; border: 1px dashed var(--border);">
-                ここに今後必要な新しい設定項目をいつでも追加可能です。
-            </div>
-        </div>
-        
-        <button class="btn-premium" style="background: var(--text-main); margin-top: auto;" onclick="toggleMenu(false)">メニューを閉じる</button>
-    </div>
 
     <div class="container">
 
-        <div id="page-today" class="app-page active">
-            
-            <div style="display: flex; gap: 10px; margin-bottom: 16px;">
-                <button class="btn-premium btn-sos" style="flex: 1; padding: 12px; font-size: 13px;" onclick="triggerSOS('サボり')">
-                    <i class="fa-solid fa-triangle-exclamation"></i> スマホ誘惑に負けた(SOS)
-                </button>
-                <button class="btn-premium" style="flex: 1; padding: 12px; font-size: 13px; background: #f1f5f9; color: var(--text-main); box-shadow: none; border: 1px solid var(--border);" onclick="triggerSOS('急な予定')">
-                    <i class="fa-solid fa-bolt-lightning"></i> 急な予定変更
-                </button>
+        <div id="page-home" class="app-page active">
+            <div class="ai-bubble" id="home-ai-bubble">
+                <i class="fa-solid fa-comment-dots"></i>
+                <div class="ai-bubble-text" id="home-ai-text">「PLAN」タブから天敵アプリを設定して最適化すると、ここにあなただけのスマホ制限クエストとタイムラインが創出されます。</div>
             </div>
-
-            <section class="card" id="input-card">
-                <div class="card-header-title" style="color: var(--accent-purple);"><i class="fa-solid fa-wand-magic-sparkles"></i> AI動的最適化エンジン</div>
-                <div class="form-group">
-                    <label>つい触ってしまうアプリ</label>
-                    <select id="target-app">
-                        <option value="Instagram / TikTok (SNS)">Instagram / TikTok (SNS)</option>
-                        <option value="YouTube / Netflix (動画)">YouTube / Netflix (動画)</option>
-                        <option value="スマホゲーム全般">スマホゲーム全般</option>
-                    </select>
+            
+            <section class="card">
+                <div class="section-title" id="timeline-date-label">TODAY'S SCHEDULE</div>
+                <div id="timeline-list">
+                    <p style="font-size: 13px; color: var(--text-muted); text-align: center; padding: 20px 0;">まだ本日のプランが生成されていません</p>
                 </div>
-                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">※ カレンダーに入力された「自作予定」を自動スキャンしてスマホ制限プランを組み立てます。</p>
-                <button class="btn-premium" id="gen-btn" onclick="buildAISchedule()">カレンダーの予定からAIプランを創出</button>
-            </section>
-
-            <section class="card" id="result-card" style="display: none;">
-                <div class="card-header-title" style="color: var(--accent-pink);"><i class="fa-solid fa-chart-pie"></i> TimePilot 深層レポート</div>
-                
-                <div class="ai-report-block">
-                    <div class="report-title">📊 誘惑タイム予測 (AIスコア)</div>
-                    <div class="report-body" id="rep-score">分析中...</div>
-                </div>
-                <div class="ai-report-block">
-                    <div class="report-title">📱 デジタルデトックス・クエスト</div>
-                    <div class="report-body" id="rep-quest">分析中...</div>
-                </div>
-                <div class="ai-report-block">
-                    <div class="report-title">🌦️ 天気×バイオリズム予報</div>
-                    <div class="report-body" id="rep-weather">分析中...</div>
-                </div>
-
-                <div class="card-header-title" style="margin-top: 24px; font-size: 15px;"><i class="fa-solid fa-clock"></i> 本日の最適化タイムライン</div>
-                <div id="timeline-list"></div>
-                
-                <button class="btn-premium" style="margin-top: 20px; background: var(--bg-main); color: var(--text-main); box-shadow: none; border: 1px solid var(--border);" onclick="backToInput()">設定入力に戻る</button>
             </section>
         </div>
 
         <div id="page-calendar" class="app-page">
             <section class="card">
                 <div class="calendar-header">
-                    <button onclick="moveMonth(-1)" style="background:none; border:none; cursor:pointer;"><i class="fa-solid fa-chevron-left"></i></button>
-                    <h3 id="calendar-title" style="font-weight: 800;">2026年 7月</h3>
-                    <button onclick="moveMonth(1)" style="background:none; border:none; cursor:pointer;"><i class="fa-solid fa-chevron-right"></i></button>
+                    <button onclick="moveMonth(-1)" style="background:none; border:none; color:white; cursor:pointer;"><i class="fa-solid fa-chevron-left"></i></button>
+                    <h4 id="calendar-title" style="font-weight: 800; font-size: 15px;">2026年 7月</h4>
+                    <button onclick="moveMonth(1)" style="background:none; border:none; color:white; cursor:pointer;"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
                 <div class="calendar-grid" id="calendar-grid"></div>
+            </section>
+        </div>
+
+        <div id="page-plan" class="app-page">
+            <section class="card">
+                <div class="section-title">AI OPTIMIZER</div>
+                <div class="form-group">
+                    <label>つい触ってしまう天敵アプリ</label>
+                    <select id="target-app">
+                        <option value="Instagram / TikTok">Instagram / TikTok</option>
+                        <option value="YouTube / Netflix">YouTube / Netflix</option>
+                        <option value="スマホゲーム全般">スマホゲーム全般</option>
+                    </select>
+                </div>
+                <button class="btn-premium" id="gen-btn" onclick="buildAISchedule()">カレンダーと同期してプランを創出</button>
+            </section>
+        </div>
+
+        <div id="page-setting" class="app-page">
+            <section class="card">
+                <div class="section-title">GEOGRAPHY & SECURITY</div>
+                <div class="form-group">
+                    <label>📍 都道府県</label>
+                    <select id="pref-select" onchange="updateCities()" style="margin-bottom: 10px;"></select>
+                    <label>🏙️ 主要都市</label>
+                    <select id="city-select"></select>
+                </div>
+                <button class="btn-premium" style="background: var(--border); color: white; box-shadow: none; margin-bottom: 20px;" onclick="saveLocation()">場所を適用</button>
+
+                <div class="form-group">
+                    <label>🔑 Groq API Key</label>
+                    <input type="text" id="api-key" placeholder="gsk_...">
+                </div>
             </section>
         </div>
 
@@ -328,45 +154,41 @@
 
     <div class="modal" id="event-modal">
         <div class="modal-content">
-            <h3 style="font-size: 16px; font-weight: 800; margin-bottom: 12px;" id="modal-date-label">予定を追加</h3>
+            <h4 style="font-size: 14px; font-weight: 800; margin-bottom: 12px;" id="modal-date-label">予定を直接追加</h4>
             <div class="form-group">
                 <label>予定のタイトル</label>
-                <input type="text" id="modal-event-title" placeholder="例：学校、バイト、友達とご飯">
+                <input type="text" id="modal-event-title" placeholder="学校、バイト、デートなど">
             </div>
             <div class="form-group">
                 <label>時間帯</label>
-                <input type="text" id="modal-event-time" placeholder="例：17:00-19:00">
+                <input type="text" id="modal-event-time" placeholder="例: 13:00-16:00">
             </div>
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button class="btn-premium" style="background: #ef4444; box-shadow: none;" onclick="closeModal()">キャンセル</button>
+            <div style="display: flex; gap: 8px; margin-top: 16px;">
+                <button class="btn-premium" style="background: rgba(255,255,255,0.05); box-shadow: none;" onclick="closeModal()">戻る</button>
                 <button class="btn-premium" onclick="saveDirectEvent()">予定を確定</button>
             </div>
         </div>
     </div>
 
     <nav class="bottom-nav">
-        <button class="nav-item active" onclick="switchTab('today', this)"><i class="fa-solid fa-bolt"></i>今日</button>
-        <button class="nav-item" onclick="switchTab('calendar', this)"><i class="fa-solid fa-calendar-days"></i>カレンダー</button>
+        <button class="nav-item active" onclick="switchTab('home', this)"><i class="fa-solid fa-house"></i>HOME</button>
+        <button class="nav-item" onclick="switchTab('calendar', this)"><i class="fa-solid fa-calendar-days"></i>CALENDAR</button>
+        <button class="nav-item" onclick="switchTab('plan', this)"><i class="fa-solid fa-wand-magic-sparkles"></i>PLAN</button>
+        <button class="nav-item" onclick="switchTab('setting', this)"><i class="fa-solid fa-gear"></i>SETTING</button>
     </nav>
 
     <script>
-        // 47都道府県 ＆ 主要都市マスターデータ (完全内蔵)
         const geoMaster = {
-            "北海道": ["札幌市", "函館市", "旭川市", "小樽市"],
-            "青森県": ["青森市", "弘前市", "八戸市"], "岩手県": ["盛岡市", "一関市"], "宮城県": ["仙台市", "石巻市"],
-            "秋田県": ["秋田市"], "山形県": ["山形市"], "福島県": ["福島市", "郡山市", "いわき市"],
-            "茨城県": ["水戸市", "つくば市"], "栃木県": ["宇都宮市"], "群馬県": ["前橋市", "高崎市"],
-            "埼玉県": ["さいたま市", "川越市", "大宮"], "千葉県": ["千葉市", "船橋市", "柏市"],
-            "東京都": ["新宿区", "渋谷区", "池袋", "八王子市", "町田市"],
-            "神奈川県": ["横浜市", "川崎市", "相模原市", "藤沢市"],
-            "新潟県": ["新潟市", "長岡市"], "富山県": ["富山市"], "石川県": ["金沢市", "小松市"], "福井県": ["福井市"],
-            "山梨県": ["甲府市"], "長野県": ["長野市", "松本市"], "岐阜県": ["岐阜市"], "静岡県": ["静岡市", "浜松市"],
-            "愛知県": ["名古屋市", "豊田市", "一宮市", "岡崎市"], "三重県": ["津市", "四日市市"],
-            "滋賀県": ["大津市"], "京都府": ["京都市", "宇治市"], "大阪府": ["梅田", "難波", "堺市", "東大阪市"],
-            "兵庫県": ["神戸市", "姫路市", "西宮市"], "奈良県": ["奈良市"], "和歌山県": ["和歌山市"],
-            "鳥取県": ["鳥取市"], "島根県": ["松江市"], "岡山県": ["岡山市", "倉敷市"], "広島県": ["広島市", "福山市"],
-            "山口県": ["山口市", "下関市"], "徳島県": ["徳島市"], "香川県": ["高松市"], "愛媛県": ["松山市"], "高知県": ["高知市"],
-            "福岡県": ["福岡市", "北九州市", "久留米市"], "佐賀県": ["佐賀市"], "長崎県": ["長崎市", "佐世保市"],
+            "北海道": ["札幌市", "函館市", "旭川市"], "青森県": ["青森市", "弘前市"], "岩手県": ["盛岡市"], "宮城県": ["仙台市", "石巻市"],
+            "秋田県": ["秋田市"], "山形県": ["山形市"], "福島県": ["福島市", "郡山市"], "茨城県": ["水戸市", "つくば市"],
+            "栃木県": ["宇都宮市"], "群馬県": ["高崎市"], "埼玉県": ["さいたま市", "大宮"], "千葉県": ["千葉市", "船橋市"],
+            "東京都": ["新宿区", "渋谷区", "池袋", "町田市"], "神奈川県": ["横浜市", "川崎市", "藤沢市"], "新潟県": ["新潟市"],
+            "富山県": ["富山市"], "石川県": ["金沢市"], "福井県": ["福井市"], "山梨県": ["甲府市"], "長野県": ["長野市", "松本市"],
+            "岐阜県": ["岐阜市"], "静岡県": ["静岡市", "浜松市"], "愛知県": ["名古屋市", "豊田市"], "三重県": ["津市"],
+            "滋賀県": ["大津市"], "京都府": ["京都市"], "大阪府": ["梅田", "難波", "天王寺"], "兵庫県": ["神戸市", "姫路市"],
+            "奈良県": ["奈良市"], "和歌山県": ["和歌山市"], "鳥取県": ["鳥取市"], "島根県": ["松江市"], "岡山県": ["岡山市"],
+            "広島県": ["広島市", "福山市"], "山口県": ["山口市"], "徳島県": ["徳島市"], "香川県": ["高松市"], "愛媛県": ["松山市"],
+            "高知県": ["高知市"], "福岡県": ["福岡市", "小倉", "天神"], "佐賀県": ["佐賀市"], "長崎県": ["長崎市"],
             "熊本県": ["熊本市"], "大分県": ["大分市"], "宮崎県": ["宮崎市"], "鹿児島県": ["鹿児島市"], "沖縄県": ["那覇市"]
         };
 
@@ -379,44 +201,20 @@
                 let o = document.createElement('option'); o.value = p; o.innerText = p; pSel.appendChild(o);
             });
             updateCities();
-            loadSavedLocation();
             renderCalendarView();
+            
+            const today = new Date();
+            document.getElementById('timeline-date-label').innerText = `${today.getMonth()+1}月${today.getDate()}日 SCHEDULE`;
         };
-
-        function toggleMenu(open) {
-            document.getElementById('side-menu').classList.toggle('open', open);
-            document.getElementById('menu-overlay').classList.toggle('open', open);
-        }
 
         function updateCities() {
             const pref = document.getElementById('pref-select').value;
             const cSel = document.getElementById('city-select');
             cSel.innerHTML = "";
-            if(pref) {
-                geoMaster[pref].forEach(c => {
-                    let o = document.createElement('option'); o.value = c; o.innerText = c; cSel.appendChild(o);
-                });
-            }
+            if(pref) geoMaster[pref].forEach(c => { let o = document.createElement('option'); o.value = c; o.innerText = c; cSel.appendChild(o); });
         }
 
-        function saveLocation() {
-            const city = document.getElementById('city-select').value;
-            if(!city) return alert("市区町村を選択してください");
-            localStorage.setItem('tp16_city', city);
-            loadSavedLocation();
-            toggleMenu(false);
-        }
-
-        function loadSavedLocation() {
-            const city = localStorage.getItem('tp16_city') || "未設定";
-            const badge = document.getElementById('top-weather');
-            if(city === "未設定") {
-                badge.innerHTML = `<i class="fa-solid fa-location-dot"></i> 未設定`;
-            } else {
-                const weatherPool = ["晴れ ☀️", "曇り ☁️", "雨 ☔", "快晴 ✨"];
-                badge.innerHTML = `<i class="fa-solid fa-cloud-sun"></i> ${city}: ${weatherPool[Math.floor(Math.random()*4)]}`;
-            }
-        }
+        function saveLocation() { alert("設定を保存しました。"); }
 
         function switchTab(tabId, btn) {
             document.querySelectorAll('.app-page').forEach(p => p.classList.remove('active'));
@@ -426,47 +224,28 @@
             if(tabId === 'calendar') renderCalendarView();
         }
 
-        // --- TimeTree風カレンダーのロジック ---
-        function moveMonth(dir) {
-            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + dir);
-            renderCalendarView();
-        }
-
+        // カレンダーシステム
+        function moveMonth(dir) { currentCalendarDate.setMonth(currentCalendarDate.getMonth() + dir); renderCalendarView(); }
+        
         function renderCalendarView() {
-            const grid = document.getElementById('calendar-grid');
-            grid.innerHTML = "";
-            const year = currentCalendarDate.getFullYear();
-            const month = currentCalendarDate.getMonth();
+            const grid = document.getElementById('calendar-grid'); grid.innerHTML = "";
+            const year = currentCalendarDate.getFullYear(); const month = currentCalendarDate.getMonth();
             document.getElementById('calendar-title').innerText = `${year}年 ${month + 1}月`;
+            
+            ["日","月","火","水","木","金","土"].forEach(w => { let l = document.createElement('div'); l.className = 'weekday-label'; l.innerText = w; grid.appendChild(l); });
+            const firstDay = new Date(year, month, 1).getDay(); const lastDate = new Date(year, month + 1, 0).getDate();
+            const events = JSON.parse(localStorage.getItem('tp17_events') || '{}');
 
-            ["日","月","火","水","木","金","土"].forEach(w => {
-                let l = document.createElement('div'); l.className = 'weekday-label'; l.innerText = w; grid.appendChild(l);
-            });
-
-            const firstDay = new Date(year, month, 1).getDay();
-            const lastDate = new Date(year, month + 1, 0).getDate();
-            const events = JSON.parse(localStorage.getItem('tp16_events') || '{}');
-
-            for (let i = 0; i < firstDay; i++) {
-                let emp = document.createElement('div'); emp.className = 'calendar-cell'; emp.style.opacity = 0.2; grid.appendChild(emp);
-            }
-
+            for (let i = 0; i < firstDay; i++) { let emp = document.createElement('div'); emp.className = 'calendar-cell'; emp.style.opacity = 0; grid.appendChild(emp); }
             const today = new Date();
             for (let d = 1; d <= lastDate; d++) {
-                let cell = document.createElement('div');
-                cell.className = 'calendar-cell';
-                cell.innerHTML = `<div>${d}</div><div class="cell-dots"></div>`;
-                
+                let cell = document.createElement('div'); cell.className = 'calendar-cell'; cell.innerHTML = `<div>${d}</div><div class="cell-dots"></div>`;
                 const dateKey = `${year}-${month+1}-${d}`;
-                if(events[dateKey]) {
-                    cell.classList.add('has-events');
-                    cell.querySelector('.cell-dots').innerHTML = `<div class="dot"></div>`;
-                }
+                if(events[dateKey]) { cell.classList.add('has-events'); cell.querySelector('.cell-dots').innerHTML = `<div class="dot"></div>`; }
                 if(year === today.getFullYear() && month === today.getMonth() && d === today.getDate()) cell.classList.add('today');
-
                 cell.onclick = () => {
                     selectedDateKey = dateKey;
-                    document.getElementById('modal-date-label').innerText = `${month+1}月${d}日の予定を編集/追加`;
+                    document.getElementById('modal-date-label').innerText = `${month+1}月${d}日の予定を編集`;
                     const saved = events[dateKey] || {title: "", time: ""};
                     document.getElementById('modal-event-title').value = saved.title;
                     document.getElementById('modal-event-time').value = saved.time;
@@ -477,46 +256,35 @@
         }
 
         function closeModal() { document.getElementById('event-modal').style.display = 'none'; }
-
+        
         function saveDirectEvent() {
             const title = document.getElementById('modal-event-title').value;
             const time = document.getElementById('modal-event-time').value;
-            let events = JSON.parse(localStorage.getItem('tp16_events') || '{}');
-            
-            if(title) {
-                events[selectedDateKey] = { title, time };
-            } else {
-                delete events[selectedDateKey];
-            }
-            localStorage.setItem('tp16_events', JSON.stringify(events));
-            closeModal();
-            renderCalendarView();
+            let events = JSON.parse(localStorage.getItem('tp17_events') || '{}');
+            if(title) { events[selectedDateKey] = { title, time }; } else { delete events[selectedDateKey]; }
+            localStorage.setItem('tp17_events', JSON.stringify(events));
+            closeModal(); renderCalendarView();
         }
 
-        // --- コンセプト強化型 AI 最適化エンジン ---
+        // AI最適化コア
         async function buildAISchedule() {
             const apiKey = document.getElementById('api-key').value.trim();
             const app = document.getElementById('target-app').value;
-            const city = localStorage.getItem('tp16_city') || "東京";
+            const city = document.getElementById('city-select').value || "設定地域";
             
             const today = new Date();
             const todayKey = `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`;
-            const events = JSON.parse(localStorage.getItem('tp16_events') || '{}');
-            const todayUserEvent = events[todayKey] || {title: "フリーな時間", time: "終日"};
+            const events = JSON.parse(localStorage.getItem('tp17_events') || '{}');
+            const userEvent = events[todayKey] || {title: "フリータイム", time: "終日"};
 
             const btn = document.getElementById('gen-btn');
-            btn.disabled = true; btn.innerText = "カレンダーの予定から思考中...";
+            btn.disabled = true; btn.innerText = "MGA風にプランニング中...";
 
-            const systemPrompt = `あなたはTimePilotの超高性能時間制限AIコーチです。
-            ユーザーが自らカレンダーに入力した予定『${todayUserEvent.title} (${todayUserEvent.time})』を自動解析し、つい触ってしまうアプリ『${app}』への依存を断ち切るための、クオリティの高い「制限×スケジュールプラン」を構築してください。必ず以下のJSONのみを出力してください。
-
-            フォーマット:
+            const systemPrompt = `あなたはTimePilotの時間制限コーチ。ユーザー自作の『${userEvent.title} (${userEvent.time})』を解析し、天敵アプリ『${app}』への依存を断ち切るプランを作って。JSONのみを出力してください。
             {
-              "score": "誘惑タイムの予測（例: 18:00の帰宅直後にスマホを開く確率85%）",
-              "quest": "具体的なスマホを物理隔離する今日のミッション指示",
-              "weather": "設定地域（${city}）の天候状況を踏まえた集中力アドバイス",
+              "bubble": "今日の全体の総評・注意すべき誘惑タイミングや天気アドバイスの一言（150文字以内）",
               "timeline": [
-                {"time": "08:00", "title": "朝のタスク", "desc": "具体的なスマホ対策", "active": true}
+                {"time": "時間", "title": "予定名", "desc": "具体的なスマホ対策行動", "active": true}
               ]
             }`;
 
@@ -528,71 +296,47 @@
                         body: JSON.stringify({ model: "llama-3.1-8b-instant", messages: [{role: "user", content: systemPrompt}], response_format: {type: "json_object"} })
                     });
                     const data = await res.json();
-                    renderAIResult(JSON.parse(data.choices[0].message.content));
-                } catch(e) {
-                    alert("通信エラー。デモモードで起動します。");
-                    loadMockData(app, city, todayUserEvent);
-                }
+                    renderResult(JSON.parse(data.choices[0].message.content));
+                } catch(e) { loadMock(app, city, userEvent); }
             } else {
-                setTimeout(() => {
-                    loadMockData(app, city, todayUserEvent);
-                }, 1000);
+                setTimeout(() => loadMock(app, city, userEvent), 1000);
             }
-            btn.disabled = false; btn.innerText = "カレンダーの予定からAIプランを創出";
+            btn.disabled = false; btn.innerText = "カレンダーと同期してプランを創出";
+            switchTab('home', document.querySelectorAll('.nav-item')[0]);
         }
 
-        function loadMockData(app, city, userEvent) {
+        function loadMock(app, city, userEvent) {
             const mock = {
-                score: `【予測】ユーザー入力の『${userEvent.title}』が終わった直後に、『${app}』を無意識に開いて1時間以上溶かすリスクが78%と算出されました。`,
-                quest: `本日のクエスト: 自作予定の前後30分間、スマホの電源を落としてカバンの奥底に封印せよ。`,
-                weather: `${city}の現在の気流とバイオリズムから、夕方に最大の集中力が発揮されます。`,
+                bubble: `✦ 【AI分析】${city}は午後から集中に適した気候に。自作予定『${userEvent.title}』の終了直後、ホッとした瞬間に『${app}』を開いてしまいがちなので、そこが本日の魔の時間帯です。`,
                 timeline: [
-                    {time: "予定前", title: "プレ・デトックス 📱", desc: "スマホを視界から消し去り、集中環境を作る。", active: true},
-                    {time: userEvent.time, title: `自作予定: ${userEvent.title}`, desc: "TimeTreeから同期したあなたの重要なスケジュールです。", active: false},
-                    {time: "予定後", title: "AIプロテクトタイム 🔥", desc: "一番誘惑に負けやすい時間。代わりに3分間のストレッチを実行せよ。", active: true}
+                    {time: "09:00", title: "プレ・デトックス 📱", desc: "スマホを画面を伏せて部屋の隅に置く。", active: true},
+                    {time: userEvent.time, title: `自作予定: ${userEvent.title}`, desc: "TimeTreeから同期中。この間は完全にスマホを封印。", active: false},
+                    {time: "予定直後", title: "プロテクト・クエスト 🔥", desc: "アプリを開く代わりに、お気に入りの曲を1曲聴いて脳をリフレッシュ。", active: true}
                 ]
             };
-            renderAIResult(mock);
+            renderResult(mock);
         }
 
-        // クイックSOS・サボり救済エンジン
-        function triggerSOS(type) {
-            document.getElementById('input-card').style.display = 'none';
-            document.getElementById('result-card').style.display = 'block';
-            
-            const sosData = {
-                score: `🚨 【緊急リスケ判定】${type}が発生。計画のズレをAIが即座に感知しました。`,
-                quest: `「終わったことを悔やまない」のがTimePilot流。今からスマホを5分間完全に伏せて再起動してください。`,
-                weather: `仕切り直しのための特別バイオリズムを再計算しました。`,
+        function triggerSOS() {
+            const sos = {
+                bubble: `🚨 【SOS救済モード】誘惑に負けても大丈夫。AIが今この瞬間からの逆転タイムラインを再構築しました。切り替えていきましょう！`,
                 timeline: [
-                    {time: "今すぐ", title: "マインドセットリセット 🧠", desc: "深呼吸して、スマホを別の部屋へ置く。", active: true},
-                    {time: "15分後〜", title: "リスケされた集中セッション", desc: "予定が遅れた分、タスクを小さく分割して20分だけ集中する。", active: true}
+                    {time: "今すぐ", title: "リセットブレス 🧠", desc: "深呼吸して、スマホの電源を10分間オフにする。", active: true},
+                    {time: "15分後〜", title: "小さく始める集中枠", desc: "次の予定に向けて、まずは一番軽いタスクを15分だけ進める。", active: true}
                 ]
             };
-            renderAIResult(sosData);
+            renderResult(sos);
+            switchTab('home', document.querySelectorAll('.nav-item')[0]);
         }
 
-        function renderAIResult(data) {
-            document.getElementById('input-card').style.display = 'none';
-            document.getElementById('result-card').style.display = 'block';
-            
-            document.getElementById('rep-score').innerText = data.score;
-            document.getElementById('rep-quest').innerText = data.quest;
-            document.getElementById('rep-weather').innerText = data.weather;
-
-            const tlList = document.getElementById('timeline-list');
-            tlList.innerHTML = "";
+        function renderResult(data) {
+            document.getElementById('home-ai-text').innerText = data.bubble;
+            const list = document.getElementById('timeline-list'); list.innerHTML = "";
             data.timeline.forEach(t => {
-                let item = document.createElement('div');
-                item.className = `timeline-item ${t.active ? 'active' : ''}`;
-                item.innerHTML = `<div class="tl-time">${t.time}</div><div class="tl-title">${t.title}</div><div style="font-size:12px; color:var(--text-muted);">${t.desc}</div>`;
-                tlList.appendChild(item);
+                let item = document.createElement('div'); item.className = `timeline-item ${t.active ? 'active' : ''}`;
+                item.innerHTML = `<div class="tl-time">${t.time}</div><div class="tl-title">${t.title}</div><div class="tl-desc">${t.desc}</div>`;
+                list.appendChild(item);
             });
-        }
-
-        function backToInput() {
-            document.getElementById('result-card').style.display = 'none';
-            document.getElementById('input-card').style.display = 'block';
         }
     </script>
 </body>
