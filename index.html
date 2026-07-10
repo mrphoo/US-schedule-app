@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TimePilot v5.5</title>
+    <title>TimePilot</title>
+    
+    <link rel="icon" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         /* =========================================
@@ -56,7 +60,8 @@
             position: sticky; top: 0; z-index: 500; background: var(--glass-bg); backdrop-filter: var(--glass-blur); border-bottom: 1px solid var(--glass-border);
         }
         .brand-logo { font-size: 20px; font-weight: 900; display: flex; align-items: center; gap: 8px; }
-        .brand-logo i { color: var(--color-ai); }
+        .brand-icon-img { width: 26px; height: 26px; border-radius: 6px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        
         .header-actions { display: flex; align-items: center; gap: 15px; }
         .theme-btn { background: none; border: none; color: var(--text-main); font-size: 20px; cursor: pointer; transition: color 0.3s; }
         
@@ -71,8 +76,15 @@
         .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
         .form-group label { font-size: 13px; font-weight: 700; }
         .form-row-twin { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        
         input, select { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.06); color: var(--text-main); font-size: 15px; outline: none; }
         body.light-theme input, body.light-theme select { background: rgba(0,0,0,0.03); color: #0f172a; }
+
+        /* 🐛 BUG FIX: ドロップダウン選択肢の白飛び修正 */
+        option {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+        }
         
         .btn-primary { width: 100%; background: linear-gradient(135deg, var(--color-ai), var(--color-study)); color: white; border: none; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.25); display: flex; justify-content: center; align-items: center; gap: 8px; }
         .btn-primary:active { transform: scale(0.97); }
@@ -125,6 +137,8 @@
         .tutorial-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-base); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px 20px; text-align: center; transition: opacity 0.5s; }
         .tut-slide { display: none; animation: fadeIn 0.4s; }
         .tut-slide.active { display: block; }
+        .tut-img-wrap { margin-bottom: 25px; }
+        .tut-icon-img { width: 100px; height: 100px; border-radius: 24px; box-shadow: 0 10px 30px rgba(168, 85, 247, 0.4); object-fit: cover; }
         .tut-icon { font-size: 80px; margin-bottom: 30px; background: -webkit-linear-gradient(45deg, var(--color-ai), var(--color-study)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .tut-title { font-size: 24px; font-weight: 900; margin-bottom: 15px; }
         .tut-desc { font-size: 15px; color: var(--text-muted); line-height: 1.6; margin-bottom: 40px; }
@@ -147,7 +161,7 @@
 
     <div class="tutorial-modal" id="tutorial-modal" style="display: none;">
         <div class="tut-slide active" id="slide-1">
-            <i class="fa-solid fa-rocket tut-icon"></i>
+            <div class="tut-img-wrap"><img src="icon.png" class="tut-icon-img" alt="App Icon" onerror="this.style.display='none'"></div>
             <div class="tut-title">Welcome to TimePilot</div>
             <div class="tut-desc">TimePilotは、AIがあなたの専属コーチになる<br>次世代の集中サポートアプリです。</div>
         </div>
@@ -169,7 +183,10 @@
     </div>
 
     <header>
-        <div class="brand-logo"><i class="fa-solid fa-microchip"></i> TimePilot</div>
+        <div class="brand-logo">
+            <img src="icon.png" class="brand-icon-img" alt="logo" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<i class=\'fa-solid fa-microchip\'></i>');">
+            TimePilot
+        </div>
         <div class="header-actions">
             <button class="theme-btn" onclick="toggleTheme()" id="theme-btn-icon"><i class="fa-solid fa-moon"></i></button>
             <div class="level-badge">
@@ -193,7 +210,7 @@
                 <input type="time" id="event-time" value="16:00">
                 <input type="text" id="event-title" placeholder="予定のタイトル">
             </div>
-            <div class="color-selector">
+            <div class="color-selector" style="display: flex; gap: 10px; margin-bottom: 15px;">
                 <div class="color-opt selected" style="background: var(--color-study);" onclick="selectColor(this, 'study')"></div>
                 <div class="color-opt" style="background: var(--color-ai);" onclick="selectColor(this, 'ai')"></div>
                 <div class="color-opt" style="background: var(--color-exercise);" onclick="selectColor(this, 'exercise')"></div>
@@ -211,7 +228,7 @@
                 <circle cx="110" cy="110" r="100" fill="none" stroke="rgba(128,128,128,0.15)" stroke-width="10"></circle>
                 <circle class="timer-progress" id="timer-progress" cx="110" cy="110" r="100"></circle>
             </svg>
-            <div class="time-display"><div class="time-text" id="time-text" style="font-family: monospace; font-size:48px; font-weight:900;">00:00</div></div>
+            <div class="time-display" style="position: absolute; top:50%; left:50%; transform:translate(-50%,-50%);"><div class="time-text" id="time-text" style="font-family: monospace; font-size:48px; font-weight:900;">00:00</div></div>
         </div>
         <div style="display: flex; gap: 10px;">
             <button class="btn-primary" id="btn-timer-start" onclick="toggleTimer()">START</button>
@@ -322,7 +339,7 @@
         <div id="page-calendar" class="app-page">
             <div class="cal-header-nav">
                 <button class="btn-primary" style="width:40px; height:40px; padding:0; background:rgba(255,255,255,0.05);" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
-                <div class="cal-month-title" id="cal-month-title">2026.07</div>
+                <div class="cal-month-title" id="cal-month-title" style="font-weight:900;">2026.07</div>
                 <button class="btn-primary" style="width:40px; height:40px; padding:0; background:rgba(255,255,255,0.05);" onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
             </div>
             <div class="glass-card" style="padding: 16px;">
@@ -346,6 +363,10 @@
                     <select id="pref-select" onchange="updateCities()"></select>
                     <select id="city-select" onchange="saveSettings()"></select>
                 </div>
+            </div>
+            <div class="section-title">Tutorial</div>
+            <div class="glass-card">
+                <button class="btn-primary" style="background: transparent; border: 1px solid var(--text-muted); color: var(--text-main);" onclick="resetTutorial()">チュートリアルをもう一度見る</button>
             </div>
         </div>
     </div>
@@ -391,13 +412,13 @@
         let selectedEventColor = 'study';
 
         let appState = {
-            exp: parseInt(localStorage.getItem('tp_exp_v55')) || 0,
-            calendar: JSON.parse(localStorage.getItem('tp_cal_v55')) || {},
-            apiKey: localStorage.getItem('tp_api_v55') || "",
-            pref: localStorage.getItem('tp_pref_v55') || "東京都",
-            city: localStorage.getItem('tp_city_v55') || JSON.stringify(geoMaster["東京都"][0]),
-            theme: localStorage.getItem('tp_theme_v55') || "dark",
-            tutorialDone: localStorage.getItem('tp_tut_v55') === 'true'
+            exp: parseInt(localStorage.getItem('tp_exp_v551')) || 0,
+            calendar: JSON.parse(localStorage.getItem('tp_cal_v551')) || {},
+            apiKey: localStorage.getItem('tp_api_v551') || "",
+            pref: localStorage.getItem('tp_pref_v551') || "東京都",
+            city: localStorage.getItem('tp_city_v551') || JSON.stringify(geoMaster["東京都"][0]),
+            theme: localStorage.getItem('tp_theme_v551') || "dark",
+            tutorialDone: localStorage.getItem('tp_tut_v551') === 'true'
         };
 
         let weatherCache = { condition: "晴れ", temp: 25 };
@@ -419,6 +440,11 @@
             }
         };
 
+        function resetTutorial() {
+            localStorage.removeItem('tp_tut_v551');
+            location.reload();
+        }
+
         function nextTutorial() {
             document.getElementById(`slide-${tutStep}`).classList.remove('active');
             document.getElementById(`dot-${tutStep}`).classList.remove('active');
@@ -431,7 +457,7 @@
                 document.getElementById('tutorial-modal').style.opacity = '0';
                 setTimeout(() => {
                     document.getElementById('tutorial-modal').style.display = 'none';
-                    localStorage.setItem('tp_tut_v55', 'true');
+                    localStorage.setItem('tp_tut_v551', 'true');
                 }, 500);
             }
         }
@@ -468,7 +494,7 @@
             appState.apiKey = document.getElementById('api-key').value.trim();
             appState.pref = document.getElementById('pref-select').value;
             appState.city = document.getElementById('city-select').value;
-            localStorage.setItem('tp_api_v55', appState.apiKey); localStorage.setItem('tp_pref_v55', appState.pref); localStorage.setItem('tp_city_v55', appState.city);
+            localStorage.setItem('tp_api_v551', appState.apiKey); localStorage.setItem('tp_pref_v551', appState.pref); localStorage.setItem('tp_city_v551', appState.city);
             fetchWeatherAndApplyTheme();
         }
         function toggleTheme() {
@@ -479,7 +505,7 @@
                 appState.theme = 'dark'; document.body.classList.remove('light-theme');
                 document.getElementById('theme-btn-icon').innerHTML = '<i class="fa-solid fa-moon"></i>';
             }
-            localStorage.setItem('tp_theme_v55', appState.theme);
+            localStorage.setItem('tp_theme_v551', appState.theme);
         }
         async function fetchWeatherAndApplyTheme() {
             const city = JSON.parse(appState.city);
@@ -493,7 +519,7 @@
         // =========================================
         // EXP / ANALYSIS
         // =========================================
-        function addExp(amount) { appState.exp += amount; localStorage.setItem('tp_exp_v55', appState.exp); updateLevelUI(); }
+        function addExp(amount) { appState.exp += amount; localStorage.setItem('tp_exp_v551', appState.exp); updateLevelUI(); }
         function updateLevelUI() {
             document.getElementById('ui-level').innerText = `Lv. ${Math.floor(appState.exp/100)+1}`;
             document.getElementById('ui-exp-bar').style.width = `${appState.exp%100}%`;
@@ -522,7 +548,7 @@
         }
 
         // =========================================
-        // CALENDAR (TimeTree)
+        // CALENDAR
         // =========================================
         function changeMonth(dir) { currentDate.setMonth(currentDate.getMonth() + dir); renderCalendar(); }
         function renderCalendar() {
@@ -562,13 +588,13 @@
             if(!t || !title) return;
             if(!appState.calendar[activeCalDateKey]) appState.calendar[activeCalDateKey] = [];
             appState.calendar[activeCalDateKey].push({ time: t, title: title, color: selectedEventColor, checked: false });
-            localStorage.setItem('tp_cal_v55', JSON.stringify(appState.calendar));
+            localStorage.setItem('tp_cal_v551', JSON.stringify(appState.calendar));
             document.getElementById('event-title').value = ""; renderDrawerList(); renderCalendar(); if(activeCalDateKey===todayKey) renderHomeChecklist();
         }
         function delEvent(i) {
             appState.calendar[activeCalDateKey].splice(i,1);
             if(appState.calendar[activeCalDateKey].length === 0) delete appState.calendar[activeCalDateKey];
-            localStorage.setItem('tp_cal_v55', JSON.stringify(appState.calendar)); renderDrawerList(); renderCalendar(); if(activeCalDateKey===todayKey) renderHomeChecklist();
+            localStorage.setItem('tp_cal_v551', JSON.stringify(appState.calendar)); renderDrawerList(); renderCalendar(); if(activeCalDateKey===todayKey) renderHomeChecklist();
         }
 
         // =========================================
@@ -584,7 +610,7 @@
         }
         function toggleCheck(i) {
             appState.calendar[todayKey][i].checked = !appState.calendar[todayKey][i].checked;
-            localStorage.setItem('tp_cal_v55', JSON.stringify(appState.calendar));
+            localStorage.setItem('tp_cal_v551', JSON.stringify(appState.calendar));
             renderHomeChecklist(); renderCalendar();
             if(appState.calendar[todayKey][i].checked) addExp(5);
         }
@@ -623,7 +649,7 @@
         }
 
         // =========================================
-        // CHAT (OFFLINE FALLBACK ADDED)
+        // CHAT (OFFLINE FALLBACK)
         // =========================================
         async function sendChat() {
             const input = document.getElementById('chat-input'), text = input.value.trim(); if(!text) return;
