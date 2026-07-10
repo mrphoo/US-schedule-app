@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TimePilot v5.4</title>
+    <title>TimePilot v5.5</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         /* =========================================
@@ -17,11 +17,11 @@
             --glass-border: rgba(255, 255, 255, 0.1);
             --glass-blur: blur(20px);
             
-            --color-ai: #a855f7;       /* 紫 */
-            --color-study: #3b82f6;    /* 青 */
-            --color-sleep: #10b981;    /* 緑 */
-            --color-phone: #ef4444;    /* 赤 */
-            --color-exercise: #f97316; /* 橙 */
+            --color-ai: #a855f7;
+            --color-study: #3b82f6;
+            --color-sleep: #10b981;
+            --color-phone: #ef4444;
+            --color-exercise: #f97316;
         }
 
         body.light-theme {
@@ -33,13 +33,7 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-        
-        body {
-            background-color: var(--bg-base); color: var(--text-main);
-            min-height: 100vh; padding-bottom: 90px;
-            display: flex; flex-direction: column; align-items: center;
-            overflow-x: hidden; transition: background-color 0.4s, color 0.4s;
-        }
+        body { background-color: var(--bg-base); color: var(--text-main); min-height: 100vh; padding-bottom: 90px; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; transition: background-color 0.4s, color 0.4s; }
 
         /* AURORA BACKGROUND */
         .bg-blobs { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden; background: var(--bg-base); transition: background 0.8s; }
@@ -47,124 +41,100 @@
         .blob-1 { top: -10%; left: -10%; width: 350px; height: 350px; background: var(--color-ai); }
         .blob-2 { bottom: 10%; right: -10%; width: 450px; height: 450px; background: var(--color-study); animation-delay: -5s; }
         .blob-3 { top: 40%; left: 50%; width: 300px; height: 300px; background: var(--color-sleep); animation-delay: -10s; }
-
-        body.weather-rain .blob-1 { background: #334155; }
-        body.weather-rain .blob-2 { background: #2563eb; }
-        body.weather-rain .blob-3 { background: #475569; }
-        body.weather-sunny .blob-1 { background: #f59e0b; }
-        body.weather-sunny .blob-2 { background: #0ea5e9; }
-        body.weather-sunny .blob-3 { background: #10b981; }
+        body.weather-rain .blob-1 { background: #334155; } body.weather-rain .blob-2 { background: #2563eb; } body.weather-rain .blob-3 { background: #475569; }
+        body.weather-sunny .blob-1 { background: #f59e0b; } body.weather-sunny .blob-2 { background: #0ea5e9; } body.weather-sunny .blob-3 { background: #10b981; }
         @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(40px, 60px) scale(1.15); } }
 
-        /* LAYOUT & CARDS */
+        /* LAYOUT & HEADER */
         .app-container { width: 100%; max-width: 560px; padding: 20px; z-index: 1; flex: 1; }
         .app-page { display: none; animation: fadeIn 0.3s ease-out; }
         .app-page.active-page { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         header {
-            width: 100%; max-width: 560px; padding: 16px 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            position: sticky; top: 0; z-index: 500;
-            background: var(--glass-bg); backdrop-filter: var(--glass-blur); border-bottom: 1px solid var(--glass-border);
+            width: 100%; max-width: 560px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 500; background: var(--glass-bg); backdrop-filter: var(--glass-blur); border-bottom: 1px solid var(--glass-border);
         }
         .brand-logo { font-size: 20px; font-weight: 900; display: flex; align-items: center; gap: 8px; }
         .brand-logo i { color: var(--color-ai); }
-
+        .header-actions { display: flex; align-items: center; gap: 15px; }
+        .theme-btn { background: none; border: none; color: var(--text-main); font-size: 20px; cursor: pointer; transition: color 0.3s; }
+        
         .level-badge { display: flex; flex-direction: column; align-items: flex-end; }
         .lvl-text { font-size: 13px; font-weight: 800; color: var(--color-study); }
-        .exp-bar-bg { width: 90px; height: 6px; background: rgba(128,128,128,0.25); border-radius: 4px; overflow: hidden; margin-top: 4px; }
+        .exp-bar-bg { width: 70px; height: 6px; background: rgba(128,128,128,0.25); border-radius: 4px; overflow: hidden; margin-top: 4px; }
         .exp-bar-fill { height: 100%; background: linear-gradient(90deg, var(--color-ai), var(--color-study)); width: 0%; transition: width 0.8s; }
 
-        .glass-card {
-            background: var(--glass-bg); backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; margin-bottom: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-        }
+        /* UI ELEMENTS */
+        .glass-card { background: var(--glass-bg); backdrop-filter: var(--glass-blur); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08); }
         .section-title { font-size: 13px; font-weight: 800; color: var(--text-muted); margin: 24px 0 12px 4px; text-transform: uppercase; }
-
         .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
         .form-group label { font-size: 13px; font-weight: 700; }
         .form-row-twin { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-        input, select {
-            width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--glass-border);
-            background: rgba(255,255,255,0.06); color: var(--text-main); font-size: 15px; outline: none; transition: border-color 0.2s;
-        }
-        input:focus, select:focus { border-color: var(--color-study); }
+        input, select { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.06); color: var(--text-main); font-size: 15px; outline: none; }
         body.light-theme input, body.light-theme select { background: rgba(0,0,0,0.03); color: #0f172a; }
         
-        .btn-primary {
-            width: 100%; background: linear-gradient(135deg, var(--color-ai), var(--color-study)); color: white;
-            border: none; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 800; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.25); transition: transform 0.1s; display: flex; justify-content: center; align-items: center; gap: 8px;
-        }
+        .btn-primary { width: 100%; background: linear-gradient(135deg, var(--color-ai), var(--color-study)); color: white; border: none; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.25); display: flex; justify-content: center; align-items: center; gap: 8px; }
         .btn-primary:active { transform: scale(0.97); }
 
-        /* TIMELINE & MISSIONS */
-        .mission-item {
-            display: flex; align-items: center; padding: 10px; background: rgba(255,255,255,0.05);
-            border: 1px solid var(--glass-border); border-radius: 10px; margin-bottom: 8px; transition: opacity 0.3s;
-        }
+        /* HOME / CHECKLIST / TIMELINE */
+        .mission-item { display: flex; align-items: center; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 10px; margin-bottom: 8px; }
         .mission-item.checked { opacity: 0.5; text-decoration: line-through; }
         .mission-color { width: 12px; height: 12px; border-radius: 4px; margin-right: 12px; flex-shrink: 0; }
-        .mission-text { flex: 1; font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mission-text { flex: 1; font-size: 13px; font-weight: 700; }
         .mission-time { font-size: 12px; color: var(--text-muted); font-weight: 700; margin-right: 12px; }
         .check-circle { width: 20px; height: 20px; border: 2px solid var(--text-muted); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; color: transparent; }
         .mission-item.checked .check-circle { background: var(--color-sleep); border-color: var(--color-sleep); color: white; }
-
+        
         .timeline-container { position: relative; padding-left: 20px; border-left: 2px solid var(--glass-border); margin-left: 10px; margin-top: 15px; }
         .timeline-item { position: relative; padding-bottom: 20px; }
         .timeline-item::before { content: ''; position: absolute; left: -27px; top: 2px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg-base); border: 3px solid var(--color-ai); }
         .tl-time { font-size: 12px; font-weight: 800; color: var(--color-ai); margin-bottom: 4px; }
         .tl-content { background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px; font-size: 14px; line-height: 1.5; }
 
-        /* CALENDAR (TimeTree style) */
+        /* ANALYSIS (Restored Interactive UI) */
+        .slider-group { margin-bottom: 15px; }
+        .slider-group label { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+        input[type="range"] { -webkit-appearance: none; width: 100%; background: transparent; height: 6px; padding: 0; border: none; }
+        input[type="range"]::-webkit-slider-runnable-track { width: 100%; height: 6px; background: rgba(128,128,128,0.3); border-radius: 3px; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: var(--text-main); margin-top: -6px; cursor: pointer; box-shadow: 0 0 10px rgba(0,0,0,0.3); }
+
+        /* CALENDAR / DRAWER / MODALS */
         .cal-header-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .cal-month-title { font-size: 20px; font-weight: 900; }
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; }
         .cal-weekday { font-size: 11px; font-weight: 800; color: var(--text-muted); margin-bottom: 6px; }
-        .cal-cell {
-            min-height: 70px; display: flex; flex-direction: column; align-items: center; padding: 4px;
-            background: rgba(128,128,128,0.05); border: 1px solid var(--glass-border); border-radius: 10px; cursor: pointer; overflow: hidden;
-        }
+        .cal-cell { min-height: 70px; display: flex; flex-direction: column; align-items: center; padding: 4px; background: rgba(128,128,128,0.05); border: 1px solid var(--glass-border); border-radius: 10px; cursor: pointer; overflow: hidden; }
         .cal-cell.today { border: 2px solid var(--color-ai); background: rgba(168, 85, 247, 0.08); }
         .cal-date-num { font-size: 12px; font-weight: 800; margin-bottom: 4px; }
         .cal-event-bar { width: 100%; padding: 2px 4px; border-radius: 4px; font-size: 9px; font-weight: 800; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; text-align: left; }
 
-        /* BOTTOM DRAWER */
-        .bottom-drawer {
-            position: fixed; bottom: -100%; left: 0; width: 100%; height: 60vh;
-            background: var(--bg-base); border-top: 1px solid var(--glass-border); border-radius: 24px 24px 0 0;
-            z-index: 2000; transition: bottom 0.3s ease-out; padding: 24px; box-shadow: 0 -10px 40px rgba(0,0,0,0.5); display: flex; flex-direction: column;
-        }
+        .bottom-drawer { position: fixed; bottom: -100%; left: 0; width: 100%; height: 65vh; background: var(--bg-base); border-top: 1px solid var(--glass-border); border-radius: 24px 24px 0 0; z-index: 2000; transition: bottom 0.3s; padding: 24px; box-shadow: 0 -10px 40px rgba(0,0,0,0.5); display: flex; flex-direction: column; }
         .bottom-drawer.open { bottom: 0; }
-        .drawer-handle { width: 40px; height: 5px; background: var(--text-muted); border-radius: 3px; margin: 0 auto 20px auto; opacity: 0.5; }
-        .color-selector { display: flex; gap: 10px; margin-bottom: 15px; }
         .color-opt { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
         .color-opt.selected { border-color: white; transform: scale(1.1); }
+        
         .overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 1500; display: none; opacity: 0; transition: opacity 0.3s; }
         .overlay.show { display: block; opacity: 1; }
 
-        /* TIMER MODAL */
-        .timer-modal {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -45%) scale(0.9); opacity: 0;
-            background: var(--bg-base); border: 1px solid var(--glass-border); border-radius: 24px;
-            padding: 30px; width: 90%; max-width: 360px; z-index: 2100; text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.6); transition: all 0.3s; pointer-events: none;
-        }
+        .timer-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -45%) scale(0.9); opacity: 0; background: var(--bg-base); border: 1px solid var(--glass-border); border-radius: 24px; padding: 30px; width: 90%; max-width: 360px; z-index: 2100; text-align: center; transition: all 0.3s; pointer-events: none; }
         .timer-modal.show { transform: translate(-50%, -50%) scale(1); opacity: 1; pointer-events: auto; }
         .timer-circle-wrap { position: relative; width: 220px; height: 220px; margin: 0 auto 20px auto; }
-        .timer-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
         .timer-progress { fill: none; stroke: var(--color-study); stroke-width: 10; stroke-dasharray: 628; stroke-dashoffset: 0; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
-        .time-display { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .time-text { font-size: 48px; font-weight: 900; font-family: monospace; }
 
-        /* BOTTOM NAV (5 TABS restored) */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: 80px;
-            background: var(--glass-bg); backdrop-filter: var(--glass-blur); border-top: 1px solid var(--glass-border); display: flex; justify-content: center; z-index: 1000;
-        }
+        /* TUTORIAL ONBOARDING */
+        .tutorial-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-base); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px 20px; text-align: center; transition: opacity 0.5s; }
+        .tut-slide { display: none; animation: fadeIn 0.4s; }
+        .tut-slide.active { display: block; }
+        .tut-icon { font-size: 80px; margin-bottom: 30px; background: -webkit-linear-gradient(45deg, var(--color-ai), var(--color-study)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .tut-title { font-size: 24px; font-weight: 900; margin-bottom: 15px; }
+        .tut-desc { font-size: 15px; color: var(--text-muted); line-height: 1.6; margin-bottom: 40px; }
+        .tut-highlight { color: var(--color-ai); font-weight: 800; background: rgba(168, 85, 247, 0.1); padding: 4px 8px; border-radius: 8px; }
+        .tut-dots { display: flex; gap: 8px; justify-content: center; margin-bottom: 30px; }
+        .tut-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(128,128,128,0.3); }
+        .tut-dot.active { background: var(--color-study); }
+
+        /* BOTTOM NAV */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; background: var(--glass-bg); backdrop-filter: var(--glass-blur); border-top: 1px solid var(--glass-border); display: flex; justify-content: center; z-index: 1000; }
         .nav-wrapper { width: 100%; max-width: 560px; display: flex; padding-bottom: 10px; }
         .nav-item { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; background: none; border: none; color: var(--text-muted); cursor: pointer; padding-top: 10px; }
         .nav-item i { font-size: 20px; margin-bottom: 4px; }
@@ -175,11 +145,37 @@
 <body>
     <div class="bg-blobs"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
 
+    <div class="tutorial-modal" id="tutorial-modal" style="display: none;">
+        <div class="tut-slide active" id="slide-1">
+            <i class="fa-solid fa-rocket tut-icon"></i>
+            <div class="tut-title">Welcome to TimePilot</div>
+            <div class="tut-desc">TimePilotは、AIがあなたの専属コーチになる<br>次世代の集中サポートアプリです。</div>
+        </div>
+        <div class="tut-slide" id="slide-2">
+            <i class="fa-solid fa-brain tut-icon"></i>
+            <div class="tut-title">他のアプリとの決定的な違い</div>
+            <div class="tut-desc">ただタイマーを回すだけではありません。<br>天候、集中度、予定をAIが分析し、<br><span class="tut-highlight">「あなただけのパーソナライズされた作戦」</span><br>を毎回自動で生成します。</div>
+        </div>
+        <div class="tut-slide" id="slide-3">
+            <i class="fa-solid fa-chart-line tut-icon"></i>
+            <div class="tut-title">分析とレベルアップ</div>
+            <div class="tut-desc">Analysisタブで日々のバランスを可視化。<br>作戦を完遂するたびにEXPが貯まり、<br>ゲーム感覚でレベルアップを楽しめます。</div>
+        </div>
+        
+        <div class="tut-dots">
+            <div class="tut-dot active" id="dot-1"></div><div class="tut-dot" id="dot-2"></div><div class="tut-dot" id="dot-3"></div>
+        </div>
+        <button class="btn-primary" style="max-width: 300px;" id="tut-btn" onclick="nextTutorial()">次へ</button>
+    </div>
+
     <header>
         <div class="brand-logo"><i class="fa-solid fa-microchip"></i> TimePilot</div>
-        <div class="level-badge">
-            <div class="lvl-text" id="ui-level">Lv. 1</div>
-            <div class="exp-bar-bg"><div class="exp-bar-fill" id="ui-exp-bar"></div></div>
+        <div class="header-actions">
+            <button class="theme-btn" onclick="toggleTheme()" id="theme-btn-icon"><i class="fa-solid fa-moon"></i></button>
+            <div class="level-badge">
+                <div class="lvl-text" id="ui-level">Lv. 1</div>
+                <div class="exp-bar-bg"><div class="exp-bar-fill" id="ui-exp-bar"></div></div>
+            </div>
         </div>
     </header>
 
@@ -215,7 +211,7 @@
                 <circle cx="110" cy="110" r="100" fill="none" stroke="rgba(128,128,128,0.15)" stroke-width="10"></circle>
                 <circle class="timer-progress" id="timer-progress" cx="110" cy="110" r="100"></circle>
             </svg>
-            <div class="time-display"><div class="time-text" id="time-text">00:00</div></div>
+            <div class="time-display"><div class="time-text" id="time-text" style="font-family: monospace; font-size:48px; font-weight:900;">00:00</div></div>
         </div>
         <div style="display: flex; gap: 10px;">
             <button class="btn-primary" id="btn-timer-start" onclick="toggleTimer()">START</button>
@@ -224,6 +220,7 @@
     </div>
 
     <div class="app-container">
+        
         <div id="page-home" class="app-page active-page">
             <div class="glass-card" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px;">
                 <div style="font-size: 12px; font-weight: 700; color: var(--color-study);" id="home-weather-text">同期中...</div>
@@ -260,7 +257,7 @@
                     <input type="text" id="input-notes" placeholder="例: スマホを机の引き出しに入れる">
                 </div>
                 <button class="btn-primary" onclick="generateAIPlan()">
-                    <i class="fa-solid fa-play"></i> AIプラン生成＆START
+                    <i class="fa-solid fa-play"></i> 自分だけのAIプラン生成
                 </button>
             </div>
 
@@ -279,23 +276,44 @@
 
         <div id="page-analysis" class="app-page">
             <div class="glass-card">
-                <div style="font-size: 14px; font-weight: 800; margin-bottom: 15px;"><i class="fa-solid fa-chart-pie"></i> アプリ別利用時間分析</div>
+                <div style="font-size: 14px; font-weight: 800; margin-bottom: 15px; color: var(--color-ai);"><i class="fa-solid fa-chart-pie"></i> パーソナル分析</div>
+                
                 <div style="display: flex; justify-content: center; margin: 20px 0;">
-                    <div style="width: 150px; height: 150px; border-radius: 50%; background: conic-gradient(var(--color-phone) 0% 40%, var(--color-study) 40% 70%, var(--color-sleep) 70% 90%, var(--color-exercise) 90% 100%); display: flex; justify-content: center; align-items: center; position: relative;">
-                        <div style="position: absolute; width: 90px; height: 90px; background: var(--bg-base); border-radius: 50%;"></div>
-                        <div style="position: relative; z-index: 1; text-align: center; font-weight: 900; font-size: 18px;">6.2h</div>
+                    <div id="analysis-pie" style="width: 160px; height: 160px; border-radius: 50%; background: conic-gradient(var(--color-phone) 0% 40%, var(--color-study) 40% 70%, var(--color-sleep) 70% 100%); display: flex; justify-content: center; align-items: center; position: relative; transition: background 0.5s;">
+                        <div style="position: absolute; width: 100px; height: 100px; background: var(--glass-bg); backdrop-filter: blur(10px); border-radius: 50%;"></div>
+                        <div style="position: relative; z-index: 1; text-align: center; font-weight: 900; font-size: 20px;" id="total-val">24h</div>
                     </div>
+                </div>
+
+                <div class="slider-group">
+                    <label><span>📱 スマホ時間</span><span id="val-phone">4.0 h</span></label>
+                    <input type="range" id="slide-phone" min="0" max="12" step="0.5" value="4" oninput="updateAnalysis()">
+                </div>
+                <div class="slider-group">
+                    <label><span>📖 勉強・作業時間</span><span id="val-study">3.0 h</span></label>
+                    <input type="range" id="slide-study" min="0" max="12" step="0.5" value="3" oninput="updateAnalysis()">
+                </div>
+                <div class="slider-group">
+                    <label><span>💤 睡眠時間</span><span id="val-sleep">7.0 h</span></label>
+                    <input type="range" id="slide-sleep" min="0" max="12" step="0.5" value="7" oninput="updateAnalysis()">
+                </div>
+                
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--glass-border);">
+                    <div style="font-size: 12px; color: var(--text-muted); font-weight: 700; margin-bottom: 8px;">AI フィードバック</div>
+                    <div id="analysis-feedback" style="font-size: 14px; font-weight: 700; color: var(--color-study);">バランス良好です！この調子で進めましょう。</div>
                 </div>
             </div>
         </div>
 
         <div id="page-chat" class="app-page">
-            <div class="glass-card" style="height: 400px; display: flex; flex-direction: column;">
+            <div class="glass-card" style="height: 450px; display: flex; flex-direction: column;">
                 <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px;" id="chat-window">
-                    <div style="align-self: flex-start; background: rgba(168,85,247,0.15); padding: 10px; border-radius: 12px; font-size: 13px;">AIコーチです。何でも相談してください。</div>
+                    <div style="align-self: flex-start; background: rgba(168,85,247,0.15); padding: 12px; border-radius: 12px; font-size: 14px; border: 1px solid rgba(168,85,247,0.3);">
+                        AIコーチです。学習の悩みや今の気分を教えてください。あなたに合ったアドバイスをします。
+                    </div>
                 </div>
                 <div style="display: flex; gap: 10px;">
-                    <input type="text" id="chat-input" placeholder="メッセージ..." style="margin:0;" onkeypress="if(event.key==='Enter') sendChat()">
+                    <input type="text" id="chat-input" placeholder="例: 疲れて集中できない..." style="margin:0;" onkeypress="if(event.key==='Enter') sendChat()">
                     <button class="btn-primary" style="width: 50px; padding: 0;" onclick="sendChat()"><i class="fa-solid fa-paper-plane"></i></button>
                 </div>
             </div>
@@ -318,18 +336,15 @@
         <div id="page-settings" class="app-page">
             <div class="section-title">AI Engine & API</div>
             <div class="glass-card">
-                <label style="font-size: 12px; font-weight: 700;">Groq API Key</label>
-                <input type="password" id="api-key" placeholder="gsk_..." onchange="saveSettings()">
+                <label style="font-size: 12px; font-weight: 700;">Groq API Key (オプション)</label>
+                <input type="password" id="api-key" placeholder="gsk_..." onchange="saveSettings()" style="margin-top:8px;">
+                <p style="font-size: 11px; color: var(--text-muted); font-weight: 600;">※空欄でもローカルAIが稼働します。</p>
             </div>
-            <div class="section-title">Location & Theme</div>
+            <div class="section-title">Location (47都道府県対応)</div>
             <div class="glass-card">
-                <div class="form-row-twin" style="margin-bottom: 15px;">
+                <div class="form-row-twin">
                     <select id="pref-select" onchange="updateCities()"></select>
                     <select id="city-select" onchange="saveSettings()"></select>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-weight: 700; font-size: 14px;">ライトモード</span>
-                    <input type="checkbox" id="theme-toggle" onchange="toggleTheme()" style="width: 20px; height: 20px;">
                 </div>
             </div>
         </div>
@@ -346,32 +361,80 @@
     </nav>
 
     <script>
-        // Data & State
-        const geoMaster = { "北海道":[{name:"札幌市",lat:43.06,lon:141.35}], "東京都":[{name:"新宿区",lat:35.69,lon:139.70}], "石川県":[{name:"金沢市",lat:36.56,lon:136.66}] };
-        const allPrefs = ["北海道","東京都","石川県"]; // Simplified for brevity
+        // =========================================
+        // DATA: 47 Prefectures & Major Cities
+        // =========================================
+        const geoMaster = {
+            "北海道":[{name:"札幌市",lat:43.06,lon:141.35},{name:"函館市",lat:41.77,lon:140.73},{name:"旭川市",lat:43.77,lon:142.36}],
+            "青森県":[{name:"青森市",lat:40.82,lon:140.74}], "岩手県":[{name:"盛岡市",lat:39.70,lon:141.15}], "宮城県":[{name:"仙台市",lat:38.27,lon:140.87}],
+            "秋田県":[{name:"秋田市",lat:39.72,lon:140.10}], "山形県":[{name:"山形市",lat:38.26,lon:140.34}], "福島県":[{name:"福島市",lat:37.76,lon:140.47}],
+            "茨城県":[{name:"水戸市",lat:36.37,lon:140.47}], "栃木県":[{name:"宇都宮市",lat:36.57,lon:139.88}], "群馬県":[{name:"前橋市",lat:36.39,lon:139.06}],
+            "埼玉県":[{name:"さいたま市",lat:35.86,lon:139.65}], "千葉県":[{name:"千葉市",lat:35.61,lon:140.12}], 
+            "東京都":[{name:"新宿区",lat:35.69,lon:139.70},{name:"渋谷区",lat:35.66,lon:139.70},{name:"八王子市",lat:35.66,lon:139.34}],
+            "神奈川県":[{name:"横浜市",lat:35.44,lon:139.64},{name:"川崎市",lat:35.53,lon:139.70}], 
+            "新潟県":[{name:"新潟市",lat:37.92,lon:139.04}], "富山県":[{name:"富山市",lat:36.70,lon:137.21}], 
+            "石川県":[{name:"金沢市",lat:36.56,lon:136.66},{name:"小松市",lat:36.40,lon:136.45}], "福井県":[{name:"福井市",lat:36.06,lon:136.22}],
+            "山梨県":[{name:"甲府市",lat:35.66,lon:138.57}], "長野県":[{name:"長野市",lat:36.65,lon:138.18}], "岐阜県":[{name:"岐阜市",lat:35.42,lon:136.76}],
+            "静岡県":[{name:"静岡市",lat:34.98,lon:138.38},{name:"浜松市",lat:34.71,lon:137.73}], "愛知県":[{name:"名古屋市",lat:35.18,lon:136.91}],
+            "三重県":[{name:"津市",lat:34.72,lon:136.51}], "滋賀県":[{name:"大津市",lat:35.02,lon:135.87}], "京都府":[{name:"京都市",lat:35.01,lon:135.77}],
+            "大阪府":[{name:"大阪市",lat:34.69,lon:135.50},{name:"堺市",lat:34.57,lon:135.48}], "兵庫県":[{name:"神戸市",lat:34.69,lon:135.19}],
+            "奈良県":[{name:"奈良市",lat:34.69,lon:135.83}], "和歌山県":[{name:"和歌山市",lat:34.23,lon:135.17}],
+            "鳥取県":[{name:"鳥取市",lat:35.50,lon:134.24}], "島根県":[{name:"松江市",lat:35.47,lon:133.05}], "岡山県":[{name:"岡山市",lat:34.66,lon:133.92}],
+            "広島県":[{name:"広島市",lat:34.39,lon:132.46}], "山口県":[{name:"山口市",lat:34.18,lon:131.47}], "徳島県":[{name:"徳島市",lat:34.07,lon:134.56}],
+            "香川県":[{name:"高松市",lat:34.34,lon:134.04}], "愛媛県":[{name:"松山市",lat:33.84,lon:132.77}], "高知県":[{name:"高知市",lat:33.56,lon:133.53}],
+            "福岡県":[{name:"福岡市",lat:33.61,lon:130.42},{name:"北九州市",lat:33.88,lon:130.88}], "佐賀県":[{name:"佐賀市",lat:33.26,lon:130.30}],
+            "長崎県":[{name:"長崎市",lat:32.75,lon:129.88}], "熊本県":[{name:"熊本市",lat:32.80,lon:130.71}], "大分県":[{name:"大分市",lat:33.24,lon:131.61}],
+            "宮崎県":[{name:"宮崎市",lat:31.91,lon:131.42}], "鹿児島県":[{name:"鹿児島市",lat:31.56,lon:130.56}], "沖縄県":[{name:"那覇市",lat:26.21,lon:127.68}]
+        };
+        const allPrefs = Object.keys(geoMaster);
         const colors = { study: 'var(--color-study)', ai: 'var(--color-ai)', exercise: 'var(--color-exercise)', phone: 'var(--color-phone)' };
         let selectedEventColor = 'study';
 
         let appState = {
-            exp: parseInt(localStorage.getItem('tp_exp_v54')) || 0,
-            calendar: JSON.parse(localStorage.getItem('tp_cal_v54')) || {},
-            apiKey: localStorage.getItem('tp_api_v54') || "",
-            pref: localStorage.getItem('tp_pref_v54') || "石川県",
-            city: localStorage.getItem('tp_city_v54') || JSON.stringify(geoMaster["石川県"][0]),
-            theme: localStorage.getItem('tp_theme_v54') || "dark"
+            exp: parseInt(localStorage.getItem('tp_exp_v55')) || 0,
+            calendar: JSON.parse(localStorage.getItem('tp_cal_v55')) || {},
+            apiKey: localStorage.getItem('tp_api_v55') || "",
+            pref: localStorage.getItem('tp_pref_v55') || "東京都",
+            city: localStorage.getItem('tp_city_v55') || JSON.stringify(geoMaster["東京都"][0]),
+            theme: localStorage.getItem('tp_theme_v55') || "dark",
+            tutorialDone: localStorage.getItem('tp_tut_v55') === 'true'
         };
 
         let weatherCache = { condition: "晴れ", temp: 25 };
-        let currentDate = new Date(2026, 6, 10);
-        let todayKey = `2026-07-10`;
+        let currentDate = new Date();
+        let todayKey = `${currentDate.getFullYear()}-${String(currentDate.getMonth()+1).padStart(2,'0')}-${String(currentDate.getDate()).padStart(2,'0')}`;
         let activeCalDateKey = "";
         let timerDuration = 0, timerRemaining = 0, timerInterval = null, isRunning = false;
+        let tutStep = 1;
 
-        // Init
+        // =========================================
+        // INIT & TUTORIAL
+        // =========================================
         window.onload = () => {
             initSettings(); updateLevelUI(); fetchWeatherAndApplyTheme();
-            renderCalendar(); renderHomeChecklist();
+            renderCalendar(); renderHomeChecklist(); updateAnalysis();
+            
+            if(!appState.tutorialDone) {
+                document.getElementById('tutorial-modal').style.display = 'flex';
+            }
         };
+
+        function nextTutorial() {
+            document.getElementById(`slide-${tutStep}`).classList.remove('active');
+            document.getElementById(`dot-${tutStep}`).classList.remove('active');
+            tutStep++;
+            if(tutStep <= 3) {
+                document.getElementById(`slide-${tutStep}`).classList.add('active');
+                document.getElementById(`dot-${tutStep}`).classList.add('active');
+                if(tutStep === 3) document.getElementById('tut-btn').innerText = "はじめる";
+            } else {
+                document.getElementById('tutorial-modal').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('tutorial-modal').style.display = 'none';
+                    localStorage.setItem('tp_tut_v55', 'true');
+                }, 500);
+            }
+        }
 
         function switchTab(tabId, btn) {
             document.querySelectorAll('.app-page').forEach(p => p.classList.remove('active-page'));
@@ -382,18 +445,15 @@
             if(tabId === 'home') renderHomeChecklist();
         }
 
-        // EXP
-        function addExp(amount) { appState.exp += amount; localStorage.setItem('tp_exp_v54', appState.exp); updateLevelUI(); }
-        function updateLevelUI() {
-            document.getElementById('ui-level').innerText = `Lv. ${Math.floor(appState.exp/100)+1}`;
-            document.getElementById('ui-exp-bar').style.width = `${appState.exp%100}%`;
-        }
-
-        // Settings & Weather
+        // =========================================
+        // SETTINGS & THEME
+        // =========================================
         function initSettings() {
             document.getElementById('api-key').value = appState.apiKey;
-            document.getElementById('theme-toggle').checked = (appState.theme === 'light');
-            if(appState.theme === 'light') document.body.classList.add('light-theme');
+            if(appState.theme === 'light') {
+                document.body.classList.add('light-theme');
+                document.getElementById('theme-btn-icon').innerHTML = '<i class="fa-solid fa-sun"></i>';
+            }
             const pSel = document.getElementById('pref-select');
             allPrefs.forEach(p => { let o = document.createElement('option'); o.value = p; o.innerText = p; pSel.appendChild(o); });
             pSel.value = appState.pref; updateCities();
@@ -408,25 +468,62 @@
             appState.apiKey = document.getElementById('api-key').value.trim();
             appState.pref = document.getElementById('pref-select').value;
             appState.city = document.getElementById('city-select').value;
-            localStorage.setItem('tp_api_v54', appState.apiKey); localStorage.setItem('tp_pref_v54', appState.pref); localStorage.setItem('tp_city_v54', appState.city);
+            localStorage.setItem('tp_api_v55', appState.apiKey); localStorage.setItem('tp_pref_v55', appState.pref); localStorage.setItem('tp_city_v55', appState.city);
             fetchWeatherAndApplyTheme();
         }
         function toggleTheme() {
-            appState.theme = document.getElementById('theme-toggle').checked ? 'light' : 'dark';
-            localStorage.setItem('tp_theme_v54', appState.theme);
-            appState.theme === 'light' ? document.body.classList.add('light-theme') : document.body.classList.remove('light-theme');
+            if(appState.theme === 'dark') {
+                appState.theme = 'light'; document.body.classList.add('light-theme');
+                document.getElementById('theme-btn-icon').innerHTML = '<i class="fa-solid fa-sun"></i>';
+            } else {
+                appState.theme = 'dark'; document.body.classList.remove('light-theme');
+                document.getElementById('theme-btn-icon').innerHTML = '<i class="fa-solid fa-moon"></i>';
+            }
+            localStorage.setItem('tp_theme_v55', appState.theme);
         }
         async function fetchWeatherAndApplyTheme() {
             const city = JSON.parse(appState.city);
             try {
                 const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current_weather=true&timezone=Asia%2FTokyo`);
-                const data = await res.json();
-                weatherCache.temp = data.current_weather.temperature;
+                const data = await res.json(); weatherCache.temp = data.current_weather.temperature;
                 document.getElementById('home-weather-text').innerText = `${appState.pref} ${city.name} ${weatherCache.temp}℃`;
             } catch(e) {}
         }
 
-        // Calendar (TimeTree)
+        // =========================================
+        // EXP / ANALYSIS
+        // =========================================
+        function addExp(amount) { appState.exp += amount; localStorage.setItem('tp_exp_v55', appState.exp); updateLevelUI(); }
+        function updateLevelUI() {
+            document.getElementById('ui-level').innerText = `Lv. ${Math.floor(appState.exp/100)+1}`;
+            document.getElementById('ui-exp-bar').style.width = `${appState.exp%100}%`;
+        }
+
+        function updateAnalysis() {
+            const phone = parseFloat(document.getElementById('slide-phone').value);
+            const study = parseFloat(document.getElementById('slide-study').value);
+            const sleep = parseFloat(document.getElementById('slide-sleep').value);
+            
+            document.getElementById('val-phone').innerText = phone.toFixed(1) + ' h';
+            document.getElementById('val-study').innerText = study.toFixed(1) + ' h';
+            document.getElementById('val-sleep').innerText = sleep.toFixed(1) + ' h';
+
+            const total = phone + study + sleep;
+            document.getElementById('total-val').innerText = total > 24 ? "! 24h over" : total.toFixed(1) + "h";
+
+            const pP = (phone / total) * 100, pSt = (study / total) * 100, pSl = (sleep / total) * 100;
+            document.getElementById('analysis-pie').style.background = `conic-gradient(var(--color-phone) 0% ${pP}%, var(--color-study) ${pP}% ${pP+pSt}%, var(--color-sleep) ${pP+pSt}% 100%)`;
+
+            const fb = document.getElementById('analysis-feedback');
+            if(phone > 5) fb.innerHTML = `<span style="color:var(--color-phone)"><i class="fa-solid fa-triangle-exclamation"></i> スマホ時間が長すぎます。睡眠の質が落ちる危険があります。</span>`;
+            else if(sleep < 6) fb.innerHTML = `<span style="color:var(--color-sleep)"><i class="fa-solid fa-bed"></i> 睡眠不足です。最低6時間は確保しましょう。</span>`;
+            else if(study > 6) fb.innerHTML = `<span style="color:var(--color-study)"><i class="fa-solid fa-fire"></i> 凄い集中力！明日は少し休む時間も作りましょう。</span>`;
+            else fb.innerHTML = `<span style="color:var(--color-ai)"><i class="fa-solid fa-check"></i> パーフェクトなバランスです！</span>`;
+        }
+
+        // =========================================
+        // CALENDAR (TimeTree)
+        // =========================================
         function changeMonth(dir) { currentDate.setMonth(currentDate.getMonth() + dir); renderCalendar(); }
         function renderCalendar() {
             const grid = document.getElementById('calendar-grid'); grid.innerHTML = "";
@@ -449,19 +546,14 @@
             document.getElementById('main-overlay').classList.add('show'); document.getElementById('cal-drawer').classList.add('open');
             renderDrawerList();
         }
-        function closeModals() {
-            document.getElementById('main-overlay').classList.remove('show');
-            document.getElementById('cal-drawer').classList.remove('open');
-            document.getElementById('timer-modal').classList.remove('show');
-        }
+        function closeModals() { document.getElementById('main-overlay').classList.remove('show'); document.getElementById('timer-modal').classList.remove('show'); document.getElementById('cal-drawer').classList.remove('open'); clearInterval(timerInterval); isRunning = false; }
+        
         function renderDrawerList() {
             const area = document.getElementById('drawer-event-list');
             const events = appState.calendar[activeCalDateKey] || [];
             if(events.length === 0) { area.innerHTML = `<div style="text-align:center; color:var(--text-muted); font-size:12px;">予定なし</div>`; return; }
             let html = "";
-            events.sort((a,b)=>a.time.localeCompare(b.time)).forEach((ev, i) => {
-                html += `<div class="mission-item"><div class="mission-color" style="background:${colors[ev.color]}"></div><div class="mission-time">${ev.time}</div><div class="mission-text">${ev.title}</div><i class="fa-solid fa-trash" style="color:var(--color-phone); cursor:pointer;" onclick="delEvent(${i})"></i></div>`;
-            });
+            events.sort((a,b)=>a.time.localeCompare(b.time)).forEach((ev, i) => { html += `<div class="mission-item"><div class="mission-color" style="background:${colors[ev.color]}"></div><div class="mission-time">${ev.time}</div><div class="mission-text">${ev.title}</div><i class="fa-solid fa-trash" style="color:var(--color-phone); cursor:pointer;" onclick="delEvent(${i})"></i></div>`; });
             area.innerHTML = html;
         }
         function selectColor(el, c) { document.querySelectorAll('.color-opt').forEach(o=>o.classList.remove('selected')); el.classList.add('selected'); selectedEventColor = c; }
@@ -470,34 +562,33 @@
             if(!t || !title) return;
             if(!appState.calendar[activeCalDateKey]) appState.calendar[activeCalDateKey] = [];
             appState.calendar[activeCalDateKey].push({ time: t, title: title, color: selectedEventColor, checked: false });
-            localStorage.setItem('tp_cal_v54', JSON.stringify(appState.calendar));
+            localStorage.setItem('tp_cal_v55', JSON.stringify(appState.calendar));
             document.getElementById('event-title').value = ""; renderDrawerList(); renderCalendar(); if(activeCalDateKey===todayKey) renderHomeChecklist();
         }
         function delEvent(i) {
             appState.calendar[activeCalDateKey].splice(i,1);
             if(appState.calendar[activeCalDateKey].length === 0) delete appState.calendar[activeCalDateKey];
-            localStorage.setItem('tp_cal_v54', JSON.stringify(appState.calendar)); renderDrawerList(); renderCalendar(); if(activeCalDateKey===todayKey) renderHomeChecklist();
+            localStorage.setItem('tp_cal_v55', JSON.stringify(appState.calendar)); renderDrawerList(); renderCalendar(); if(activeCalDateKey===todayKey) renderHomeChecklist();
         }
 
-        // Home Checklist
+        // =========================================
+        // HOME CHECKLIST & AI PLAN
+        // =========================================
         function renderHomeChecklist() {
             const area = document.getElementById('home-checklist-area');
             const events = appState.calendar[todayKey] || [];
             if(events.length === 0) { area.innerHTML = ""; return; }
             let html = `<div style="font-size: 11px; font-weight: 800; color: var(--text-muted); margin-bottom:8px;">TODAY'S MISSION</div>`;
-            events.sort((a,b)=>a.time.localeCompare(b.time)).forEach((ev, i) => {
-                html += `<div class="mission-item ${ev.checked?'checked':''}"><div class="mission-color" style="background:${colors[ev.color]}"></div><div class="mission-time">${ev.time}</div><div class="mission-text">${ev.title}</div><div class="check-circle" onclick="toggleCheck(${i})"><i class="fa-solid fa-check"></i></div></div>`;
-            });
+            events.sort((a,b)=>a.time.localeCompare(b.time)).forEach((ev, i) => { html += `<div class="mission-item ${ev.checked?'checked':''}"><div class="mission-color" style="background:${colors[ev.color]}"></div><div class="mission-time">${ev.time}</div><div class="mission-text">${ev.title}</div><div class="check-circle" onclick="toggleCheck(${i})"><i class="fa-solid fa-check"></i></div></div>`; });
             area.innerHTML = html;
         }
         function toggleCheck(i) {
             appState.calendar[todayKey][i].checked = !appState.calendar[todayKey][i].checked;
-            localStorage.setItem('tp_cal_v54', JSON.stringify(appState.calendar));
+            localStorage.setItem('tp_cal_v55', JSON.stringify(appState.calendar));
             renderHomeChecklist(); renderCalendar();
             if(appState.calendar[todayKey][i].checked) addExp(5);
         }
 
-        // AI Plan Generation
         async function generateAIPlan() {
             const task = document.getElementById('input-task').value || "タスク未入力";
             const st = document.getElementById('input-start').value, et = document.getElementById('input-end').value;
@@ -507,51 +598,65 @@
             timerDuration = diffMins * 60;
 
             const btn = document.querySelector('#page-home .btn-primary');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> AI思考中...'; btn.disabled = true;
-
-            const prompt = `タスク: ${task}\n時間: ${st}〜${et} (${diffMins}分)\n制限アプリ: ${app}\n集中度: ${focus}\nメモ: ${notes}\n天気: ${weatherCache.temp}度\nこれを3フェーズのタイムラインで出力して。`;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> AI分析・生成中...'; btn.disabled = true;
 
             let resText = `<div class="timeline-container">
-                <div class="timeline-item"><div class="tl-time">${st}</div><div class="tl-content"><strong>フェーズ1: 誘惑遮断</strong><br>${app!=='なし'?app+'を制限。':''}集中度${focus}に合わせて着手。${notes?'メモ: '+notes:''}</div></div>
-                <div class="timeline-item"><div class="tl-time">+ ${Math.floor(diffMins/2)}分</div><div class="tl-content"><strong>フェーズ2: 巡航</strong><br>気温${weatherCache.temp}℃。水分補給しつつペース維持。</div></div>
-                <div class="timeline-item" style="padding-bottom:0;"><div class="tl-time">${et}</div><div class="tl-content"><strong>フェーズ3: 完了</strong><br>${diffMins}分完走。</div></div>
+                <div class="timeline-item"><div class="tl-time">${st} (開始)</div><div class="tl-content"><strong>フェーズ1: 誘惑遮断とアイドリング</strong><br>${app!=='なし'?app+'の通知をオフ。':''}集中度「${focus}」を考慮し、簡単な作業から着手します。</div></div>
+                <div class="timeline-item"><div class="tl-time">+ ${Math.floor(diffMins/2)}分</div><div class="tl-content"><strong>フェーズ2: ディープフォーカス</strong><br>気温${weatherCache.temp}℃の環境下です。水分を摂りつつ巡航速度を維持してください。${notes?'(メモ: '+notes+')':''}</div></div>
+                <div class="timeline-item" style="padding-bottom:0;"><div class="tl-time">${et} (完了)</div><div class="tl-content"><strong>フェーズ3: セッション完了</strong><br>${diffMins}分間の作戦終了。休息をとりましょう。</div></div>
             </div>`;
 
             if(appState.apiKey) {
                 try {
+                    const prompt = `タスク: ${task}\n時間: ${st}〜${et} (${diffMins}分)\n制限アプリ: ${app}\n集中度: ${focus}\nメモ: ${notes}\n天気: ${weatherCache.temp}度\nこれを3フェーズのタイムラインで出力して。`;
                     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${appState.apiKey}` }, body: JSON.stringify({ model: "llama3-8b-8192", messages: [{role: "user", content: prompt}] }) });
                     const data = await res.json();
-                    resText = `<div style="font-size:13px;">${data.choices[0].message.content.replace(/\n/g, "<br>")}</div>`;
-                } catch(e) {}
+                    if(data.choices) resText = `<div style="font-size:13px; font-weight:600; line-height:1.6;">${data.choices[0].message.content.replace(/\n/g, "<br>")}</div>`;
+                } catch(e) { console.log("API Error, using fallback"); }
             }
 
             document.getElementById('ai-plan-content').innerHTML = resText;
             document.getElementById('home-ai-result').style.display = 'block';
-            btn.innerHTML = '<i class="fa-solid fa-play"></i> AIプラン生成＆START'; btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-play"></i> 自分だけのAIプラン生成'; btn.disabled = false;
             
             setTimeout(() => window.scrollTo({ top: document.getElementById('ai-scroll-anchor').offsetTop - 60, behavior: 'smooth' }), 100);
         }
 
-        // Chat
+        // =========================================
+        // CHAT (OFFLINE FALLBACK ADDED)
+        // =========================================
         async function sendChat() {
             const input = document.getElementById('chat-input'), text = input.value.trim(); if(!text) return;
             const w = document.getElementById('chat-window');
-            w.innerHTML += `<div style="align-self:flex-end; background:var(--color-study); color:white; padding:10px; border-radius:12px; font-size:13px;">${text}</div>`;
+            w.innerHTML += `<div style="align-self:flex-end; background:var(--color-study); color:white; padding:12px; border-radius:12px; font-size:14px; max-width:85%;">${text}</div>`;
             input.value = ''; w.scrollTop = w.scrollHeight;
-            let reply = "APIキーを設定してください。";
+            
+            let reply = "";
             if(appState.apiKey) {
                 try {
                     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${appState.apiKey}` }, body: JSON.stringify({ model: "llama3-8b-8192", messages: [{role: "user", content: text}] }) });
-                    const data = await res.json(); reply = data.choices[0].message.content;
-                } catch(e) { reply = "通信エラー"; }
+                    const data = await res.json(); 
+                    if(data.choices) reply = data.choices[0].message.content;
+                    else throw new Error("API Limit");
+                } catch(e) { reply = getLocalFallbackReply(text); }
+            } else {
+                reply = getLocalFallbackReply(text);
             }
-            w.innerHTML += `<div style="align-self:flex-start; background:rgba(168,85,247,0.15); padding:10px; border-radius:12px; font-size:13px;">${reply}</div>`;
+            
+            w.innerHTML += `<div style="align-self:flex-start; background:rgba(168,85,247,0.15); padding:12px; border-radius:12px; font-size:14px; max-width:85%; border: 1px solid rgba(168,85,247,0.3);">${reply}</div>`;
             w.scrollTop = w.scrollHeight;
         }
 
-        // Timer
+        function getLocalFallbackReply(text) {
+            if(text.includes('疲') || text.includes('眠')) return "お疲れ様です。<strong style='color:var(--color-sleep)'>15分間の仮眠</strong>をとるか、今日は早めに休んで明日のパフォーマンスに投資しましょう！";
+            if(text.includes('集中') || text.includes('できない')) return "スマホを別の部屋に置いて、まずは<strong style='color:var(--color-study)'>「5分だけ」</strong>と決めて作業を始めてみてください。作業興奮が訪れますよ。";
+            return "なるほど、記録しました。AIプラン生成機能を使って、具体的なタイムラインを作ってみるのもおすすめですよ。";
+        }
+
+        // =========================================
+        // TIMER
+        // =========================================
         function openTimerModal() { document.getElementById('main-overlay').classList.add('show'); document.getElementById('timer-modal').classList.add('show'); timerRemaining = timerDuration; updateTimerDisplay(); }
-        function closeModals() { document.getElementById('main-overlay').classList.remove('show'); document.getElementById('timer-modal').classList.remove('show'); document.getElementById('cal-drawer').classList.remove('open'); clearInterval(timerInterval); isRunning = false; }
         function toggleTimer() {
             const btn = document.getElementById('btn-timer-start');
             if(isRunning) { clearInterval(timerInterval); isRunning = false; btn.innerText = "RESUME"; }
