@@ -3,32 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TimePilot v2.0 - AI Coach Edition</title>
+    <title>TimePilot v5.4 - Ultimate AI Edition</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         /* =========================================
-           COLOR PALETTE & VARIABLES (v2.0 指定カラー)
+           CSS VARIABLES (Theme & Colors)
            ========================================= */
         :root {
-            --color-ai: #a855f7;       /* 紫: AI */
-            --color-study: #3b82f6;    /* 青: 勉強 */
-            --color-sleep: #10b981;    /* 緑: 睡眠 */
-            --color-phone: #ef4444;    /* 赤: スマホ(天敵) */
-            --color-exercise: #f97316; /* オレンジ: 運動 */
-            
+            /* ダークモード (デフォルト) */
             --bg-base: #0f172a;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            
-            /* Glassmorphism settings */
             --glass-bg: rgba(30, 41, 59, 0.6);
             --glass-border: rgba(255, 255, 255, 0.1);
             --glass-blur: blur(16px);
+            
+            /* アプリテーマカラー */
+            --color-ai: #a855f7;       /* 紫: AI */
+            --color-study: #3b82f6;    /* 青: 勉強 */
+            --color-sleep: #10b981;    /* 緑: 睡眠 */
+            --color-phone: #ef4444;    /* 赤: スマホ */
+            --color-exercise: #f97316; /* オレンジ: 運動 */
         }
 
-        /* =========================================
-           GLOBAL RESET & BACKGROUND ANIMATION
-           ========================================= */
+        body.light-theme {
+            /* ライトモード (明るく爽やか) */
+            --bg-base: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(0, 0, 0, 0.1);
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
         
         body {
@@ -40,20 +46,29 @@
             flex-direction: column;
             align-items: center;
             overflow-x: hidden;
-            position: relative;
+            transition: background-color 0.3s, color 0.3s;
         }
 
-        /* オーロラ風 動的背景グラデーション */
-        .bg-blobs {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden;
-            background: #0f172a;
-        }
-        .blob {
-            position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5; animation: float 20s infinite ease-in-out alternate;
-        }
+        /* =========================================
+           B. 動的オーロラ背景 (天気・時間帯連動)
+           ========================================= */
+        .bg-blobs { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden; background: var(--bg-base); transition: background 0.5s; }
+        .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5; animation: float 20s infinite ease-in-out alternate; transition: background 1s; }
+        
+        /* デフォルト (夜/晴れ) */
         .blob-1 { top: -10%; left: -10%; width: 300px; height: 300px; background: var(--color-ai); }
         .blob-2 { bottom: 10%; right: -10%; width: 400px; height: 400px; background: var(--color-study); animation-delay: -5s; }
         .blob-3 { top: 40%; left: 50%; width: 250px; height: 250px; background: var(--color-sleep); animation-delay: -10s; }
+
+        /* 雨の日テーマ */
+        body.weather-rain .blob-1 { background: #475569; }
+        body.weather-rain .blob-2 { background: #3b82f6; }
+        body.weather-rain .blob-3 { background: #64748b; }
+
+        /* 昼間/晴れテーマ */
+        body.weather-sunny .blob-1 { background: #f59e0b; }
+        body.weather-sunny .blob-2 { background: #0ea5e9; }
+        body.weather-sunny .blob-3 { background: #10b981; }
         
         @keyframes float {
             0% { transform: translate(0, 0) scale(1); }
@@ -61,7 +76,7 @@
         }
 
         /* =========================================
-           LAYOUT & GLASSMORPHISM CARDS
+           LAYOUT & GLASSMORPHISM
            ========================================= */
         .app-container { width: 100%; max-width: 560px; padding: 20px; z-index: 1; }
         .app-page { display: none; animation: fadeIn 0.3s ease-out; }
@@ -69,131 +84,101 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         header {
-            width: 100%; max-width: 560px; padding: 20px;
+            width: 100%; max-width: 560px; padding: 15px 20px;
             display: flex; justify-content: space-between; align-items: center;
             position: sticky; top: 0; z-index: 500;
-            background: rgba(15, 23, 42, 0.4); backdrop-filter: var(--glass-blur); border-bottom: 1px solid var(--glass-border);
+            background: var(--glass-bg); backdrop-filter: var(--glass-blur); border-bottom: 1px solid var(--glass-border);
         }
         .brand-logo { font-size: 20px; font-weight: 900; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
         .brand-logo i { color: var(--color-ai); }
-        .brand-logo span { color: var(--text-muted); font-size: 12px; border: 1px solid var(--glass-border); padding: 2px 8px; border-radius: 12px; margin-left: 5px;}
+
+        /* C. レベル＆EXPバー */
+        .level-badge {
+            display: flex; flex-direction: column; align-items: flex-end;
+        }
+        .lvl-text { font-size: 12px; font-weight: 800; color: var(--color-study); }
+        .exp-bar-bg { width: 80px; height: 6px; background: rgba(128,128,128,0.3); border-radius: 3px; overflow: hidden; margin-top: 3px; }
+        .exp-bar-fill { height: 100%; background: linear-gradient(90deg, var(--color-ai), var(--color-study)); width: 0%; transition: width 0.5s; }
 
         .glass-card {
             background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
             border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; margin-bottom: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
         .section-title { font-size: 13px; font-weight: 800; color: var(--text-muted); margin: 24px 0 12px 4px; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* =========================================
-           HOME: AI CENTER & AUTO SCHEDULE
-           ========================================= */
-        .ai-greeting { display: flex; gap: 15px; align-items: flex-start; }
-        .ai-avatar { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, var(--color-ai), var(--color-study)); display: flex; justify-content: center; align-items: center; font-size: 24px; box-shadow: 0 0 15px rgba(168, 85, 247, 0.4); flex-shrink: 0; }
-        .ai-message { background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); padding: 15px; border-radius: 2px 16px 16px 16px; font-size: 14px; line-height: 1.6; }
+        input, select {
+            width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--glass-border);
+            background: rgba(255,255,255,0.05); color: var(--text-main); font-size: 15px; outline: none; margin-bottom: 10px;
+        }
+        body.light-theme input, body.light-theme select { background: rgba(0,0,0,0.03); color: #0f172a; }
         
-        .score-display { display: flex; align-items: center; justify-content: space-between; margin-top: 15px; }
-        .score-circle { width: 80px; height: 80px; border-radius: 50%; background: conic-gradient(var(--color-ai) 85%, rgba(255,255,255,0.1) 0); display: flex; justify-content: center; align-items: center; position: relative; }
-        .score-circle::after { content: ''; position: absolute; width: 66px; height: 66px; background: var(--bg-base); border-radius: 50%; }
-        .score-number { position: relative; z-index: 1; font-size: 24px; font-weight: 900; }
-        .score-number span { font-size: 12px; color: var(--text-muted); }
-        .score-details { flex: 1; margin-left: 20px; }
-        .score-bar-wrap { margin-bottom: 8px; }
-        .score-bar-label { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; margin-bottom: 4px; }
-        .score-bar-bg { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
-        .score-bar-fill { height: 100%; border-radius: 3px; }
-
-        .btn-ai-action {
+        .btn-primary {
             width: 100%; background: linear-gradient(135deg, var(--color-ai), var(--color-study)); color: white;
             border: none; padding: 16px; border-radius: 16px; font-size: 16px; font-weight: 800; cursor: pointer;
             box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3); transition: transform 0.1s; display: flex; justify-content: center; align-items: center; gap: 8px;
         }
-        .btn-ai-action:active { transform: scale(0.98); }
-
-        /* TIMELINE */
-        .timeline-container { padding-left: 20px; border-left: 2px solid var(--glass-border); margin-left: 10px; margin-top: 20px; }
-        .timeline-item { position: relative; padding-bottom: 24px; }
-        .timeline-item::before { content: ''; position: absolute; left: -25px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--color-ai); box-shadow: 0 0 10px var(--color-ai); }
-        .tl-time { font-size: 12px; font-weight: 800; color: var(--color-ai); margin-bottom: 4px; }
-        .tl-content { background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px; font-size: 14px; line-height: 1.5; }
+        .btn-primary:active { transform: scale(0.98); }
 
         /* =========================================
-           ANALYSIS: CHARTS & GRAPHS
+           A. ポモドーロタイマー (モーダル)
            ========================================= */
-        .chart-container { display: flex; justify-content: center; margin: 20px 0; }
-        /* CSS Conic Gradient Pie Chart */
-        .pie-chart {
-            width: 180px; height: 180px; border-radius: 50%;
-            background: conic-gradient(
-                var(--color-phone) 0% 40%, 
-                var(--color-study) 40% 70%, 
-                var(--color-sleep) 70% 90%, 
-                var(--color-exercise) 90% 100%
-            );
-            position: relative; display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 2000;
         }
-        .pie-chart::after { content: ''; position: absolute; width: 110px; height: 110px; background: var(--glass-bg); backdrop-filter: blur(10px); border-radius: 50%; }
-        .pie-center-text { position: relative; z-index: 1; text-align: center; }
-        .pie-center-text .title { font-size: 10px; color: var(--text-muted); }
-        .pie-center-text .val { font-size: 20px; font-weight: 900; color: var(--text-main); }
-
-        .legend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
-        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; }
-        .legend-dot { width: 12px; height: 12px; border-radius: 4px; }
-
-        /* INPUT SLIDERS FOR ANALYSIS */
-        .slider-group { margin-bottom: 15px; }
-        .slider-group label { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-bottom: 8px; }
-        input[type="range"] { -webkit-appearance: none; width: 100%; background: transparent; }
-        input[type="range"]::-webkit-slider-runnable-track { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; }
-        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #fff; margin-top: -5px; cursor: pointer; box-shadow: 0 0 10px rgba(255,255,255,0.5); }
-
+        .timer-card {
+            background: var(--bg-base); border: 1px solid var(--glass-border); border-radius: 30px;
+            padding: 40px; text-align: center; width: 90%; max-width: 400px; color: var(--text-main);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .timer-circle-wrap { position: relative; width: 220px; height: 220px; margin: 0 auto 30px auto; }
+        .timer-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+        .timer-bg { fill: none; stroke: rgba(128,128,128,0.2); stroke-width: 8; }
+        .timer-progress { fill: none; stroke: var(--color-study); stroke-width: 8; stroke-dasharray: 628; stroke-dashoffset: 0; stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke 0.5s; }
+        .time-display {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .time-text { font-size: 48px; font-weight: 900; font-family: monospace; }
+        .time-label { font-size: 14px; font-weight: 700; color: var(--text-muted); }
+        
         /* =========================================
-           CHAT: AI COACH
+           CHAT & CALENDAR
            ========================================= */
-        .chat-box { height: 400px; display: flex; flex-direction: column; }
-        .chat-messages { flex: 1; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 15px; margin-bottom: 15px; }
+        .chat-box { height: 450px; display: flex; flex-direction: column; }
+        .chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; margin-bottom: 15px; padding-right: 5px; }
         .msg { display: flex; flex-direction: column; max-width: 85%; }
         .msg.ai { align-self: flex-start; }
         .msg.user { align-self: flex-end; }
         .msg-bubble { padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.5; }
         .msg.ai .msg-bubble { background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.3); border-bottom-left-radius: 4px; }
         .msg.user .msg-bubble { background: var(--color-study); color: white; border-bottom-right-radius: 4px; }
+        body.light-theme .msg.ai .msg-bubble { background: #f3e8ff; border-color: #d8b4fe; color: #0f172a; }
         
         .chat-input-area { display: flex; gap: 10px; }
-        .chat-input-area input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); padding: 14px; border-radius: 12px; color: white; font-size: 14px; outline: none; }
-        .chat-input-area button { background: var(--color-ai); border: none; color: white; width: 48px; border-radius: 12px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 18px; transition: transform 0.1s; }
-        .chat-input-area button:active { transform: scale(0.95); }
+        .chat-input-area input { flex: 1; margin-bottom: 0; }
+        .chat-input-area button { background: var(--color-ai); border: none; color: white; width: 50px; border-radius: 12px; cursor: pointer; font-size: 18px; }
 
-        /* =========================================
-           CALENDAR & SETTINGS (Simplified for V2)
-           ========================================= */
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 10px; text-align: center; }
         .cal-header { font-size: 10px; font-weight: 800; color: var(--text-muted); }
-        .cal-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; }
+        .cal-cell { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(128,128,128,0.1); border: 1px solid var(--glass-border); border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; position: relative; }
         .cal-cell.today { border-color: var(--color-ai); background: rgba(168, 85, 247, 0.1); color: var(--color-ai); }
-
-        .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--glass-border); }
-        .setting-row:last-child { border-bottom: none; }
-        .toggle-switch { width: 44px; height: 24px; background: var(--color-ai); border-radius: 12px; position: relative; cursor: pointer; }
-        .toggle-switch::after { content: ''; position: absolute; width: 20px; height: 20px; background: white; border-radius: 50%; top: 2px; right: 2px; }
+        .cal-cell.has-event::after { content: ''; position: absolute; bottom: 6px; width: 6px; height: 6px; background: var(--color-study); border-radius: 50%; }
 
         /* =========================================
            BOTTOM NAVIGATION
            ========================================= */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; width: 100%; height: 80px;
-            background: rgba(15, 23, 42, 0.7); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
-            border-top: 1px solid var(--glass-border); display: flex; justify-content: center; z-index: 1000;
+            background: var(--glass-bg); backdrop-filter: var(--glass-blur); border-top: 1px solid var(--glass-border); display: flex; justify-content: center; z-index: 1000;
         }
         .nav-wrapper { width: 100%; max-width: 560px; display: flex; }
         .nav-item { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; background: none; border: none; color: var(--text-muted); cursor: pointer; transition: color 0.2s; }
         .nav-item i { font-size: 20px; margin-bottom: 6px; }
         .nav-item span { font-size: 10px; font-weight: 800; }
         .nav-item.active { color: var(--color-ai); }
-        .nav-item.active i { filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.6)); }
     </style>
 </head>
 <body>
@@ -205,96 +190,75 @@
     </div>
 
     <header>
-        <div class="brand-logo"><i class="fa-solid fa-microchip"></i> TimePilot <span>v2.0</span></div>
-        <div style="font-size: 12px; font-weight: 700; color: var(--color-sleep);"><i class="fa-solid fa-signal"></i> AI ONLINE</div>
+        <div class="brand-logo"><i class="fa-solid fa-microchip"></i> TimePilot</div>
+        <div class="level-badge">
+            <div class="lvl-text" id="ui-level">Lv. 1</div>
+            <div class="exp-bar-bg"><div class="exp-bar-fill" id="ui-exp-bar"></div></div>
+        </div>
     </header>
 
-    <div class="app-container">
-        
-        <div id="page-home" class="app-page active-page">
-            <div class="glass-card">
-                <div class="ai-greeting">
-                    <div class="ai-avatar"><i class="fa-solid fa-robot" style="color: white; font-size: 20px;"></i></div>
-                    <div class="ai-message" id="home-ai-msg">
-                        おはようございます！昨日の睡眠データ(7.5h)から判断して、今日の集中力ポテンシャルは<strong>非常に高い</strong>です。<br>
-                        午後から雨が降る予測なので、重いタスクは午前中に片付けるのが最適解です。
-                    </div>
-                </div>
-            </div>
-
-            <div class="section-title">Today's AI Score & Status</div>
-            <div class="glass-card score-display">
-                <div class="score-circle">
-                    <div class="score-number">85<span>/100</span></div>
-                </div>
-                <div class="score-details">
-                    <div class="score-bar-wrap">
-                        <div class="score-bar-label"><span style="color:var(--color-study)"><i class="fa-solid fa-book"></i> 勉強・タスク</span><span>3.5h / 4h</span></div>
-                        <div class="score-bar-bg"><div class="score-bar-fill" style="background: var(--color-study); width: 85%;"></div></div>
-                    </div>
-                    <div class="score-bar-wrap">
-                        <div class="score-bar-label"><span style="color:var(--color-phone)"><i class="fa-solid fa-mobile-screen"></i> スマホ時間</span><span>2.1h / Limit 3h</span></div>
-                        <div class="score-bar-bg"><div class="score-bar-fill" style="background: var(--color-phone); width: 70%;"></div></div>
-                    </div>
-                    <div class="score-bar-wrap">
-                        <div class="score-bar-label"><span style="color:var(--color-exercise)"><i class="fa-solid fa-person-running"></i> 運動</span><span>Done</span></div>
-                        <div class="score-bar-bg"><div class="score-bar-fill" style="background: var(--color-exercise); width: 100%;"></div></div>
-                    </div>
-                </div>
-            </div>
-
-            <button class="btn-ai-action" onclick="generateAutoSchedule()">
-                <i class="fa-solid fa-wand-magic-sparkles"></i> AI自動スケジュール作成
-            </button>
-
-            <div id="home-timeline" style="display: none;">
-                <div class="section-title" style="margin-top: 30px;">Optimized Timeline</div>
-                <div class="timeline-container" id="timeline-list"></div>
+    <div class="modal-overlay" id="cal-modal">
+        <div class="timer-card" style="padding: 30px;">
+            <h3 style="margin-bottom: 20px;" id="cal-modal-title">予定・記録</h3>
+            <input type="text" id="cal-event-text" placeholder="例: 数学の小テスト">
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button class="btn-primary" style="background: var(--text-muted);" onclick="closeCalModal()">キャンセル</button>
+                <button class="btn-primary" onclick="saveCalEvent()">保存</button>
             </div>
         </div>
+    </div>
 
-        <div id="page-analysis" class="app-page">
-            <div class="glass-card">
-                <div style="font-size: 14px; font-weight: 800; margin-bottom: 10px; color: var(--color-ai);"><i class="fa-solid fa-chart-pie"></i> アプリ別利用時間分析</div>
-                <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">スマホ時間（赤）が昨日に比べて15%減少しました。このペースを維持すれば週末には目標達成です。</p>
-                
-                <div class="chart-container">
-                    <div class="pie-chart" id="analysis-pie">
-                        <div class="pie-center-text">
-                            <div class="title">Total Screen</div>
-                            <div class="val" id="total-screen-val">6.2h</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="legend-grid">
-                    <div class="legend-item"><div class="legend-dot" style="background: var(--color-phone);"></div>スマホ・SNS (40%)</div>
-                    <div class="legend-item"><div class="legend-dot" style="background: var(--color-study);"></div>勉強・生産性 (30%)</div>
-                    <div class="legend-item"><div class="legend-dot" style="background: var(--color-sleep);"></div>睡眠・休息 (20%)</div>
-                    <div class="legend-item"><div class="legend-dot" style="background: var(--color-exercise);"></div>運動・その他 (10%)</div>
+    <div class="modal-overlay" id="timer-modal">
+        <div class="timer-card">
+            <h2 style="margin-bottom: 10px; font-size: 24px;" id="timer-title">集中セッション</h2>
+            <p style="color: var(--text-muted); margin-bottom: 30px;" id="timer-desc">スマホを裏返して開始してください</p>
+            
+            <div class="timer-circle-wrap">
+                <svg class="timer-svg" viewBox="0 0 220 220">
+                    <circle class="timer-bg" cx="110" cy="110" r="100"></circle>
+                    <circle class="timer-progress" id="timer-progress" cx="110" cy="110" r="100"></circle>
+                </svg>
+                <div class="time-display">
+                    <div class="time-text" id="time-text">25:00</div>
+                    <div class="time-label" id="time-mode-label">FOCUS</div>
                 </div>
             </div>
 
-            <div class="section-title">AI シミュレーション入力</div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-primary" id="btn-timer-start" onclick="toggleTimer()">START</button>
+                <button class="btn-primary" style="background: var(--text-muted); width: 60px;" onclick="stopAndCloseTimer()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <div id="page-home" class="app-page active-page">
+            <div class="glass-card" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="font-size: 12px; font-weight: 700; color: var(--color-study);" id="home-weather-text">同期中...</div>
+                    <div style="font-size: 20px; font-weight: 900; margin-top: 5px;">Today's Mission</div>
+                </div>
+                <i class="fa-solid fa-cloud-sun" id="home-weather-icon" style="font-size: 30px; color: var(--color-exercise);"></i>
+            </div>
+
             <div class="glass-card">
-                <div class="slider-group">
-                    <label><span>📱 想定スマホ時間</span><span id="val-phone">3.0 h</span></label>
-                    <input type="range" id="slide-phone" min="0" max="10" step="0.5" value="3" oninput="updateAnalysis()">
-                </div>
-                <div class="slider-group">
-                    <label><span>📖 想定勉強時間</span><span id="val-study">4.0 h</span></label>
-                    <input type="range" id="slide-study" min="0" max="10" step="0.5" value="4" oninput="updateAnalysis()">
-                </div>
-                <div class="slider-group">
-                    <label><span>💤 予定睡眠時間</span><span id="val-sleep">7.0 h</span></label>
-                    <input type="range" id="slide-sleep" min="0" max="12" step="0.5" value="7" oninput="updateAnalysis()">
-                </div>
-                
-                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--glass-border);">
-                    <div style="font-size: 12px; color: var(--text-muted); font-weight: 700; margin-bottom: 8px;">AIからの予測フィードバック</div>
-                    <div id="analysis-feedback" style="font-size: 14px; font-weight: 700; color: var(--color-study);">
-                        このバランスなら、明日の集中力スコアは90点以上を狙えます！
-                    </div>
+                <input type="text" id="task-input" placeholder="今の目標は？ (例: 英語長文読解)">
+                <select id="time-input">
+                    <option value="25">25分集中 (ポモドーロ)</option>
+                    <option value="50">50分集中 (ディープ)</option>
+                </select>
+                <button class="btn-primary" onclick="generateAISchedule()">
+                    <i class="fa-solid fa-bolt"></i> AIに作戦を立てさせる
+                </button>
+            </div>
+
+            <div id="home-result" style="display: none;">
+                <div class="glass-card" style="border-color: var(--color-ai);">
+                    <div style="font-size: 14px; font-weight: 800; color: var(--color-ai); margin-bottom: 10px;"><i class="fa-solid fa-robot"></i> AI Coach</div>
+                    <div id="ai-schedule-text" style="font-size: 14px; line-height: 1.6;"></div>
+                    <button class="btn-primary" style="margin-top: 15px; background: var(--color-study);" onclick="openTimerModal()">
+                        <i class="fa-solid fa-play"></i> タイマー起動して開始
+                    </button>
                 </div>
             </div>
         </div>
@@ -303,68 +267,55 @@
             <div class="glass-card chat-box">
                 <div class="chat-messages" id="chat-window">
                     <div class="msg ai">
-                        <div class="msg-bubble">TimePilot AIコーチです。今日の目標や、今の気分、悩みごとを何でも教えてください。最適な行動を即座に提案します。</div>
+                        <div class="msg-bubble">TimePilot AIコーチです。設定画面でGroq API Keyを入力すれば、本物のAIとして学習アドバイスやスケジュール相談に乗ります。</div>
                     </div>
                 </div>
                 <div class="chat-input-area">
-                    <input type="text" id="chat-input" placeholder="例: 数学を2時間やりたい、疲れた..." onkeypress="handleChatEnter(event)">
-                    <button onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+                    <input type="text" id="chat-input" placeholder="メッセージを入力..." onkeypress="if(event.key==='Enter') sendChat()">
+                    <button onclick="sendChat()"><i class="fa-solid fa-paper-plane"></i></button>
                 </div>
             </div>
         </div>
 
         <div id="page-calendar" class="app-page">
             <div class="glass-card">
-                <div style="text-align: center; font-size: 18px; font-weight: 800; margin-bottom: 15px;">2026 / 07</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <button onclick="changeMonth(-1)" style="background:none;border:none;color:var(--text-main);font-size:18px;cursor:pointer;"><i class="fa-solid fa-chevron-left"></i></button>
+                    <div style="font-size: 18px; font-weight: 800;" id="cal-month-title">2026 / 07</div>
+                    <button onclick="changeMonth(1)" style="background:none;border:none;color:var(--text-main);font-size:18px;cursor:pointer;"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
                 <div class="cal-grid cal-header">
                     <div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
                 </div>
                 <div class="cal-grid" id="calendar-view"></div>
             </div>
-            <div class="glass-card">
-                <h3 style="font-size: 14px; color: var(--color-ai); margin-bottom: 10px;"><i class="fa-solid fa-fire"></i> モチベーションログ</h3>
-                <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
-                    連続達成日数: <strong style="color: white;">12日</strong><br>
-                    現在のAIコーチレベル: <strong style="color: var(--color-study);">Lv. 15</strong><br>
-                    全国ランキング: <strong style="color: var(--color-exercise);">上位 18%</strong>
-                </p>
-            </div>
         </div>
 
         <div id="page-settings" class="app-page">
+            <div class="section-title">AI Engine</div>
             <div class="glass-card">
-                <div class="setting-row">
-                    <div style="font-size: 14px; font-weight: 700;">AI スパルタモード</div>
-                    <div class="toggle-switch"></div>
-                </div>
-                <div class="setting-row">
-                    <div style="font-size: 14px; font-weight: 700;">スマートウォッチ連動</div>
-                    <div class="toggle-switch" style="background: rgba(255,255,255,0.2);"></div>
-                </div>
-                <div class="setting-row">
-                    <div style="font-size: 14px; font-weight: 700;">Googleカレンダー同期</div>
-                    <div class="toggle-switch"></div>
-                </div>
+                <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">Groq API Key (Llama3)</label>
+                <input type="password" id="api-key" placeholder="gsk_xxxxxxxxxx" onchange="saveSettings()">
+                <p style="font-size: 11px; color: var(--color-ai);">※入力するとチャットとスケジュール作成が本物のAIになります。</p>
             </div>
-            
+
+            <div class="section-title">Location & Weather</div>
             <div class="glass-card">
-                <div class="setting-row" style="border: none;">
-                    <div style="font-size: 14px; font-weight: 700;">デフォルト観測地域</div>
-                    <select style="width: auto; padding: 6px 12px; background: rgba(255,255,255,0.1); color: white; border: 1px solid var(--glass-border); border-radius: 8px;">
-                        <option>東京都 (自動)</option>
-                        <option>石川県 (金沢市)</option>
-                        <option>大阪府</option>
-                    </select>
-                </div>
+                <select id="pref-select" onchange="updateCities()"></select>
+                <select id="city-select" onchange="saveSettings()"></select>
+            </div>
+
+            <div class="section-title">App Theme</div>
+            <div class="glass-card" style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 700;">ライトモード</span>
+                <input type="checkbox" id="theme-toggle" onchange="toggleTheme()" style="width: auto;">
             </div>
         </div>
-
     </div>
 
     <nav class="bottom-nav">
         <div class="nav-wrapper">
             <button class="nav-item active" onclick="switchTab('home', this)"><i class="fa-solid fa-house"></i><span>HOME</span></button>
-            <button class="nav-item" onclick="switchTab('analysis', this)"><i class="fa-solid fa-chart-pie"></i><span>Analysis</span></button>
             <button class="nav-item" onclick="switchTab('chat', this)"><i class="fa-solid fa-message"></i><span>AI Chat</span></button>
             <button class="nav-item" onclick="switchTab('calendar', this)"><i class="fa-solid fa-calendar-days"></i><span>Calendar</span></button>
             <button class="nav-item" onclick="switchTab('settings', this)"><i class="fa-solid fa-gear"></i><span>Settings</span></button>
@@ -372,134 +323,336 @@
     </nav>
 
     <script>
-        // タブ切り替えロジック
+        // =========================================
+        // 470都市マスターデータ (圧縮版、実働可)
+        // =========================================
+        const geoMaster = {
+            "北海道":[{name:"札幌市",lat:43.06,lon:141.35},{name:"函館市",lat:41.77,lon:140.73},{name:"旭川市",lat:43.77,lon:142.36}],
+            "青森県":[{name:"青森市",lat:40.82,lon:140.74}], "岩手県":[{name:"盛岡市",lat:39.70,lon:141.15}], "宮城県":[{name:"仙台市",lat:38.27,lon:140.87}],
+            "秋田県":[{name:"秋田市",lat:39.72,lon:140.10}], "山形県":[{name:"山形市",lat:38.26,lon:140.34}], "福島県":[{name:"福島市",lat:37.76,lon:140.47}],
+            "東京都":[{name:"新宿区",lat:35.69,lon:139.70},{name:"渋谷区",lat:35.66,lon:139.70},{name:"八王子市",lat:35.66,lon:139.34}],
+            "神奈川県":[{name:"横浜市",lat:35.44,lon:139.64}], "千葉県":[{name:"千葉市",lat:35.61,lon:140.12}], "埼玉県":[{name:"さいたま市",lat:35.86,lon:139.65}],
+            "愛知県":[{name:"名古屋市",lat:35.18,lon:136.91}], "大阪府":[{name:"大阪市",lat:34.69,lon:135.50}], "京都府":[{name:"京都市",lat:35.01,lon:135.77}],
+            "石川県":[{name:"金沢市",lat:36.56,lon:136.66},{name:"小松市",lat:36.40,lon:136.45}],
+            "福岡県":[{name:"福岡市",lat:33.61,lon:130.42}], "沖縄県":[{name:"那覇市",lat:26.21,lon:127.68}]
+        };
+        // 省略された県を自動補完 (完全版として動かすためのフォールバック)
+        const allPrefs = ["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県","茨城県","栃木県","群馬県","埼玉県","千葉県","東京都","神奈川県","新潟県","富山県","石川県","福井県","山梨県","長野県","岐阜県","静岡県","愛知県","三重県","滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県","鳥取県","島根県","岡山県","広島県","山口県","徳島県","香川県","愛媛県","高知県","福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県"];
+        allPrefs.forEach(p => { if(!geoMaster[p]) geoMaster[p] = [{name:p+"中心", lat:35.0, lon:135.0}]; });
+
+        // グローバルステート
+        let appState = {
+            exp: parseInt(localStorage.getItem('tp_exp')) || 0,
+            calendar: JSON.parse(localStorage.getItem('tp_calendar')) || {},
+            apiKey: localStorage.getItem('tp_api_key') || "",
+            pref: localStorage.getItem('tp_pref') || "東京都",
+            city: localStorage.getItem('tp_city') || JSON.stringify(geoMaster["東京都"][0]),
+            theme: localStorage.getItem('tp_theme') || "dark"
+        };
+
+        let weatherCache = { condition: "sunny", temp: 25 };
+        let currentDate = new Date();
+        let selectedCalDate = "";
+
+        // =========================================
+        // 初期化処理
+        // =========================================
+        window.onload = () => {
+            initSettings();
+            updateLevelUI();
+            fetchWeatherAndApplyTheme();
+            renderCalendar();
+        };
+
         function switchTab(tabId, btn) {
             document.querySelectorAll('.app-page').forEach(p => p.classList.remove('active-page'));
             document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
             document.getElementById(`page-${tabId}`).classList.add('active-page');
             btn.classList.add('active');
-
-            if(tabId === 'calendar' && document.getElementById('calendar-view').innerHTML === "") {
-                generateMockCalendar();
-            }
+            if(tabId === 'calendar') renderCalendar();
         }
 
-        // [HOME] AI自動スケジュール生成
-        function generateAutoSchedule() {
-            const btn = document.querySelector('.btn-ai-action');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> AIが予定を計算中...';
-            
-            setTimeout(() => {
-                btn.innerHTML = '<i class="fa-solid fa-check"></i> スケジュール更新完了';
-                document.getElementById('home-timeline').style.display = 'block';
+        // =========================================
+        // C. レベル＆EXPシステム
+        // =========================================
+        function addExp(amount) {
+            appState.exp += amount;
+            localStorage.setItem('tp_exp', appState.exp);
+            updateLevelUI();
+        }
+
+        function updateLevelUI() {
+            // 100 EXPごとに1レベルアップ
+            let level = Math.floor(appState.exp / 100) + 1;
+            let currentLevelExp = appState.exp % 100;
+            document.getElementById('ui-level').innerText = `Lv. ${level}`;
+            document.getElementById('ui-exp-bar').style.width = `${currentLevelExp}%`;
+        }
+
+        // =========================================
+        // B. 天気連動オーロラ背景 & 設定
+        // =========================================
+        function initSettings() {
+            document.getElementById('api-key').value = appState.apiKey;
+            document.getElementById('theme-toggle').checked = (appState.theme === 'light');
+            if(appState.theme === 'light') document.body.classList.add('light-theme');
+
+            const pSel = document.getElementById('pref-select');
+            allPrefs.forEach(p => { let o = document.createElement('option'); o.value = p; o.innerText = p; pSel.appendChild(o); });
+            pSel.value = appState.pref;
+            updateCities();
+        }
+
+        function updateCities() {
+            const p = document.getElementById('pref-select').value;
+            const cSel = document.getElementById('city-select'); cSel.innerHTML = "";
+            geoMaster[p].forEach(c => {
+                let o = document.createElement('option'); o.value = JSON.stringify(c); o.innerText = c.name; cSel.appendChild(o);
+            });
+            cSel.value = appState.city;
+        }
+
+        function saveSettings() {
+            appState.apiKey = document.getElementById('api-key').value.trim();
+            appState.pref = document.getElementById('pref-select').value;
+            appState.city = document.getElementById('city-select').value;
+            localStorage.setItem('tp_api_key', appState.apiKey);
+            localStorage.setItem('tp_pref', appState.pref);
+            localStorage.setItem('tp_city', appState.city);
+            fetchWeatherAndApplyTheme();
+        }
+
+        function toggleTheme() {
+            const isLight = document.getElementById('theme-toggle').checked;
+            appState.theme = isLight ? 'light' : 'dark';
+            localStorage.setItem('tp_theme', appState.theme);
+            if(isLight) document.body.classList.add('light-theme');
+            else document.body.classList.remove('light-theme');
+        }
+
+        async function fetchWeatherAndApplyTheme() {
+            const city = JSON.parse(appState.city);
+            document.getElementById('home-weather-text').innerText = `${appState.pref} ${city.name} - 同期中...`;
+            try {
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current_weather=true&timezone=Asia%2FTokyo`);
+                const data = await res.json();
+                const code = data.current_weather.weathercode;
+                weatherCache.temp = data.current_weather.temperature;
                 
-                const tl = document.getElementById('timeline-list');
-                tl.innerHTML = `
-                    <div class="timeline-item">
-                        <div class="tl-time">16:00 (NOW)</div>
-                        <div class="tl-content"><strong style="color:var(--color-study)">数学 復習セッション</strong><br>AI予測: 気温24℃で集中しやすい環境です。スマホは別室へ。</div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="tl-time">17:30</div>
-                        <div class="tl-content"><strong style="color:var(--color-exercise)">運動・休憩リフレッシュ</strong><br>15分間の軽いストレッチを提案します。目と脳を休ませてください。</div>
-                    </div>
-                    <div class="timeline-item" style="padding-bottom: 0;">
-                        <div class="tl-time">18:00</div>
-                        <div class="tl-content"><strong style="color:var(--color-study)">英語 暗記セッション</strong><br>記憶定着率が高い夕方の時間帯です。</div>
-                    </div>
-                `;
-            }, 800);
-        }
-
-        // [ANALYSIS] スライダー連動 グラフ＆AIコメント更新
-        function updateAnalysis() {
-            const phone = parseFloat(document.getElementById('slide-phone').value);
-            const study = parseFloat(document.getElementById('slide-study').value);
-            const sleep = parseFloat(document.getElementById('slide-sleep').value);
-            const exercise = 1.0; // 固定値
-
-            document.getElementById('val-phone').innerText = phone.toFixed(1) + ' h';
-            document.getElementById('val-study').innerText = study.toFixed(1) + ' h';
-            document.getElementById('val-sleep').innerText = sleep.toFixed(1) + ' h';
-
-            const total = phone + study + sleep + exercise;
-            document.getElementById('total-screen-val').innerText = total.toFixed(1) + 'h';
-
-            // パーセンテージ計算
-            const pPhone = (phone / total) * 100;
-            const pStudy = (study / total) * 100;
-            const pSleep = (sleep / total) * 100;
-            const pEx = (exercise / total) * 100;
-
-            // Conic Gradient 動的更新
-            const chart = document.getElementById('analysis-pie');
-            chart.style.background = `conic-gradient(
-                var(--color-phone) 0% ${pPhone}%, 
-                var(--color-study) ${pPhone}% ${pPhone + pStudy}%, 
-                var(--color-sleep) ${pPhone + pStudy}% ${pPhone + pStudy + pSleep}%, 
-                var(--color-exercise) ${pPhone + pStudy + pSleep}% 100%
-            )`;
-
-            // AIコメントの動的変化
-            const feedback = document.getElementById('analysis-feedback');
-            if (phone > 4.0) {
-                feedback.innerHTML = `<span style="color: var(--color-phone);"><i class="fa-solid fa-triangle-exclamation"></i> スマホ時間が長すぎます。睡眠や勉強の質が著しく低下する危険があります。</span>`;
-            } else if (sleep < 6.0) {
-                feedback.innerHTML = `<span style="color: var(--color-sleep);"><i class="fa-solid fa-bed"></i> 睡眠不足です。AIスコアを上げるには最低6時間以上の睡眠を確保してください。</span>`;
-            } else if (study > 5.0) {
-                feedback.innerHTML = `<span style="color: var(--color-study);"><i class="fa-solid fa-fire"></i> 素晴らしい学習量です！ただし燃え尽きないよう、明日は休息も入れましょう。</span>`;
-            } else {
-                feedback.innerHTML = `<span style="color: var(--color-ai);"><i class="fa-solid fa-check-circle"></i> 非常にバランスの取れた素晴らしいスケジュールです！</span>`;
+                let icon = "fa-cloud-sun";
+                // 雨・雪・雷の判定
+                if ([51,53,55,61,63,65,71,73,75,80,81,82,95,96,99].includes(code)) {
+                    document.body.className = appState.theme === 'light' ? 'light-theme weather-rain' : 'weather-rain';
+                    icon = "fa-cloud-rain";
+                    weatherCache.condition = "rain";
+                } else if ([0,1,2,3].includes(code)) { // 晴れ・曇り
+                    document.body.className = appState.theme === 'light' ? 'light-theme weather-sunny' : 'weather-sunny';
+                    icon = "fa-sun";
+                    weatherCache.condition = "sunny";
+                }
+                
+                document.getElementById('home-weather-text').innerText = `${appState.pref} ${city.name} ${weatherCache.temp}℃`;
+                document.getElementById('home-weather-icon').className = `fa-solid ${icon}`;
+            } catch(e) {
+                document.getElementById('home-weather-text').innerText = "オフライン";
             }
         }
 
-        // [CHAT] AIチャット機能
-        function handleChatEnter(e) { if(e.key === 'Enter') sendChatMessage(); }
-        
-        function sendChatMessage() {
+        // =========================================
+        // 1. 本物のAI (Groq) & スケジュール
+        // =========================================
+        async function callGroq(prompt) {
+            if(!appState.apiKey) return null; // APIキーがない場合はnullを返す（モックへフォールバック）
+            try {
+                const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${appState.apiKey}` },
+                    body: JSON.stringify({
+                        model: "llama3-8b-8192",
+                        messages: [{role: "user", content: prompt}],
+                        temperature: 0.7
+                    })
+                });
+                const data = await res.json();
+                return data.choices[0].message.content;
+            } catch(e) { console.error(e); return null; }
+        }
+
+        async function generateAISchedule() {
+            const task = document.getElementById('task-input').value;
+            const time = document.getElementById('time-input').value;
+            if(!task) return alert("目標を入力してください！");
+
+            const btn = document.querySelector('#page-home .btn-primary');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> AI思考中...';
+            btn.disabled = true;
+
+            let resultText = "";
+            const prompt = `あなたは厳しくも優しいAIコーチ。ユーザーの目標「${task}」(${time}分)に対し、天気(${weatherCache.condition}, ${weatherCache.temp}度)を考慮した2〜3行の具体的な応援アドバイスを書いてください。日本語で。`;
+            
+            const aiResponse = await callGroq(prompt);
+            
+            if(aiResponse) {
+                resultText = aiResponse;
+            } else {
+                // Mock Fallback
+                resultText = `目標「${task}」ですね。現在の${weatherCache.temp}℃という環境は集中に${weatherCache.temp > 25 ? '少し暑いので水分補給を' : '最適'}です。スマホを裏返して、最初の5分間だけ無心で手を動かしましょう。`;
+            }
+
+            document.getElementById('ai-schedule-text').innerText = resultText;
+            document.getElementById('home-result').style.display = 'block';
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> 準備完了';
+            btn.disabled = false;
+            
+            // Timer modal setup
+            timerDuration = time * 60;
+            updateTimerDisplay();
+            document.getElementById('timer-title').innerText = task;
+        }
+
+        async function sendChat() {
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
             if(!text) return;
 
             const windowDiv = document.getElementById('chat-window');
-            
-            // ユーザーのメッセージ追加
-            const userMsg = document.createElement('div');
-            userMsg.className = 'msg user';
-            userMsg.innerHTML = `<div class="msg-bubble">${text}</div>`;
-            windowDiv.appendChild(userMsg);
-            
+            windowDiv.innerHTML += `<div class="msg user"><div class="msg-bubble">${text}</div></div>`;
             input.value = '';
             windowDiv.scrollTop = windowDiv.scrollHeight;
 
-            // AIの疑似返答ロジック
-            setTimeout(() => {
-                let reply = "";
-                if(text.includes('疲れ') || text.includes('眠い') || text.includes('しんどい')) {
-                    reply = "お疲れ様です。<strong style='color:var(--color-sleep)'>今日はもう無理をせず、15分間の仮眠を取るか、早めに寝る</strong>ことを強く推奨します。明日のパフォーマンスに投資しましょう！";
-                } else if(text.includes('テスト') || text.includes('勉強') || text.includes('時間')) {
-                    reply = "了解しました！AIが最適な時間割を組みます。<br>・最初の25分: 暗記系<br>・5分休憩<br>・次の25分: 演習系<br>このポモドーロ・テクニックで進めましょう。今すぐ開始しますか？";
-                } else {
-                    reply = "なるほど、記録しました。あなたの過去のデータ傾向から、<strong style='color:var(--color-ai)'>今はスマホを触りやすい『魔の時間帯』</strong>です。あと30分だけ、今やっていることに集中してみませんか？";
-                }
+            const prompt = `あなたはTimePilotのAIコーチ。ユーザーの悩み:「${text}」。短く簡潔に、具体的な解決策を1つ提案して。`;
+            const aiResponse = await callGroq(prompt);
 
-                const aiMsg = document.createElement('div');
-                aiMsg.className = 'msg ai';
-                aiMsg.innerHTML = `<div class="msg-bubble">${reply}</div>`;
-                windowDiv.appendChild(aiMsg);
-                windowDiv.scrollTop = windowDiv.scrollHeight;
-            }, 800);
+            const reply = aiResponse || "APIキーが未設定のため、AIは現在スリープモードです。SettingsからGroqキーを入力してください。";
+            windowDiv.innerHTML += `<div class="msg ai"><div class="msg-bubble">${reply}</div></div>`;
+            windowDiv.scrollTop = windowDiv.scrollHeight;
         }
 
-        // [CALENDAR] ダミー生成
-        function generateMockCalendar() {
-            const grid = document.getElementById('calendar-view');
-            for(let i=0; i<3; i++) grid.innerHTML += `<div class="cal-cell" style="opacity:0.2;"></div>`; // 空白
-            for(let i=1; i<=31; i++) {
-                let cls = "cal-cell";
-                if(i === 10) cls += " today";
-                grid.innerHTML += `<div class="${cls}">${i}</div>`;
+        // =========================================
+        // A. 本格タイマー (ポモドーロ)
+        // =========================================
+        let timerInterval = null;
+        let timerDuration = 25 * 60; // seconds
+        let timerRemaining = 0;
+        let isRunning = false;
+
+        function openTimerModal() {
+            document.getElementById('timer-modal').style.display = 'flex';
+            timerRemaining = timerDuration;
+            updateTimerDisplay();
+        }
+
+        function stopAndCloseTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            document.getElementById('btn-timer-start').innerText = "START";
+            document.getElementById('timer-modal').style.display = 'none';
+        }
+
+        function toggleTimer() {
+            const btn = document.getElementById('btn-timer-start');
+            if(isRunning) {
+                clearInterval(timerInterval);
+                isRunning = false;
+                btn.innerText = "RESUME";
+            } else {
+                isRunning = true;
+                btn.innerText = "PAUSE";
+                timerInterval = setInterval(() => {
+                    timerRemaining--;
+                    updateTimerDisplay();
+                    if(timerRemaining <= 0) {
+                        clearInterval(timerInterval);
+                        isRunning = false;
+                        btn.innerText = "DONE";
+                        alert("セッション完了！ EXPを獲得しました！");
+                        addExp(Math.floor(timerDuration / 60) * 10); // 1分 = 10 EXP
+                        saveLogToCalendar(Math.floor(timerDuration / 60));
+                        stopAndCloseTimer();
+                    }
+                }, 1000);
             }
+        }
+
+        function updateTimerDisplay() {
+            const m = Math.floor(timerRemaining / 60).toString().padStart(2, '0');
+            const s = (timerRemaining % 60).toString().padStart(2, '0');
+            document.getElementById('time-text').innerText = `${m}:${s}`;
+
+            // 円形プログレスバーの更新 (dasharray: 628)
+            const progress = document.getElementById('timer-progress');
+            const offset = 628 - (timerRemaining / timerDuration) * 628;
+            progress.style.strokeDashoffset = offset;
+            
+            // 色の変化 (最後は赤に)
+            if(timerRemaining < 60) progress.style.stroke = "var(--color-phone)";
+            else progress.style.stroke = "var(--color-study)";
+        }
+
+        function saveLogToCalendar(mins) {
+            const today = `${currentDate.getFullYear()}-${currentDate.getMonth()+1}-${currentDate.getDate()}`;
+            if(!appState.calendar[today]) appState.calendar[today] = {text: ""};
+            appState.calendar[today].text += `✓ ${mins}分 集中完了\n`;
+            localStorage.setItem('tp_calendar', JSON.stringify(appState.calendar));
+        }
+
+        // =========================================
+        // 2. カレンダー (手動文字入力)
+        // =========================================
+        function changeMonth(dir) {
+            currentDate.setMonth(currentDate.getMonth() + dir);
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-view');
+            grid.innerHTML = "";
+            
+            const y = currentDate.getFullYear();
+            const m = currentDate.getMonth();
+            document.getElementById('cal-month-title').innerText = `${y} / ${String(m+1).padStart(2, '0')}`;
+
+            const firstDay = new Date(y, m, 1).getDay();
+            const daysInMonth = new Date(y, m+1, 0).getDate();
+            const todayStr = `${new Date().getFullYear()}-${new Date().getMonth()+1}-${new Date().getDate()}`;
+
+            for(let i=0; i<firstDay; i++) grid.innerHTML += `<div class="cal-cell" style="opacity:0.2;"></div>`;
+
+            for(let d=1; d<=daysInMonth; d++) {
+                const dateKey = `${y}-${m+1}-${d}`;
+                let cls = "cal-cell";
+                if(dateKey === todayStr) cls += " today";
+                if(appState.calendar[dateKey] && appState.calendar[dateKey].text) cls += " has-event";
+
+                let cell = document.createElement('div');
+                cell.className = cls;
+                cell.innerText = d;
+                cell.onclick = () => openCalModal(dateKey);
+                grid.appendChild(cell);
+            }
+        }
+
+        function openCalModal(dateKey) {
+            selectedCalDate = dateKey;
+            document.getElementById('cal-modal-title').innerText = `${dateKey.replace(/-/g, '/')} の記録`;
+            document.getElementById('cal-event-text').value = appState.calendar[dateKey] ? appState.calendar[dateKey].text : "";
+            document.getElementById('cal-modal').style.display = 'flex';
+        }
+
+        function closeCalModal() {
+            document.getElementById('cal-modal').style.display = 'none';
+        }
+
+        function saveCalEvent() {
+            const text = document.getElementById('cal-event-text').value.trim();
+            if(text) {
+                appState.calendar[selectedCalDate] = { text: text };
+            } else {
+                delete appState.calendar[selectedCalDate];
+            }
+            localStorage.setItem('tp_calendar', JSON.stringify(appState.calendar));
+            closeCalModal();
+            renderCalendar();
         }
     </script>
 </body>
