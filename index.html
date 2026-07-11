@@ -10,35 +10,7 @@
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     /* ==========================================
-   スマホ表示の重なり＆ダークモード修正パッチ
-   ========================================== */
 
-/* 1. ダークモード時のプルダウン（option）の白飛び修正 */
-body.dark-mode select,
-body.dark-mode select option {
-  background-color: #1a1a2e !important; /* ダークモードの背景色 */
-  color: #ffffff !important;
-}
-
-/* 2. スマホ画面での入力欄の重なり＆はみ出し防止 */
-@media (max-width: 480px) {
-  /* 時間入力欄の枠が画面サイズに合わせてキレイに縮むように強制調整 */
-  input[type="time"],
-  input[type="text"],
-  select {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    box-sizing: border-box !important;
-  }
-
-  /* 横並びのレイアウトがスマホで窮屈な場合は自動でキレイに整列させる */
-  div[style*="display: flex"],
-  div[style*="grid-template-columns"] {
-    max-width: 100% !important;
-    overflow-x: hidden !important;
-  }
-}
 
         <style>
         /* =========================================
@@ -733,3 +705,56 @@ body.dark-mode select option {
     </script>
 </body>
 </html>
+
+<style>
+@media (max-width: 480px) {
+  /* 1. 入力枠やプルダウンの重なりとはみ出しを完全防止 */
+  input[type="text"],
+  input[type="time"],
+  input[type="number"],
+  select,
+  textarea {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    font-size: 16px !important; /* iPhoneの勝手なズーム現象を防止 */
+  }
+
+  /* 2. 横並びの要素が画面サイズを超えて衝突するのを防ぎ、自動で折りたたむ */
+  div[style*="display: flex"],
+  div[style*="display:flex"],
+  div[style*="grid-template-columns"],
+  .flex,
+  .row,
+  .grid {
+    flex-wrap: wrap !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 3. 窮屈になった時間の入力欄などを、スマホ画面で見やすく自動調整 */
+  div[style*="display: flex"] > div,
+  div[style*="display:flex"] > div {
+    min-width: 0 !important;
+    flex: 1 1 100% !important;
+    margin-bottom: 8px !important;
+  }
+
+  /* 4. アプリ全体の横揺れ・はみ出し防止 */
+  body, html {
+    overflow-x: hidden !important;
+  }
+
+  /* スマホ画面に合わせてカードの左右の余白を最適化 */
+  .card, .container, main, section {
+    width: 94% !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding: 16px !important;
+    box-sizing: border-box !important;
+  }
+}
+</style>
+
