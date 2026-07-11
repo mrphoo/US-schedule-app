@@ -9,10 +9,7 @@
     <link rel="apple-touch-icon" href="icon.png">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    /* ==========================================
-
-
-        <style>
+    <style>
         /* =========================================
            CSS VARIABLES (Theme & Colors)
            ========================================= */
@@ -705,56 +702,3 @@
     </script>
 </body>
 </html>
-
-<style>
-@media (max-width: 480px) {
-  /* 1. 入力枠やプルダウンの重なりとはみ出しを完全防止 */
-  input[type="text"],
-  input[type="time"],
-  input[type="number"],
-  select,
-  textarea {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    box-sizing: border-box !important;
-    font-size: 16px !important; /* iPhoneの勝手なズーム現象を防止 */
-  }
-
-  /* 2. 横並びの要素が画面サイズを超えて衝突するのを防ぎ、自動で折りたたむ */
-  div[style*="display: flex"],
-  div[style*="display:flex"],
-  div[style*="grid-template-columns"],
-  .flex,
-  .row,
-  .grid {
-    flex-wrap: wrap !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  /* 3. 窮屈になった時間の入力欄などを、スマホ画面で見やすく自動調整 */
-  div[style*="display: flex"] > div,
-  div[style*="display:flex"] > div {
-    min-width: 0 !important;
-    flex: 1 1 100% !important;
-    margin-bottom: 8px !important;
-  }
-
-  /* 4. アプリ全体の横揺れ・はみ出し防止 */
-  body, html {
-    overflow-x: hidden !important;
-  }
-
-  /* スマホ画面に合わせてカードの左右の余白を最適化 */
-  .card, .container, main, section {
-    width: 94% !important;
-    max-width: 100% !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    padding: 16px !important;
-    box-sizing: border-box !important;
-  }
-}
-</style>
-
