@@ -3,16 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TimePilot v5.6.0</title>
+    <title>TimePilot</title>
     
     <link rel="icon" href="icon.png">
     <link rel="apple-touch-icon" href="icon.png">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        /* =========================================
-           CSS VARIABLES (Theme & Colors)
-           ========================================= */
         :root {
             --bg-base: #0f172a;
             --text-main: #f8fafc;
@@ -39,7 +36,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background-color: var(--bg-base); color: var(--text-main); min-height: 100vh; padding-bottom: 90px; display: flex; flex-direction: column; align-items: center; overflow-x: hidden; transition: background-color 0.4s, color 0.4s; }
 
-        /* AURORA BACKGROUND */
         .bg-blobs { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden; background: var(--bg-base); transition: background 0.8s; }
         .blob { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.55; animation: float 20s infinite ease-in-out alternate; transition: background 1.5s; }
         .blob-1 { top: -10%; left: -10%; width: 350px; height: 350px; background: var(--color-ai); }
@@ -49,7 +45,6 @@
         body.weather-sunny .blob-1 { background: #f59e0b; } body.weather-sunny .blob-2 { background: #0ea5e9; } body.weather-sunny .blob-3 { background: #10b981; }
         @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(40px, 60px) scale(1.15); } }
 
-        /* LAYOUT & HEADER */
         .app-container { width: 100%; max-width: 560px; padding: 20px; z-index: 1; flex: 1; }
         .app-page { display: none; animation: fadeIn 0.3s ease-out; }
         .app-page.active-page { display: block; }
@@ -70,7 +65,6 @@
         .exp-bar-bg { width: 70px; height: 6px; background: rgba(128,128,128,0.25); border-radius: 4px; overflow: hidden; margin-top: 4px; }
         .exp-bar-fill { height: 100%; background: linear-gradient(90deg, var(--color-ai), var(--color-study)); width: 0%; transition: width 0.8s; }
 
-        /* UI ELEMENTS */
         .glass-card { background: var(--glass-bg); backdrop-filter: var(--glass-blur); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08); }
         .section-title { font-size: 13px; font-weight: 800; color: var(--text-muted); margin: 24px 0 12px 4px; text-transform: uppercase; }
         .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
@@ -80,7 +74,6 @@
         input, select { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.06); color: var(--text-main); font-size: 15px; outline: none; }
         body.light-theme input, body.light-theme select { background: rgba(0,0,0,0.03); color: #0f172a; }
 
-        /* 🐛 BUG FIX: ドロップダウン選択肢の白飛び修正 */
         option {
             background-color: var(--bg-base);
             color: var(--text-main);
@@ -88,8 +81,8 @@
         
         .btn-primary { width: 100%; background: linear-gradient(135deg, var(--color-ai), var(--color-study)); color: white; border: none; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 15px rgba(168, 85, 247, 0.25); display: flex; justify-content: center; align-items: center; gap: 8px; }
         .btn-primary:active { transform: scale(0.97); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        /* HOME / CHECKLIST / TIMELINE */
         .mission-item { display: flex; align-items: center; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 10px; margin-bottom: 8px; }
         .mission-item.checked { opacity: 0.5; text-decoration: line-through; }
         .mission-color { width: 12px; height: 12px; border-radius: 4px; margin-right: 12px; flex-shrink: 0; }
@@ -104,14 +97,12 @@
         .tl-time { font-size: 12px; font-weight: 800; color: var(--color-ai); margin-bottom: 4px; }
         .tl-content { background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px; font-size: 14px; line-height: 1.5; }
 
-        /* ANALYSIS (Restored Interactive UI) */
         .slider-group { margin-bottom: 15px; }
         .slider-group label { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
         input[type="range"] { -webkit-appearance: none; width: 100%; background: transparent; height: 6px; padding: 0; border: none; }
         input[type="range"]::-webkit-slider-runnable-track { width: 100%; height: 6px; background: rgba(128,128,128,0.3); border-radius: 3px; }
         input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: var(--text-main); margin-top: -6px; cursor: pointer; box-shadow: 0 0 10px rgba(0,0,0,0.3); }
 
-        /* CALENDAR / DRAWER / MODALS */
         .cal-header-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; }
         .cal-weekday { font-size: 11px; font-weight: 800; color: var(--text-muted); margin-bottom: 6px; }
@@ -133,7 +124,6 @@
         .timer-circle-wrap { position: relative; width: 220px; height: 220px; margin: 0 auto 20px auto; }
         .timer-progress { fill: none; stroke: var(--color-study); stroke-width: 10; stroke-dasharray: 628; stroke-dashoffset: 0; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
 
-        /* TUTORIAL ONBOARDING */
         .tutorial-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-base); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px 20px; text-align: center; transition: opacity 0.5s; }
         .tut-slide { display: none; animation: fadeIn 0.4s; }
         .tut-slide.active { display: block; }
@@ -147,22 +137,12 @@
         .tut-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(128,128,128,0.3); }
         .tut-dot.active { background: var(--color-study); }
 
-        /* BOTTOM NAV */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; background: var(--glass-bg); backdrop-filter: var(--glass-blur); border-top: 1px solid var(--glass-border); display: flex; justify-content: center; z-index: 1000; }
         .nav-wrapper { width: 100%; max-width: 560px; display: flex; padding-bottom: 10px; }
         .nav-item { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; background: none; border: none; color: var(--text-muted); cursor: pointer; padding-top: 10px; }
         .nav-item i { font-size: 20px; margin-bottom: 4px; }
         .nav-item span { font-size: 10px; font-weight: 800; }
         .nav-item.active { color: var(--color-ai); }
-
-        /* =========================================
-           【Ver 5.6.0】タスクリストUI追加スタイル
-           ========================================= */
-        .task-tag-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.08); padding: 12px 14px; border-radius: 12px; border: 1px solid var(--glass-border); font-size: 14px; font-weight: 700; }
-        body.light-theme .task-tag-item { background: rgba(0,0,0,0.04); }
-        .task-type-badge { font-size: 10px; padding: 3px 6px; border-radius: 6px; font-weight: 800; margin-right: 8px; }
-        .badge-fixed { background: var(--color-phone); color: white; }
-        .badge-flex { background: var(--color-study); color: white; }
     </style>
 </head>
 <body>
@@ -257,31 +237,12 @@
 
             <div class="glass-card">
                 <div class="form-group">
-                    <label>今日の予定・タスクを追加（複数OK）</label>
-                    <div style="margin-bottom: 8px;">
-                        <input type="text" id="input-task-name" placeholder="例: 英語の勉強、塾、ランニング">
-                    </div>
-                    <div class="form-row-twin" style="margin-bottom: 8px;">
-                        <select id="input-task-type" onchange="toggleTaskTimeInputs()">
-                            <option value="flex">目安時間の作業 (自由)</option>
-                            <option value="fixed">開始時間あり (固定予定)</option>
-                        </select>
-                        <div id="area-flex-time">
-                            <input type="number" id="input-flex-mins" placeholder="目安(分)" value="45">
-                        </div>
-                        <div id="area-fixed-time" style="display: none;">
-                            <input type="time" id="input-fixed-time" value="17:00">
-                        </div>
-                    </div>
-                    <button class="btn-primary" style="padding: 12px; background: var(--color-study); margin-bottom: 8px;" onclick="addHomeTask()">
-                        <i class="fa-solid fa-plus"></i> リストに追加する
-                    </button>
-                    <div id="home-task-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                    <label>今日の主要タスク</label>
+                    <input type="text" id="input-task" placeholder="例: 英語の長文読解">
                 </div>
-
                 <div class="form-row-twin">
-                    <div class="form-group"><label>1日の開始時間</label><input type="time" id="input-start" value="16:00"></div>
-                    <div class="form-group"><label>1日の終了時間</label><input type="time" id="input-end" value="20:00"></div>
+                    <div class="form-group"><label>開始時間</label><input type="time" id="input-start" value="16:00"></div>
+                    <div class="form-group"><label>終了時間</label><input type="time" id="input-end" value="18:00"></div>
                 </div>
                 <div class="form-row-twin">
                     <div class="form-group">
@@ -302,7 +263,7 @@
                     <input type="text" id="input-notes" placeholder="例: スマホを机の引き出しに入れる">
                 </div>
                 <button class="btn-primary" onclick="generateAIPlan()">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> 複数予定のスケジュール編成
+                    <i class="fa-solid fa-play"></i> 自分だけのAIプラン生成
                 </button>
             </div>
 
@@ -439,14 +400,26 @@
         const colors = { study: 'var(--color-study)', ai: 'var(--color-ai)', exercise: 'var(--color-exercise)', phone: 'var(--color-phone)' };
         let selectedEventColor = 'study';
 
+        // 🛡️ エラー防止用安全パース関数
+        function safeJSONParse(str, fallback) {
+            if (!str) return fallback;
+            try {
+                const val = JSON.parse(str);
+                return val !== null && val !== undefined ? val : fallback;
+            } catch(e) {
+                return fallback;
+            }
+        }
+
+        // 🛡️ 破損データでクラッシュしないよう新キー＆安全読み込み
         let appState = {
-            exp: parseInt(localStorage.getItem('tp_exp_v551')) || 0,
-            calendar: JSON.parse(localStorage.getItem('tp_cal_v551')) || {},
-            apiKey: localStorage.getItem('tp_api_v551') || "",
-            pref: localStorage.getItem('tp_pref_v551') || "東京都",
-            city: localStorage.getItem('tp_city_v551') || JSON.stringify(geoMaster["東京都"][0]),
-            theme: localStorage.getItem('tp_theme_v551') || "dark",
-            tutorialDone: localStorage.getItem('tp_tut_v551') === 'true'
+            exp: parseInt(localStorage.getItem('tp_exp_v600')) || 0,
+            calendar: safeJSONParse(localStorage.getItem('tp_cal_v600'), {}),
+            apiKey: localStorage.getItem('tp_api_v600') || "",
+            pref: localStorage.getItem('tp_pref_v600') || "東京都",
+            city: localStorage.getItem('tp_city_v600') || JSON.stringify(geoMaster["東京都"][0]),
+            theme: localStorage.getItem('tp_theme_v600') || "dark",
+            tutorialDone: localStorage.getItem('tp_tut_v600') === 'true'
         };
 
         let weatherCache = { condition: "晴れ", temp: 25 };
@@ -456,41 +429,47 @@
         let timerDuration = 0, timerRemaining = 0, timerInterval = null, isRunning = false;
         let tutStep = 1;
 
-        // 【Ver 5.6.0】ホーム画面用タスク管理配列
-        let homeTasks = [];
-
         // =========================================
-        // INIT & TUTORIAL
+        // INIT & TUTORIAL (各処理を独立保護)
         // =========================================
         window.onload = () => {
-            initSettings(); updateLevelUI(); fetchWeatherAndApplyTheme();
-            renderCalendar(); renderHomeChecklist(); updateAnalysis();
-            renderHomeTasks();
+            try { initSettings(); } catch(e) { console.error(e); }
+            try { updateLevelUI(); } catch(e) { console.error(e); }
+            try { fetchWeatherAndApplyTheme(); } catch(e) { console.error(e); }
+            try { renderCalendar(); } catch(e) { console.error(e); }
+            try { renderHomeChecklist(); } catch(e) { console.error(e); }
+            try { updateAnalysis(); } catch(e) { console.error(e); }
             
             if(!appState.tutorialDone) {
-                document.getElementById('tutorial-modal').style.display = 'flex';
+                const tutModal = document.getElementById('tutorial-modal');
+                if(tutModal) tutModal.style.display = 'flex';
             }
         };
 
         function resetTutorial() {
-            localStorage.removeItem('tp_tut_v551');
+            localStorage.removeItem('tp_tut_v600');
             location.reload();
         }
 
         function nextTutorial() {
-            document.getElementById(`slide-${tutStep}`).classList.remove('active');
-            document.getElementById(`dot-${tutStep}`).classList.remove('active');
-            tutStep++;
-            if(tutStep <= 3) {
-                document.getElementById(`slide-${tutStep}`).classList.add('active');
-                document.getElementById(`dot-${tutStep}`).classList.add('active');
-                if(tutStep === 3) document.getElementById('tut-btn').innerText = "はじめる";
-            } else {
-                document.getElementById('tutorial-modal').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('tutorial-modal').style.display = 'none';
-                    localStorage.setItem('tp_tut_v551', 'true');
-                }, 500);
+            try {
+                document.getElementById(`slide-${tutStep}`).classList.remove('active');
+                document.getElementById(`dot-${tutStep}`).classList.remove('active');
+                tutStep++;
+                if(tutStep <= 3) {
+                    document.getElementById(`slide-${tutStep}`).classList.add('active');
+                    document.getElementById(`dot-${tutStep}`).classList.add('active');
+                    if(tutStep === 3) document.getElementById('tut-btn').innerText = "はじめる";
+                } else {
+                    document.getElementById('tutorial-modal').style.opacity = '0';
+                    setTimeout(() => {
+                        document.getElementById('tutorial-modal').style.display = 'none';
+                        localStorage.setItem('tp_tut_v600', 'true');
+                    }, 500);
+                }
+            } catch(e) {
+                document.getElementById('tutorial-modal').style.display = 'none';
+                localStorage.setItem('tp_tut_v600', 'true');
             }
         }
 
@@ -507,26 +486,35 @@
         // SETTINGS & THEME
         // =========================================
         function initSettings() {
-            document.getElementById('api-key').value = appState.apiKey;
+            document.getElementById('api-key').value = appState.apiKey || "";
             if(appState.theme === 'light') {
                 document.body.classList.add('light-theme');
                 document.getElementById('theme-btn-icon').innerHTML = '<i class="fa-solid fa-sun"></i>';
             }
             const pSel = document.getElementById('pref-select');
+            pSel.innerHTML = "";
             allPrefs.forEach(p => { let o = document.createElement('option'); o.value = p; o.innerText = p; pSel.appendChild(o); });
-            pSel.value = appState.pref; updateCities();
+            pSel.value = geoMaster[appState.pref] ? appState.pref : "東京都";
+            updateCities();
         }
         function updateCities() {
-            const p = document.getElementById('pref-select').value;
-            const cSel = document.getElementById('city-select'); cSel.innerHTML = "";
+            const pSel = document.getElementById('pref-select');
+            const p = geoMaster[pSel.value] ? pSel.value : "東京都";
+            const cSel = document.getElementById('city-select'); 
+            cSel.innerHTML = "";
             geoMaster[p].forEach(c => { let o = document.createElement('option'); o.value = JSON.stringify(c); o.innerText = c.name; cSel.appendChild(o); });
-            cSel.value = appState.city;
+            try {
+                cSel.value = appState.city;
+                if(!cSel.value) cSel.selectedIndex = 0;
+            } catch(e) { cSel.selectedIndex = 0; }
         }
         function saveSettings() {
             appState.apiKey = document.getElementById('api-key').value.trim();
             appState.pref = document.getElementById('pref-select').value;
             appState.city = document.getElementById('city-select').value;
-            localStorage.setItem('tp_api_v551', appState.apiKey); localStorage.setItem('tp_pref_v551', appState.pref); localStorage.setItem('tp_city_v551', appState.city);
+            localStorage.setItem('tp_api_v600', appState.apiKey);
+            localStorage.setItem('tp_pref_v600', appState.pref);
+            localStorage.setItem('tp_city_v600', appState.city);
             fetchWeatherAndApplyTheme();
         }
         function toggleTheme() {
@@ -537,21 +525,24 @@
                 appState.theme = 'dark'; document.body.classList.remove('light-theme');
                 document.getElementById('theme-btn-icon').innerHTML = '<i class="fa-solid fa-moon"></i>';
             }
-            localStorage.setItem('tp_theme_v551', appState.theme);
+            localStorage.setItem('tp_theme_v600', appState.theme);
         }
         async function fetchWeatherAndApplyTheme() {
-            const city = JSON.parse(appState.city);
             try {
+                const city = safeJSONParse(appState.city, geoMaster["東京都"][0]);
                 const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current_weather=true&timezone=Asia%2FTokyo`);
-                const data = await res.json(); weatherCache.temp = data.current_weather.temperature;
-                document.getElementById('home-weather-text').innerText = `${appState.pref} ${city.name}${weatherCache.temp}℃`;
-            } catch(e) {}
+                const data = await res.json(); 
+                weatherCache.temp = data.current_weather ? data.current_weather.temperature : 25;
+                document.getElementById('home-weather-text').innerText = `${appState.pref} ${city.name} ${weatherCache.temp}℃`;
+            } catch(e) {
+                document.getElementById('home-weather-text').innerText = `${appState.pref} 25℃ (オフライン)`;
+            }
         }
 
         // =========================================
         // EXP / ANALYSIS
         // =========================================
-        function addExp(amount) { appState.exp += amount; localStorage.setItem('tp_exp_v551', appState.exp); updateLevelUI(); }
+        function addExp(amount) { appState.exp += amount; localStorage.setItem('tp_exp_v600', appState.exp); updateLevelUI(); }
         function updateLevelUI() {
             document.getElementById('ui-level').innerText = `Lv. ${Math.floor(appState.exp/100)+1}`;
             document.getElementById('ui-exp-bar').style.width = `${appState.exp%100}%`;
@@ -570,7 +561,7 @@
             document.getElementById('total-val').innerText = total > 24 ? "! 24h over" : total.toFixed(1) + "h";
 
             const pP = (phone / total) * 100, pSt = (study / total) * 100, pSl = (sleep / total) * 100;
-            document.getElementById('analysis-pie').style.background = `conic-gradient(var(--color-phone) 0% ${pP}\%, var(--color-study)${pP}% ${pP+pSt}\%, var(--color-sleep)${pP+pSt}% 100%)`;
+            document.getElementById('analysis-pie').style.background = `conic-gradient(var(--color-phone) 0% ${pP}%, var(--color-study) ${pP}% ${pP+pSt}%, var(--color-sleep) ${pP+pSt}% 100%)`;
 
             const fb = document.getElementById('analysis-feedback');
             if(phone > 5) fb.innerHTML = `<span style="color:var(--color-phone)"><i class="fa-solid fa-triangle-exclamation"></i> スマホ時間が長すぎます。睡眠の質が落ちる危険があります。</span>`;
@@ -593,7 +584,7 @@
             for(let d=1; d<=days; d++) {
                 const dKey = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                 let html = `<div class="cal-date-num">${d}</div>`;
-                if(appState.calendar[dKey]) appState.calendar[dKey].forEach(ev => html += `<div class="cal-event-bar" style="background:${colors[ev.color]}; opacity:${ev.checked?0.4:1}">${ev.time}${ev.title}</div>`);
+                if(appState.calendar[dKey]) appState.calendar[dKey].forEach(ev => html += `<div class="cal-event-bar" style="background:${colors[ev.color]}; opacity:${ev.checked?0.4:1}">${ev.time} ${ev.title}</div>`);
                 let cell = document.createElement('div'); cell.className = `cal-cell ${dKey===todayKey?'today':''}`;
                 cell.innerHTML = html; cell.onclick = () => openDrawer(dKey, `${m+1}月${d}日`);
                 grid.appendChild(cell);
@@ -620,65 +611,17 @@
             if(!t || !title) return;
             if(!appState.calendar[activeCalDateKey]) appState.calendar[activeCalDateKey] = [];
             appState.calendar[activeCalDateKey].push({ time: t, title: title, color: selectedEventColor, checked: false });
-            localStorage.setItem('tp_cal_v551', JSON.stringify(appState.calendar));
+            localStorage.setItem('tp_cal_v600', JSON.stringify(appState.calendar));
             document.getElementById('event-title').value = ""; renderDrawerList(); renderCalendar(); if(activeCalDateKey===todayKey) renderHomeChecklist();
         }
         function delEvent(i) {
             appState.calendar[activeCalDateKey].splice(i,1);
             if(appState.calendar[activeCalDateKey].length === 0) delete appState.calendar[activeCalDateKey];
-            localStorage.setItem('tp_cal_v551', JSON.stringify(appState.calendar)); renderDrawerList(); renderCalendar(); if(activeCalDateKey===todayKey) renderHomeChecklist();
+            localStorage.setItem('tp_cal_v600', JSON.stringify(appState.calendar)); renderDrawerList(); renderCalendar(); if(activeCalDateKey===todayKey) renderHomeChecklist();
         }
 
         // =========================================
-        // 【Ver 5.6.0】タスク追加＆時間タイプ選択UIロジック
-        // =========================================
-        function toggleTaskTimeInputs() {
-            const type = document.getElementById('input-task-type').value;
-            if(type === 'flex') {
-                document.getElementById('area-flex-time').style.display = 'block';
-                document.getElementById('area-fixed-time').style.display = 'none';
-            } else {
-                document.getElementById('area-flex-time').style.display = 'none';
-                document.getElementById('area-fixed-time').style.display = 'block';
-            }
-        }
-        function addHomeTask() {
-            const name = document.getElementById('input-task-name').value.trim();
-            if(!name) return;
-            const type = document.getElementById('input-task-type').value;
-            let timeVal = "";
-            if(type === 'flex') {
-                const mins = document.getElementById('input-flex-mins').value || 30;
-                timeVal = `${mins}分`;
-            } else {
-                timeVal = document.getElementById('input-fixed-time').value || "17:00";
-            }
-            homeTasks.push({ name: name, type: type, time: timeVal });
-            document.getElementById('input-task-name').value = "";
-            renderHomeTasks();
-        }
-        function deleteHomeTask(index) {
-            homeTasks.splice(index, 1);
-            renderHomeTasks();
-        }
-        function renderHomeTasks() {
-            const container = document.getElementById('home-task-list');
-            if(homeTasks.length === 0) {
-                container.innerHTML = `<div style="font-size:12px; color:var(--text-muted); font-weight:700; text-align:center; padding:8px 0; background:rgba(255,255,255,0.03); border-radius:8px;">予定やタスクを追加してね！</div>`;
-                return;
-            }
-            let html = "";
-            homeTasks.forEach((t, i) => {
-                const badge = t.type === 'fixed' 
-                    ? `<span class="task-type-badge badge-fixed">⏰ ${t.time}〜 固定</span>` 
-                    : `<span class="task-type-badge badge-flex">⏳ 約${t.time} 自由</span>`;
-                html += `<div class="task-tag-item"><div>${badge} ${t.name}</div><i class="fa-solid fa-xmark" style="color:var(--color-phone); cursor:pointer;" onclick="deleteHomeTask(${i})"></i></div>`;
-            });
-            container.innerHTML = html;
-        }
-
-        // =========================================
-        // HOME CHECKLIST & AI PLAN (複数タスク対応版)
+        // HOME CHECKLIST & AI PLAN
         // =========================================
         function renderHomeChecklist() {
             const area = document.getElementById('home-checklist-area');
@@ -690,64 +633,40 @@
         }
         function toggleCheck(i) {
             appState.calendar[todayKey][i].checked = !appState.calendar[todayKey][i].checked;
-            localStorage.setItem('tp_cal_v551', JSON.stringify(appState.calendar));
+            localStorage.setItem('tp_cal_v600', JSON.stringify(appState.calendar));
             renderHomeChecklist(); renderCalendar();
             if(appState.calendar[todayKey][i].checked) addExp(5);
         }
 
         async function generateAIPlan() {
-            if(homeTasks.length === 0) {
-                alert("まずは今日の予定・タスクを1つ以上追加してください！");
-                return;
-            }
-
+            const task = document.getElementById('input-task').value || "タスク未入力";
             const st = document.getElementById('input-start').value, et = document.getElementById('input-end').value;
             const app = document.getElementById('input-app').value, focus = document.getElementById('input-focus').value, notes = document.getElementById('input-notes').value;
             
-            // タイマーの初期時間を「最初の自由作業タスクの分数（なければ30分）」に安全設定
-            const firstFlex = homeTasks.find(t => t.type === 'flex');
-            const firstMins = firstFlex ? parseInt(firstFlex.time) : 30;
-            timerDuration = (isNaN(firstMins) ? 30 : firstMins) * 60;
+            const diffMins = Math.max(1, Math.round((new Date(`2000-01-01T${et}:00`) - new Date(`2000-01-01T${st}:00`))/60000));
+            timerDuration = diffMins * 60;
 
-            const btn = document.querySelector('#page-home .btn-primary:last-child');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> AIスケジュール自動編成中...'; btn.disabled = true;
+            const btn = document.querySelector('#page-home .btn-primary');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> AI分析・生成中...'; btn.disabled = true;
 
-            // 1. ローカルAIによるスケジュール構築
-            let resText = `<div class="timeline-container">`;
-            let currentTime = new Date(`2000-01-01T${st}:00`);
-            
-            homeTasks.forEach((t) => {
-                let currentStr = `${String(currentTime.getHours()).padStart(2,'0')}:${String(currentTime.getMinutes()).padStart(2,'0')}`;
-                if(t.type === 'fixed') {
-                    resText += `<div class="timeline-item"><div class="tl-time" style="color:var(--color-phone)">⏰ ${t.time}〜 (固定予定)</div><div class="tl-content"><strong>📌 ${t.name}</strong><br>時間が決まっている絶対の予定です。前後に余裕を持って行動しましょう。</div></div>`;
-                    currentTime = new Date(`2000-01-01T${t.time}:00`);
-                    currentTime.setHours(currentTime.getHours() + 1);
-                } else {
-                    let mins = parseInt(t.time) || 30;
-                    resText += `<div class="timeline-item"><div class="tl-time">${currentStr} 〜 (約${mins}分セッション)</div><div class="tl-content"><strong>🔥 ${t.name}</strong><br>${app!=='なし'?'【重要】'+app+'の通知をオフ！<br>':''}集中度「${focus}」、気温${weatherCache.temp}℃の環境下です。1セッション集中してやり切りましょう！</div></div>`;
-                    currentTime.setMinutes(currentTime.getMinutes() + mins + 10); // 10分休憩を加算
-                }
-            });
+            let resText = `<div class="timeline-container">
+                <div class="timeline-item"><div class="tl-time">${st} (開始)</div><div class="tl-content"><strong>フェーズ1: 誘惑遮断とアイドリング</strong><br>${app!=='なし'?app+'の通知をオフ。':''}集中度「${focus}」を考慮し、簡単な作業から着手します。</div></div>
+                <div class="timeline-item"><div class="tl-time">+ ${Math.floor(diffMins/2)}分</div><div class="tl-content"><strong>フェーズ2: ディープフォーカス</strong><br>気温${weatherCache.temp}℃の環境下です。水分を摂りつつ巡航速度を維持してください。${notes?'(メモ: '+notes+')':''}</div></div>
+                <div class="timeline-item" style="padding-bottom:0;"><div class="tl-time">${et} (完了)</div><div class="tl-content"><strong>フェーズ3: セッション完了</strong><br>${diffMins}分間の作戦終了。休息をとりましょう。</div></div>
+            </div>`;
 
-            let finalStr = `${String(currentTime.getHours()).padStart(2,'0')}:${String(currentTime.getMinutes()).padStart(2,'0')}`;
-            resText += `<div class="timeline-item" style="padding-bottom:0;"><div class="tl-time">${finalStr}頃 (全ミッション完了予定)</div><div class="tl-content"><strong>✨ クールダウン & リラックス</strong><br>計画完了予定時刻です！今日頑張った自分をしっかり労ってあげてね。${notes?'<br>📌 メモ確認: '+notes:''}</div></div></div>`;
-
-            // 2. Groq APIを使う場合、複数予定のタイムテーブル生成用プロンプトに強化
             if(appState.apiKey) {
                 try {
-                    const taskListStr = homeTasks.map(t => `・${t.name} (${t.type==='fixed' ? t.time+'開始の固定予定' : '約'+t.time+'の自由作業'})`).join('\n');
-                    const prompt = `あなたは世界最高のタイムマネジメント・AI学習コーチです。\nユーザーの今日こなしたい「予定・タスク一覧」を、全体の活動時間（${st}〜${et}）の中に配置し、1日全体のタイムスケジュールをHTMLのdivタイムライン形式のみで出力してください。\n【予定・タスク】\n${taskListStr}\n【状況】\n活動時間: ${st}〜${et} / 制限アプリ: ${app} / 集中度: ${focus} / メモ:${notes}\n【絶対ルール】\n・「固定予定」は時間を動かさず配置し、その前後の空き時間に「自由作業」をパズル状に配置。\n・作業の間には必ず短い休憩時間を挟むこと。\n・Markdown(```)は使わず、<div class="timeline-container">から始まるHTMLのみ出力。`;
-                    const res = await fetch('[https://api.groq.com/openai/v1/chat/completions](https://api.groq.com/openai/v1/chat/completions)', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${appState.apiKey}` }, body: JSON.stringify({ model: "llama3-8b-8192", messages: [{role: "user", content: prompt}], temperature: 0.7 }) });
+                    const prompt = `タスク: ${task}\n時間: ${st}〜${et} (${diffMins}分)\n制限アプリ: ${app}\n集中度: ${focus}\nメモ: ${notes}\n天気: ${weatherCache.temp}度\nこれを3フェーズのタイムラインで出力して。`;
+                    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${appState.apiKey}` }, body: JSON.stringify({ model: "llama3-8b-8192", messages: [{role: "user", content: prompt}] }) });
                     const data = await res.json();
-                    if(data.choices && data.choices[0].message.content) {
-                        resText = data.choices[0].message.content.replace(/```html/g, "").replace(/```/g, "");
-                    }
+                    if(data.choices) resText = `<div style="font-size:13px; font-weight:600; line-height:1.6;">${data.choices[0].message.content.replace(/\n/g, "<br>")}</div>`;
                 } catch(e) { console.log("API Error, using fallback"); }
             }
 
             document.getElementById('ai-plan-content').innerHTML = resText;
             document.getElementById('home-ai-result').style.display = 'block';
-            btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> 複数予定のスケジュール編成'; btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-play"></i> 自分だけのAIプラン生成'; btn.disabled = false;
             
             setTimeout(() => window.scrollTo({ top: document.getElementById('ai-scroll-anchor').offsetTop - 60, behavior: 'smooth' }), 100);
         }
@@ -764,7 +683,7 @@
             let reply = "";
             if(appState.apiKey) {
                 try {
-                    const res = await fetch('[https://api.groq.com/openai/v1/chat/completions](https://api.groq.com/openai/v1/chat/completions)', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${appState.apiKey}` }, body: JSON.stringify({ model: "llama3-8b-8192", messages: [{role: "user", content: text}] }) });
+                    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${appState.apiKey}` }, body: JSON.stringify({ model: "llama3-8b-8192", messages: [{role: "user", content: text}] }) });
                     const data = await res.json(); 
                     if(data.choices) reply = data.choices[0].message.content;
                     else throw new Error("API Limit");
