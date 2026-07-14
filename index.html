@@ -42,6 +42,8 @@
         .blob-1 { top: -10%; left: -10%; width: 350px; height: 350px; background: var(--color-ai); }
         .blob-2 { bottom: 10%; right: -10%; width: 450px; height: 450px; background: var(--color-study); animation-delay: -5s; }
         .blob-3 { top: 40%; left: 50%; width: 300px; height: 300px; background: var(--color-sleep); animation-delay: -10s; }
+        body.weather-rain .blob-1 { background: #334155; } body.weather-rain .blob-2 { background: #2563eb; } body.weather-rain .blob-3 { background: #475569; }
+        body.weather-sunny .blob-1 { background: #f59e0b; } body.weather-sunny .blob-2 { background: #0ea5e9; } body.weather-sunny .blob-3 { background: #10b981; }
         @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(40px, 60px) scale(1.15); } }
 
         .app-container { width: 100%; max-width: 560px; padding: 20px; z-index: 1; flex: 1; position: relative; }
@@ -88,7 +90,7 @@
         .mission-item.checked .check-circle { background: var(--color-sleep); border-color: var(--color-sleep); color: white; }
         
         /* =========================================
-           🚀 次世代AIプランカード UI (復活＆強化！)
+           🚀 次世代AIプランカード UI
         ========================================= */
         .plan-session-card { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--glass-border); border-radius: 16px; padding: 16px; margin-bottom: 12px; position: relative; overflow: hidden; transition: all 0.3s; }
         .plan-session-card:hover { border-color: rgba(168, 85, 247, 0.4); background: rgba(168, 85, 247, 0.06); }
@@ -399,7 +401,7 @@
         }
 
         // =========================================
-        // 🎮 SOUND EFFECTS (外部ファイル不要の音効ジェネレーター！)
+        // 🎮 SOUND EFFECTS (外部ファイル不要の音効ジェネレーター)
         // =========================================
         let audioCtx = null;
         function playSE(type) {
@@ -408,7 +410,6 @@
                 if (audioCtx.state === 'suspended') audioCtx.resume();
                 
                 if (type === 'check') {
-                    // ミッション完了時の「ピコーン！」音
                     const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
                     osc.connect(gain); gain.connect(audioCtx.destination);
                     osc.type = 'sine';
@@ -418,7 +419,6 @@
                     gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
                     osc.start(); osc.stop(audioCtx.currentTime + 0.2);
                 } else if (type === 'clear') {
-                    // タイマー完了時の「ファンファーレ」音
                     const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
                     notes.forEach((freq, index) => {
                         const subOsc = audioCtx.createOscillator(); const subGain = audioCtx.createGain();
@@ -479,7 +479,7 @@
         let activeCalDateKey = "";
         let timerDuration = 0, timerRemaining = 0, timerInterval = null, isRunning = false;
         let tutStep = 1;
-        let currentGeneratedPlan = null; // AIが組んだ直近のプランデータ
+        let currentGeneratedPlan = null;
 
         // =========================================
         // INIT & TUTORIAL
@@ -667,7 +667,7 @@
         }
 
         // =========================================
-        // HOME CHECKLIST & NEXT-GEN AI STRATEGIST ENGINE (復活＆完全搭載！)
+        // HOME CHECKLIST & NEXT-GEN AI STRATEGIST ENGINE
         // =========================================
         function renderHomeChecklist() {
             try {
@@ -685,13 +685,13 @@
                 safeStorage.set('tp_cal_v600', JSON.stringify(appState.calendar));
                 renderHomeChecklist(); renderCalendar();
                 if(appState.calendar[todayKey][i].checked) {
-                    playSE('check'); // 🎮 ミッション完了効果音！
+                    playSE('check'); // 🎮 ミッション完了音！
                     addExp(5);
                 }
             }
         }
 
-        // 🛡️ Safari等でもクラッシュしない安全な算術時間変換
+        // 🛡️ どんなスマホ・Safariでも絶対にバグらない算術時間変換
         function timeToMins(timeStr) {
             if (!timeStr || !timeStr.includes(':')) return 0;
             const parts = timeStr.split(':').map(Number);
@@ -740,7 +740,6 @@
                 } catch(e) { console.warn("API Error, switching to local cognitive algorithm", e); }
             }
 
-            // API未設定時やエラー時は「ウルトラディアンリズム自動分割エンジン」で生成！
             if (!planData) {
                 planData = generateLocalScientificPlan(task, st, totalDiffMins, focus, app, notes);
             }
@@ -757,7 +756,7 @@
             }, 150);
         }
 
-        // 🛡️ フリーズゼロの「科学的セッション自動分割エンジン」
+        // 🛡️ フリーズゼロの科学的自動分割エンジン
         function generateLocalScientificPlan(task, startTimeStr, totalMins, focus, app, notes) {
             let currentMin = timeToMins(startTimeStr);
             const sessions = [];
@@ -811,7 +810,7 @@
             };
         }
 
-        // 🚀 次世代アクションカードの描画関数
+        // 🚀 次世代アクションカードUI描画
         function renderRichAIPlan(plan) {
             const container = document.getElementById('ai-plan-content');
             let html = `<div style="font-size:13px; color:var(--text-main); font-weight:700; margin-bottom:14px; background:rgba(168,85,247,0.15); padding:10px 14px; border-radius:12px; border:1px solid rgba(168,85,247,0.3); line-height:1.5;">
@@ -833,13 +832,13 @@
                 </div>`;
             });
 
-            // 🚀 一括スケジュール登録スーパーボタン！
+            // 🚀 一括スケジュール登録ボタン！
             html += `<button class="btn-primary" style="margin-top: 14px; background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);" onclick="applyPlanToCalendar()"><i class="fa-solid fa-calendar-check"></i> このプランを今日のスケジュールに全て組み込む</button>`;
             container.innerHTML = html;
             document.getElementById('home-ai-result').style.display = 'block';
         }
 
-        // 🚀 個別カードの「このセッションを開始」を押した時にタイマーを自動設定＆即起動！
+        // 🚀 個別カードのボタンを押した時にタイマーを即起動
         function startSpecificSession(index) {
             if (!currentGeneratedPlan || !currentGeneratedPlan.sessions[index]) return;
             const session = currentGeneratedPlan.sessions[index];
@@ -849,7 +848,7 @@
             toggleTimer();
         }
 
-        // 🚀 生成された全セッションを今日のカレンダー＆ミッションへ一括追加！
+        // 🚀 生成されたプランを今日のミッションへ一括追加
         function applyPlanToCalendar() {
             if (!currentGeneratedPlan || !currentGeneratedPlan.sessions) return;
             if (!appState.calendar) appState.calendar = {};
@@ -866,12 +865,12 @@
             appState.calendar[todayKey].sort((a,b) => a.time.localeCompare(b.time));
             safeStorage.set('tp_cal_v600', JSON.stringify(appState.calendar));
             renderHomeChecklist(); renderCalendar();
-            alert(`✅ ${addedCount}個の学習セッションを今日のスケジュールに組み込みました！上部の「TODAY'S MISSION」やカレンダーからいつでもチェックできます。`);
+            alert(`✅ ${addedCount}個の学習セッションを今日のスケジュールに組み込みました！上部のリストから確認できます。`);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // =========================================
-        // CHAT (OFFLINE FALLBACK)
+        // CHAT & TIMER
         // =========================================
         async function sendChat() {
             const input = document.getElementById('chat-input'), text = input.value.trim(); if(!text) return;
@@ -899,13 +898,10 @@
             return "なるほど、記録しました。AIプラン生成機能を使って、具体的なタイムラインを作ってみるのもおすすめですよ。";
         }
 
-        // =========================================
-        // TIMER
-        // =========================================
         function openTimerModal() {
             document.getElementById('main-overlay').classList.add('show');
             document.getElementById('timer-modal').classList.add('show');
-            timerRemaining = timerDuration || 1500; // 未設定なら25分
+            timerRemaining = timerDuration || 1500;
             updateTimerDisplay();
         }
         function toggleTimer() {
@@ -917,7 +913,7 @@
                     timerRemaining--; updateTimerDisplay();
                     if(timerRemaining <= 0) {
                         clearInterval(timerInterval);
-                        playSE('clear'); // 🎮 タイマー終了ファンファーレ！
+                        playSE('clear'); // 🎮 ファンファーレ音！
                         alert("完了！EXP獲得！");
                         addExp(Math.floor((timerDuration||1500)/60)*10); closeModals();
                     }
