@@ -3,19 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TimePilot - AI Learning Strategist</title>
+    <title>TimePilot v8.0 - Apex Engine</title>
     
     <link rel="icon" href="icon.png">
     <link rel="apple-touch-icon" href="icon.png">
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
     <style>
+        /* =========================================
+           CSS VARIABLES (Theme & Colors)
+           ========================================= */
         :root {
             --bg-base: #0f172a;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --glass-bg: rgba(30, 41, 59, 0.65);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-bg: rgba(30, 41, 59, 0.70);
+            --glass-border: rgba(255, 255, 255, 0.12);
             --glass-blur: blur(20px);
             
             --color-ai: #a855f7;
@@ -29,7 +32,7 @@
             --bg-base: #f8fafc;
             --text-main: #0f172a;
             --text-muted: #64748b;
-            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-bg: rgba(255, 255, 255, 0.80);
             --glass-border: rgba(0, 0, 0, 0.08);
         }
 
@@ -38,14 +41,13 @@
 
         /* 🛡️ pointer-events: none でタッチ遮断を100%防ぐ */
         .bg-blobs { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden; background: var(--bg-base); transition: background 0.8s; pointer-events: none; }
-        .blob { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.55; animation: float 20s infinite ease-in-out alternate; transition: background 1.5s; pointer-events: none; }
+        .blob { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.50; animation: float 20s infinite ease-in-out alternate; pointer-events: none; }
         .blob-1 { top: -10%; left: -10%; width: 350px; height: 350px; background: var(--color-ai); }
         .blob-2 { bottom: 10%; right: -10%; width: 450px; height: 450px; background: var(--color-study); animation-delay: -5s; }
         .blob-3 { top: 40%; left: 50%; width: 300px; height: 300px; background: var(--color-sleep); animation-delay: -10s; }
-        body.weather-rain .blob-1 { background: #334155; } body.weather-rain .blob-2 { background: #2563eb; } body.weather-rain .blob-3 { background: #475569; }
-        body.weather-sunny .blob-1 { background: #f59e0b; } body.weather-sunny .blob-2 { background: #0ea5e9; } body.weather-sunny .blob-3 { background: #10b981; }
         @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(40px, 60px) scale(1.15); } }
 
+        /* LAYOUT & HEADER */
         .app-container { width: 100%; max-width: 560px; padding: 20px; z-index: 1; flex: 1; position: relative; }
         .app-page { display: none; animation: fadeIn 0.3s ease-out; }
         .app-page.active-page { display: block; }
@@ -67,6 +69,7 @@
         .exp-bar-bg { width: 70px; height: 6px; background: rgba(128,128,128,0.25); border-radius: 4px; overflow: hidden; margin-top: 4px; }
         .exp-bar-fill { height: 100%; background: linear-gradient(90deg, var(--color-ai), var(--color-study)); width: 0%; transition: width 0.8s; }
 
+        /* UI ELEMENTS */
         .glass-card { background: var(--glass-bg); backdrop-filter: var(--glass-blur); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08); position: relative; }
         .section-title { font-size: 13px; font-weight: 800; color: var(--text-muted); margin: 24px 0 12px 4px; text-transform: uppercase; }
         .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
@@ -81,6 +84,7 @@
         .btn-primary:active { transform: scale(0.96); opacity: 0.9; }
         .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
+        /* HOME / CHECKLIST / TIMELINE */
         .mission-item { display: flex; align-items: center; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 12px; margin-bottom: 8px; transition: all 0.2s; }
         .mission-item.checked { opacity: 0.4; text-decoration: line-through; }
         .mission-color { width: 12px; height: 12px; border-radius: 4px; margin-right: 12px; flex-shrink: 0; }
@@ -89,9 +93,7 @@
         .check-circle { width: 24px; height: 24px; border: 2px solid var(--text-muted); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; color: transparent; transition: all 0.2s; }
         .mission-item.checked .check-circle { background: var(--color-sleep); border-color: var(--color-sleep); color: white; }
         
-        /* =========================================
-           🚀 次世代AIプランカード UI
-        ========================================= */
+        /* 🚀 次世代AIプランカード UI */
         .plan-session-card { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--glass-border); border-radius: 16px; padding: 16px; margin-bottom: 12px; position: relative; overflow: hidden; transition: all 0.3s; }
         .plan-session-card:hover { border-color: rgba(168, 85, 247, 0.4); background: rgba(168, 85, 247, 0.06); }
         .plan-badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; margin-bottom: 8px; }
@@ -110,12 +112,14 @@
         .btn-session-start:active { transform: scale(0.96); }
         .btn-session-start.break-mode { background: var(--color-sleep); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
 
+        /* ANALYSIS SLIDERS */
         .slider-group { margin-bottom: 15px; }
         .slider-group label { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
         input[type="range"] { -webkit-appearance: none; width: 100%; background: transparent; height: 6px; padding: 0; border: none; }
         input[type="range"]::-webkit-slider-runnable-track { width: 100%; height: 6px; background: rgba(128,128,128,0.3); border-radius: 3px; }
         input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: var(--text-main); margin-top: -6px; cursor: pointer; box-shadow: 0 0 10px rgba(0,0,0,0.3); }
 
+        /* CALENDAR / DRAWER / MODALS */
         .cal-header-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; }
         .cal-weekday { font-size: 11px; font-weight: 800; color: var(--text-muted); margin-bottom: 6px; }
@@ -137,8 +141,9 @@
         .timer-circle-wrap { position: relative; width: 220px; height: 220px; margin: 0 auto 20px auto; }
         .timer-progress { fill: none; stroke: var(--color-study); stroke-width: 10; stroke-dasharray: 628; stroke-dashoffset: 0; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
 
-        .tutorial-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-base); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px 20px; text-align: center; transition: opacity 0.5s; pointer-events: none; opacity: 0; }
-        .tutorial-modal.show { pointer-events: auto; opacity: 1; }
+        /* TUTORIAL ONBOARDING */
+        .tutorial-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-base); z-index: 9999; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 40px 20px; text-align: center; transition: opacity 0.4s; pointer-events: none; opacity: 0; }
+        .tutorial-modal.show { display: flex; pointer-events: auto; opacity: 1; }
         .tut-slide { display: none; animation: fadeIn 0.4s; }
         .tut-slide.active { display: block; }
         .tut-img-wrap { margin-bottom: 25px; }
@@ -151,6 +156,7 @@
         .tut-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(128,128,128,0.3); }
         .tut-dot.active { background: var(--color-study); }
 
+        /* BOTTOM NAV */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; background: var(--glass-bg); backdrop-filter: var(--glass-blur); border-top: 1px solid var(--glass-border); display: flex; justify-content: center; z-index: 1000; }
         .nav-wrapper { width: 100%; max-width: 560px; display: flex; padding-bottom: 10px; }
         .nav-item { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; background: none; border: none; color: var(--text-muted); cursor: pointer; padding-top: 10px; transition: color 0.2s, transform 0.1s; }
@@ -166,18 +172,18 @@
     <div class="tutorial-modal" id="tutorial-modal">
         <div class="tut-slide active" id="slide-1">
             <div class="tut-img-wrap"><img src="icon.png" class="tut-icon-img" alt="App Icon" onerror="this.style.display='none'"></div>
-            <div class="tut-title">Welcome to TimePilot</div>
-            <div class="tut-desc">TimePilotは、AIがあなたの専属コーチになる<br>次世代の集中サポートアプリです。</div>
+            <div class="tut-title">TimePilot v8.0</div>
+            <div class="tut-desc">AIがあなたの学習戦略を構築する<br>次世代の集中支援アシスタントです。</div>
         </div>
         <div class="tut-slide" id="slide-2">
             <i class="fa-solid fa-brain tut-icon"></i>
-            <div class="tut-title">他のアプリとの決定的な違い</div>
-            <div class="tut-desc">ただタイマーを回すだけではありません。<br>天候、集中度、予定をAIが分析し、<br><span class="tut-highlight">「あなただけのパーソナライズされた作戦」</span><br>を毎回自動で生成します。</div>
+            <div class="tut-title">科学的プランニング</div>
+            <div class="tut-desc">ただタイマーを回すだけではありません。<br>集中度・予定・天候を分析し、<br><span class="tut-highlight">「疲労を溜めないセッション戦略」</span><br>を毎回自動で設計します。</div>
         </div>
         <div class="tut-slide" id="slide-3">
             <i class="fa-solid fa-chart-line tut-icon"></i>
             <div class="tut-title">分析とレベルアップ</div>
-            <div class="tut-desc">Analysisタブで日々のバランスを可視化。<br>作戦を完遂するたびにEXPが貯まり、<br>ゲーム感覚でレベルアップを楽しめます。</div>
+            <div class="tut-desc">Analysisで日々のバランスを可視化。<br>タスクやセッションを完遂するたびにEXPが貯まり、<br>ゲーム感覚で成長できます。</div>
         </div>
         <div class="tut-dots">
             <div class="tut-dot active" id="dot-1"></div><div class="tut-dot" id="dot-2"></div><div class="tut-dot" id="dot-3"></div>
@@ -225,7 +231,7 @@
 
     <div class="timer-modal" id="timer-modal">
         <h2 style="margin-bottom: 5px; font-size: 20px;" id="timer-title">集中セッション</h2>
-        <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 12px;">スマホを裏返して開始してください</p>
+        <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 12px;">スマホを視界から外して集中しましょう</p>
         <div class="timer-circle-wrap">
             <svg class="timer-svg" viewBox="0 0 220 220">
                 <circle cx="110" cy="110" r="100" fill="none" stroke="rgba(128,128,128,0.15)" stroke-width="10"></circle>
@@ -285,7 +291,7 @@
             <div id="home-ai-result" style="display: none;">
                 <div class="glass-card" style="border-color: var(--color-ai);">
                     <div style="font-size: 14px; font-weight: 900; color: var(--color-ai); margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
-                        <i class="fa-solid fa-microchip fa-fade"></i> AI Strategist Plan
+                        <i class="fa-solid fa-microchip"></i> AI Strategist Plan
                     </div>
                     <div id="ai-plan-content"></div>
                 </div>
@@ -327,7 +333,7 @@
             <div class="glass-card" style="height: 450px; display: flex; flex-direction: column;">
                 <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px;" id="chat-window">
                     <div style="align-self: flex-start; background: rgba(168,85,247,0.15); padding: 12px; border-radius: 12px; font-size: 14px; border: 1px solid rgba(168,85,247,0.3);">
-                        AIコーチです。学習の悩みや今の気分を教えてください。あなたに合ったアドバイスをします。
+                        AIコーチです。学習の悩みや今の気分を教えてください。あなたに最適化したアドバイスを返答します。
                     </div>
                 </div>
                 <div style="display: flex; gap: 10px;">
@@ -365,12 +371,10 @@
                     <select id="city-select" onchange="saveSettings()"></select>
                 </div>
             </div>
-            <div class="section-title">Tutorial</div>
+            <div class="section-title">Tutorial & System</div>
             <div class="glass-card">
-                <button class="btn-primary" style="background: transparent; border: 1px solid var(--text-muted); color: var(--text-main);" onclick="resetTutorial()">チュートリアルをもう一度見る</button>
-            </div>
-            <div style="text-align: center; color: var(--text-muted); font-size: 11px; margin-top: 20px;">
-                TimePilot v7.5.0 (Next-Gen AI & Sound Powered)
+                <button class="btn-primary" style="background: transparent; border: 1px solid var(--text-muted); color: var(--text-main); margin-bottom: 10px;" onclick="resetTutorial()">チュートリアルをもう一度見る</button>
+                <div style="font-size: 11px; color: var(--text-muted); text-align: center; font-family: monospace;">TimePilot v8.0.0 (Apex Bulletproof Engine)</div>
             </div>
         </div>
     </div>
@@ -386,55 +390,66 @@
     </nav>
 
     <script>
-        // =========================================
-        // 🛡️ CRASH-PROOF STORAGE WRAPPER (即死エラー完全防弾)
-        // =========================================
+        // =========================================================
+        // 🛡️ 究極の安全ストレージエンジン（絶対にクラッシュしない）
+        // =========================================================
         const safeStorage = {
-            get: (key, fallback) => { try { return localStorage.getItem(key) || fallback; } catch(e) { return fallback; } },
-            set: (key, val) => { try { localStorage.setItem(key, val); } catch(e) {} },
-            remove: (key) => { try { localStorage.removeItem(key); } catch(e) {} }
+            memory: {},
+            get: function(key) {
+                try { return localStorage.getItem(key) || this.memory[key] || null; }
+                catch(e) { return this.memory[key] || null; }
+            },
+            set: function(key, val) {
+                try { localStorage.setItem(key, val); }
+                catch(e) {}
+                this.memory[key] = val;
+            },
+            remove: function(key) {
+                try { localStorage.removeItem(key); }
+                catch(e) {}
+                delete this.memory[key];
+            }
         };
 
-        function safeJSONParse(str, fallback) {
-            if (!str) return fallback;
-            try { const val = JSON.parse(str); return (val !== null && typeof val === 'object') ? val : fallback; } catch(e) { return fallback; }
-        }
-
-        // =========================================
-        // 🎮 SOUND EFFECTS (外部ファイル不要の音効ジェネレーター)
-        // =========================================
-        let audioCtx = null;
+        // =========================================================
+        // 🎮 Web Audio API 音響ジェネレーター（外部ファイル不要）
+        // =========================================================
         function playSE(type) {
             try {
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-                
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                if (ctx.state === 'suspended') ctx.resume();
+
                 if (type === 'check') {
-                    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-                    osc.connect(gain); gain.connect(audioCtx.destination);
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain); gain.connect(ctx.destination);
                     osc.type = 'sine';
-                    osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
-                    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.08); // A5
-                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
-                    osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+                    osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+                    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.08); // A5
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+                    osc.start(); osc.stop(ctx.currentTime + 0.2);
                 } else if (type === 'clear') {
                     const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
-                    notes.forEach((freq, index) => {
-                        const subOsc = audioCtx.createOscillator(); const subGain = audioCtx.createGain();
-                        subOsc.connect(subGain); subGain.connect(audioCtx.destination);
-                        subOsc.type = 'triangle';
-                        subOsc.frequency.setValueAtTime(freq, audioCtx.currentTime + index * 0.12);
-                        subGain.gain.setValueAtTime(0.25, audioCtx.currentTime + index * 0.12);
-                        subGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + index * 0.12 + 0.4);
-                        subOsc.start(audioCtx.currentTime + index * 0.12); subOsc.stop(audioCtx.currentTime + index * 0.12 + 0.4);
+                    notes.forEach((freq, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.connect(gain); gain.connect(ctx.destination);
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.12);
+                        gain.gain.setValueAtTime(0.25, ctx.currentTime + idx * 0.12);
+                        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + idx * 0.12 + 0.4);
+                        osc.start(ctx.currentTime + idx * 0.12);
+                        osc.stop(ctx.currentTime + idx * 0.12 + 0.4);
                     });
                 }
-            } catch(e) { console.warn("Audio error ignored", e); }
+            } catch(e) {}
         }
 
         // =========================================
-        // DATA: 47 Prefectures & Major Cities
+        // DATA: 47都道府県マスタ
         // =========================================
         const geoMaster = {
             "北海道":[{name:"札幌市",lat:43.06,lon:141.35},{name:"函館市",lat:41.77,lon:140.73},{name:"旭川市",lat:43.77,lon:142.36}],
@@ -462,60 +477,62 @@
         const colors = { study: 'var(--color-study)', ai: 'var(--color-ai)', exercise: 'var(--color-exercise)', phone: 'var(--color-phone)' };
         let selectedEventColor = 'study';
 
-        // 🛡️ どんな環境でも絶対に死なない状態変数
         let appState = {
-            exp: parseInt(safeStorage.get('tp_exp_v600', '0')) || 0,
-            calendar: safeJSONParse(safeStorage.get('tp_cal_v600', '{}'), {}),
-            apiKey: safeStorage.get('tp_api_v600', ''),
-            pref: safeStorage.get('tp_pref_v600', '東京都'),
-            city: safeStorage.get('tp_city_v600', JSON.stringify(geoMaster["東京都"][0])),
-            theme: safeStorage.get('tp_theme_v600', 'dark'),
-            tutorialDone: safeStorage.get('tp_tut_v600', 'false') === 'true'
+            exp: parseInt(safeStorage.get('tp_exp_v800')) || 0,
+            calendar: JSON.parse(safeStorage.get('tp_cal_v800')) || {},
+            apiKey: safeStorage.get('tp_api_v800') || "",
+            pref: safeStorage.get('tp_pref_v800') || "東京都",
+            city: safeStorage.get('tp_city_v800') || JSON.stringify(geoMaster["東京都"][0]),
+            theme: safeStorage.get('tp_theme_v800') || "dark",
+            tutorialDone: safeStorage.get('tp_tut_v800') === 'true'
         };
 
         let weatherCache = { condition: "晴れ", temp: 25 };
         let currentDate = new Date();
         let todayKey = `${currentDate.getFullYear()}-${String(currentDate.getMonth()+1).padStart(2,'0')}-${String(currentDate.getDate()).padStart(2,'0')}`;
         let activeCalDateKey = "";
-        let timerDuration = 0, timerRemaining = 0, timerInterval = null, isRunning = false;
+        let timerDuration = 1500, timerRemaining = 1500, timerInterval = null, isRunning = false;
         let tutStep = 1;
         let currentGeneratedPlan = null;
 
         // =========================================
-        // INIT & TUTORIAL
+        // INIT & ONLOAD
         // =========================================
         window.addEventListener('DOMContentLoaded', () => {
-            try { initSettings(); } catch(e) {}
-            try { updateLevelUI(); } catch(e) {}
-            try { fetchWeatherAndApplyTheme(); } catch(e) {}
-            try { renderCalendar(); } catch(e) {}
-            try { renderHomeChecklist(); } catch(e) {}
-            try { updateAnalysis(); } catch(e) {}
+            initSettings();
+            updateLevelUI();
+            fetchWeatherAndApplyTheme();
+            renderCalendar();
+            renderHomeChecklist();
+            updateAnalysis();
             
-            if(!appState.tutorialDone) {
-                const tutModal = document.getElementById('tutorial-modal');
-                if(tutModal) tutModal.classList.add('show');
+            if (!appState.tutorialDone) {
+                const modal = document.getElementById('tutorial-modal');
+                modal.classList.add('show');
             }
         });
 
-        function resetTutorial() { safeStorage.remove('tp_tut_v600'); location.reload(); }
+        function resetTutorial() {
+            safeStorage.remove('tp_tut_v800');
+            location.reload();
+        }
 
         function nextTutorial() {
             try {
                 document.getElementById(`slide-${tutStep}`).classList.remove('active');
                 document.getElementById(`dot-${tutStep}`).classList.remove('active');
                 tutStep++;
-                if(tutStep <= 3) {
+                if (tutStep <= 3) {
                     document.getElementById(`slide-${tutStep}`).classList.add('active');
                     document.getElementById(`dot-${tutStep}`).classList.add('active');
-                    if(tutStep === 3) document.getElementById('tut-btn').innerText = "はじめる";
+                    if (tutStep === 3) document.getElementById('tut-btn').innerText = "はじめる";
                 } else {
                     document.getElementById('tutorial-modal').classList.remove('show');
-                    safeStorage.set('tp_tut_v600', 'true');
+                    safeStorage.set('tp_tut_v800', 'true');
                 }
             } catch(e) {
                 document.getElementById('tutorial-modal').classList.remove('show');
-                safeStorage.set('tp_tut_v600', 'true');
+                safeStorage.set('tp_tut_v800', 'true');
             }
         }
 
@@ -525,8 +542,8 @@
                 document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
                 document.getElementById(`page-${tabId}`).classList.add('active-page');
                 btn.classList.add('active');
-                if(tabId === 'calendar') renderCalendar();
-                if(tabId === 'home') renderHomeChecklist();
+                if (tabId === 'calendar') renderCalendar();
+                if (tabId === 'home') renderHomeChecklist();
             } catch(e) {}
         }
 
@@ -535,18 +552,21 @@
         // =========================================
         function initSettings() {
             document.getElementById('api-key').value = appState.apiKey || "";
-            if(appState.theme === 'light') {
+            if (appState.theme === 'light') {
                 document.body.classList.add('light-theme');
                 document.getElementById('theme-btn-icon').innerHTML = '<i class="fa-solid fa-sun"></i>';
             }
-            const pSel = document.getElementById('pref-select'); pSel.innerHTML = "";
+            const pSel = document.getElementById('pref-select');
+            pSel.innerHTML = "";
             allPrefs.forEach(p => { let o = document.createElement('option'); o.value = p; o.innerText = p; pSel.appendChild(o); });
             pSel.value = geoMaster[appState.pref] ? appState.pref : "東京都";
             updateCities();
         }
         function updateCities() {
-            const pSel = document.getElementById('pref-select'); const p = geoMaster[pSel.value] ? pSel.value : "東京都";
-            const cSel = document.getElementById('city-select'); cSel.innerHTML = "";
+            const pSel = document.getElementById('pref-select');
+            const p = geoMaster[pSel.value] ? pSel.value : "東京都";
+            const cSel = document.getElementById('city-select');
+            cSel.innerHTML = "";
             geoMaster[p].forEach(c => { let o = document.createElement('option'); o.value = JSON.stringify(c); o.innerText = c.name; cSel.appendChild(o); });
             try { cSel.value = appState.city; if(!cSel.value) cSel.selectedIndex = 0; } catch(e) { cSel.selectedIndex = 0; }
         }
@@ -554,52 +574,69 @@
             appState.apiKey = document.getElementById('api-key').value.trim();
             appState.pref = document.getElementById('pref-select').value;
             appState.city = document.getElementById('city-select').value;
-            safeStorage.set('tp_api_v600', appState.apiKey); safeStorage.set('tp_pref_v600', appState.pref); safeStorage.set('tp_city_v600', appState.city);
+            safeStorage.set('tp_api_v800', appState.apiKey);
+            safeStorage.set('tp_pref_v800', appState.pref);
+            safeStorage.set('tp_city_v800', appState.city);
             fetchWeatherAndApplyTheme();
         }
         function toggleTheme() {
-            if(appState.theme === 'dark') {
-                appState.theme = 'light'; document.body.classList.add('light-theme');
+            if (appState.theme === 'dark') {
+                appState.theme = 'light';
+                document.body.classList.add('light-theme');
                 document.getElementById('theme-btn-icon').innerHTML = '<i class="fa-solid fa-sun"></i>';
             } else {
-                appState.theme = 'dark'; document.body.classList.remove('light-theme');
+                appState.theme = 'dark';
+                document.body.classList.remove('light-theme');
                 document.getElementById('theme-btn-icon').innerHTML = '<i class="fa-solid fa-moon"></i>';
             }
-            safeStorage.set('tp_theme_v600', appState.theme);
+            safeStorage.set('tp_theme_v800', appState.theme);
         }
         async function fetchWeatherAndApplyTheme() {
             try {
-                const city = safeJSONParse(appState.city, geoMaster["東京都"][0]);
+                const city = JSON.parse(appState.city);
                 const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current_weather=true&timezone=Asia%2FTokyo`);
-                const data = await res.json(); 
-                weatherCache.temp = data.current_weather ? data.current_weather.temperature : 25;
+                const data = await res.json();
+                weatherCache.temp = data.current_weather.temperature;
                 document.getElementById('home-weather-text').innerText = `${appState.pref} ${city.name} ${weatherCache.temp}℃`;
-            } catch(e) { document.getElementById('home-weather-text').innerText = `${appState.pref} 25℃ (オフライン)`; }
+            } catch(e) {
+                document.getElementById('home-weather-text').innerText = `${appState.pref} (オフライン稼働中)`;
+            }
         }
 
         // =========================================
-        // EXP / ANALYSIS
+        // EXP & ANALYSIS
         // =========================================
-        function addExp(amount) { appState.exp += amount; safeStorage.set('tp_exp_v600', appState.exp); updateLevelUI(); }
+        function addExp(amount) {
+            appState.exp += amount;
+            safeStorage.set('tp_exp_v800', appState.exp);
+            updateLevelUI();
+        }
         function updateLevelUI() {
-            document.getElementById('ui-level').innerText = `Lv. ${Math.floor(appState.exp/100)+1}`;
-            document.getElementById('ui-exp-bar').style.width = `${appState.exp%100}%`;
+            document.getElementById('ui-level').innerText = `Lv. ${Math.floor(appState.exp / 100) + 1}`;
+            document.getElementById('ui-exp-bar').style.width = `${appState.exp % 100}%`;
         }
-
         function updateAnalysis() {
             try {
-                const phone = parseFloat(document.getElementById('slide-phone').value) || 0;
-                const study = parseFloat(document.getElementById('slide-study').value) || 0;
-                const sleep = parseFloat(document.getElementById('slide-sleep').value) || 0;
-                document.getElementById('val-phone').innerText = phone.toFixed(1) + ' h'; document.getElementById('val-study').innerText = study.toFixed(1) + ' h'; document.getElementById('val-sleep').innerText = sleep.toFixed(1) + ' h';
+                const phone = parseFloat(document.getElementById('slide-phone').value);
+                const study = parseFloat(document.getElementById('slide-study').value);
+                const sleep = parseFloat(document.getElementById('slide-sleep').value);
+                
+                document.getElementById('val-phone').innerText = phone.toFixed(1) + ' h';
+                document.getElementById('val-study').innerText = study.toFixed(1) + ' h';
+                document.getElementById('val-sleep').innerText = sleep.toFixed(1) + ' h';
+
                 const total = phone + study + sleep;
                 document.getElementById('total-val').innerText = total > 24 ? "! 24h over" : total.toFixed(1) + "h";
-                const pP = total > 0 ? (phone / total) * 100 : 0, pSt = total > 0 ? (study / total) * 100 : 0, pSl = total > 0 ? (sleep / total) * 100 : 0;
+
+                const pP = total > 0 ? (phone / total) * 100 : 0;
+                const pSt = total > 0 ? (study / total) * 100 : 0;
+                const pSl = total > 0 ? (sleep / total) * 100 : 0;
                 document.getElementById('analysis-pie').style.background = `conic-gradient(var(--color-phone) 0% ${pP}%, var(--color-study) ${pP}% ${pP+pSt}%, var(--color-sleep) ${pP+pSt}% 100%)`;
+
                 const fb = document.getElementById('analysis-feedback');
-                if(phone > 5) fb.innerHTML = `<span style="color:var(--color-phone)"><i class="fa-solid fa-triangle-exclamation"></i> スマホ時間が長すぎます。睡眠の質が落ちる危険があります。</span>`;
-                else if(sleep < 6) fb.innerHTML = `<span style="color:var(--color-sleep)"><i class="fa-solid fa-bed"></i> 睡眠不足です。最低6時間は確保しましょう。</span>`;
-                else if(study > 6) fb.innerHTML = `<span style="color:var(--color-study)"><i class="fa-solid fa-fire"></i> 凄い集中力！明日は少し休む時間も作りましょう。</span>`;
+                if (phone > 5) fb.innerHTML = `<span style="color:var(--color-phone)"><i class="fa-solid fa-triangle-exclamation"></i> スマホ時間が長すぎます。睡眠の質が落ちる危険があります。</span>`;
+                else if (sleep < 6) fb.innerHTML = `<span style="color:var(--color-sleep)"><i class="fa-solid fa-bed"></i> 睡眠不足です。最低6時間は確保しましょう。</span>`;
+                else if (study > 6) fb.innerHTML = `<span style="color:var(--color-study)"><i class="fa-solid fa-fire"></i> 凄い集中力！明日は少し休む時間も作りましょう。</span>`;
                 else fb.innerHTML = `<span style="color:var(--color-ai)"><i class="fa-solid fa-check"></i> パーフェクトなバランスです！</span>`;
             } catch(e) {}
         }
@@ -615,11 +652,11 @@
                 document.getElementById('cal-month-title').innerText = `${y}.${String(m+1).padStart(2,'0')}`;
                 const firstDay = new Date(y, m, 1).getDay(), days = new Date(y, m+1, 0).getDate();
 
-                for(let i=0; i<firstDay; i++) grid.innerHTML += `<div class="cal-cell" style="opacity:0"></div>`;
-                for(let d=1; d<=days; d++) {
+                for (let i=0; i<firstDay; i++) grid.innerHTML += `<div class="cal-cell" style="opacity:0"></div>`;
+                for (let d=1; d<=days; d++) {
                     const dKey = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                     let html = `<div class="cal-date-num">${d}</div>`;
-                    if(appState.calendar && Array.isArray(appState.calendar[dKey])) {
+                    if (appState.calendar && Array.isArray(appState.calendar[dKey])) {
                         appState.calendar[dKey].forEach(ev => html += `<div class="cal-event-bar" style="background:${colors[ev.color]}; opacity:${ev.checked?0.4:1}">${ev.time} ${ev.title}</div>`);
                     }
                     let cell = document.createElement('div'); cell.className = `cal-cell ${dKey===todayKey?'today':''}`;
@@ -629,77 +666,86 @@
             } catch(e) {}
         }
         function openDrawer(dKey, title) {
-            activeCalDateKey = dKey; document.getElementById('drawer-date-title').innerText = title;
-            document.getElementById('main-overlay').classList.add('show'); document.getElementById('cal-drawer').classList.add('open');
+            activeCalDateKey = dKey;
+            document.getElementById('drawer-date-title').innerText = title;
+            document.getElementById('main-overlay').classList.add('show');
+            document.getElementById('cal-drawer').classList.add('open');
             renderDrawerList();
         }
         function closeModals() {
             document.getElementById('main-overlay').classList.remove('show');
             document.getElementById('timer-modal').classList.remove('show');
             document.getElementById('cal-drawer').classList.remove('open');
-            clearInterval(timerInterval); isRunning = false;
+            clearInterval(timerInterval);
+            isRunning = false;
         }
-        
         function renderDrawerList() {
             const area = document.getElementById('drawer-event-list');
             const events = (appState.calendar && Array.isArray(appState.calendar[activeCalDateKey])) ? appState.calendar[activeCalDateKey] : [];
-            if(events.length === 0) { area.innerHTML = `<div style="text-align:center; color:var(--text-muted); font-size:12px;">予定なし</div>`; return; }
+            if (events.length === 0) { area.innerHTML = `<div style="text-align:center; color:var(--text-muted); font-size:12px;">予定なし</div>`; return; }
             let html = "";
-            events.sort((a,b)=>a.time.localeCompare(b.time)).forEach((ev, i) => { html += `<div class="mission-item"><div class="mission-color" style="background:${colors[ev.color]}"></div><div class="mission-time">${ev.time}</div><div class="mission-text">${ev.title}</div><i class="fa-solid fa-trash" style="color:var(--color-phone); cursor:pointer;" onclick="delEvent(${i})"></i></div>`; });
+            events.sort((a,b)=>a.time.localeCompare(b.time)).forEach((ev, i) => {
+                html += `<div class="mission-item"><div class="mission-color" style="background:${colors[ev.color]}"></div><div class="mission-time">${ev.time}</div><div class="mission-text">${ev.title}</div><i class="fa-solid fa-trash" style="color:var(--color-phone); cursor:pointer; padding:8px;" onclick="delEvent(${i})"></i></div>`;
+            });
             area.innerHTML = html;
         }
         function selectColor(el, c) { document.querySelectorAll('.color-opt').forEach(o=>o.classList.remove('selected')); el.classList.add('selected'); selectedEventColor = c; }
         function addCalendarEvent() {
             const t = document.getElementById('event-time').value, title = document.getElementById('event-title').value.trim();
-            if(!t || !title) return;
-            if(!appState.calendar) appState.calendar = {};
-            if(!Array.isArray(appState.calendar[activeCalDateKey])) appState.calendar[activeCalDateKey] = [];
+            if (!t || !title) return;
+            if (!appState.calendar) appState.calendar = {};
+            if (!Array.isArray(appState.calendar[activeCalDateKey])) appState.calendar[activeCalDateKey] = [];
             appState.calendar[activeCalDateKey].push({ time: t, title: title, color: selectedEventColor, checked: false });
-            safeStorage.set('tp_cal_v600', JSON.stringify(appState.calendar));
-            document.getElementById('event-title').value = ""; renderDrawerList(); renderCalendar(); if(activeCalDateKey===todayKey) renderHomeChecklist();
+            safeStorage.set('tp_cal_v800', JSON.stringify(appState.calendar));
+            document.getElementById('event-title').value = "";
+            renderDrawerList(); renderCalendar();
+            if (activeCalDateKey === todayKey) renderHomeChecklist();
         }
         function delEvent(i) {
-            if(appState.calendar && Array.isArray(appState.calendar[activeCalDateKey])) {
-                appState.calendar[activeCalDateKey].splice(i,1);
-                if(appState.calendar[activeCalDateKey].length === 0) delete appState.calendar[activeCalDateKey];
-                safeStorage.set('tp_cal_v600', JSON.stringify(appState.calendar)); renderDrawerList(); renderCalendar(); if(activeCalDateKey===todayKey) renderHomeChecklist();
-            }
+            appState.calendar[activeCalDateKey].splice(i,1);
+            if (appState.calendar[activeCalDateKey].length === 0) delete appState.calendar[activeCalDateKey];
+            safeStorage.set('tp_cal_v800', JSON.stringify(appState.calendar));
+            renderDrawerList(); renderCalendar();
+            if (activeCalDateKey === todayKey) renderHomeChecklist();
         }
 
         // =========================================
-        // HOME CHECKLIST & NEXT-GEN AI STRATEGIST ENGINE
+        // HOME CHECKLIST & AI PLANNER
         // =========================================
         function renderHomeChecklist() {
             try {
                 const area = document.getElementById('home-checklist-area');
                 const events = (appState.calendar && Array.isArray(appState.calendar[todayKey])) ? appState.calendar[todayKey] : [];
-                if(events.length === 0) { area.innerHTML = ""; return; }
+                if (events.length === 0) { area.innerHTML = ""; return; }
                 let html = `<div style="font-size: 11px; font-weight: 800; color: var(--text-muted); margin-bottom:8px;">TODAY'S MISSION</div>`;
-                events.sort((a,b)=>a.time.localeCompare(b.time)).forEach((ev, i) => { html += `<div class="mission-item ${ev.checked?'checked':''}"><div class="mission-color" style="background:${colors[ev.color]}"></div><div class="mission-time">${ev.time}</div><div class="mission-text">${ev.title}</div><div class="check-circle" onclick="toggleCheck(${i})"><i class="fa-solid fa-check"></i></div></div>`; });
+                events.sort((a,b)=>a.time.localeCompare(b.time)).forEach((ev, i) => {
+                    html += `<div class="mission-item ${ev.checked?'checked':''}"><div class="mission-color" style="background:${colors[ev.color]}"></div><div class="mission-time">${ev.time}</div><div class="mission-text">${ev.title}</div><div class="check-circle" onclick="toggleCheck(${i})"><i class="fa-solid fa-check"></i></div></div>`;
+                });
                 area.innerHTML = html;
             } catch(e) {}
         }
         function toggleCheck(i) {
-            if(appState.calendar && Array.isArray(appState.calendar[todayKey]) && appState.calendar[todayKey][i]) {
+            if (appState.calendar && Array.isArray(appState.calendar[todayKey]) && appState.calendar[todayKey][i]) {
                 appState.calendar[todayKey][i].checked = !appState.calendar[todayKey][i].checked;
-                safeStorage.set('tp_cal_v600', JSON.stringify(appState.calendar));
+                safeStorage.set('tp_cal_v800', JSON.stringify(appState.calendar));
                 renderHomeChecklist(); renderCalendar();
-                if(appState.calendar[todayKey][i].checked) {
-                    playSE('check'); // 🎮 ミッション完了音！
+                if (appState.calendar[todayKey][i].checked) {
+                    playSE('check');
                     addExp(5);
                 }
             }
         }
 
-        // 🛡️ どんなスマホ・Safariでも絶対にバグらない算術時間変換
+        // 🛡️ Safari等でも絶対にバグらない純粋整数時間計算
         function timeToMins(timeStr) {
-            if (!timeStr || !timeStr.includes(':')) return 0;
+            if (!timeStr || typeof timeStr !== 'string' || !timeStr.includes(':')) return 0;
             const parts = timeStr.split(':').map(Number);
             return (isNaN(parts[0]) ? 0 : parts[0]) * 60 + (isNaN(parts[1]) ? 0 : parts[1]);
         }
         function minsToTime(totalMins) {
             const m = ((totalMins % 1440) + 1440) % 1440;
-            const hours = Math.floor(m / 60); const mins = m % 60;
+            const hours = Math.floor(m / 60);
+            const mins = m % 60;
             return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
         }
 
@@ -711,48 +757,50 @@
             const focus = document.getElementById('input-focus').value;
             const notes = document.getElementById('input-notes').value.trim();
             
-            const startMins = timeToMins(st);
-            const endMins = timeToMins(et);
-            let totalDiffMins = endMins - startMins;
-            if (totalDiffMins <= 0) totalDiffMins += 24 * 60;
+            let startMins = timeToMins(st);
+            let endMins = timeToMins(et);
+            if (endMins <= startMins) endMins += 1440; // 日またぎ対応
+            const totalDiffMins = Math.max(10, endMins - startMins);
 
             const btn = document.querySelector('#page-home .btn-primary');
-            const originalBtnText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-microchip fa-fade"></i> AI戦略エンジンが計算・構築中...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> AI分析・戦略構築中...';
             btn.disabled = true;
 
-            let planData = null;
+            let plan = generateLocalScientificPlan(task, st, totalDiffMins, focus, app, notes);
 
             if (appState.apiKey) {
                 try {
-                    const systemPrompt = `あなたは脳科学と認知心理学に基づく世界最高峰の学習戦略コーチです。返答は必ず以下のJSONスキーマに従ったJSON文字列のみを出力し、解説文や\`\`\`は含めないでください。{"strategy_summary": "全体方針（50字以内）", "sessions": [{"type": "prep"|"focus"|"break", "start_time": "HH:MM", "end_time": "HH:MM", "duration_mins": Integer, "title": "具体的なタスク名", "advice": "アドバイス"}]}`;
-                    const userPrompt = `【タスク】${task}\n【時間枠】${st} 〜 ${et} (計${totalDiffMins}分)\n【制限アプリ】${app}\n【集中度】${focus}\n【環境】気温${weatherCache.temp}℃\n【補足】${notes}`;
-
+                    const prompt = `あなたはプロの学習戦略アドバイザーです。以下の条件でセッションを分割し、必ずJSON配列のみを出力してください。\nタスク:${task}\n時間:${totalDiffMins}分\n集中度:${focus}\n天候:${weatherCache.temp}度\nフォーマット:[{"type":"focus"|"break"|"prep", "duration_mins":数字, "title":"タイトル", "advice":"アドバイス"}]`;
                     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${appState.apiKey}` },
-                        body: JSON.stringify({ model: "llama3-8b-8192", messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }], temperature: 0.3 })
+                        body: JSON.stringify({ model: "llama3-8b-8192", messages: [{role: "user", content: prompt}], temperature: 0.3 })
                     });
                     const data = await res.json();
-                    const rawText = data.choices[0].message.content.trim();
-                    const jsonStr = rawText.substring(rawText.indexOf('{'), rawText.lastIndexOf('}') + 1);
-                    planData = JSON.parse(jsonStr);
-                } catch(e) { console.warn("API Error, switching to local cognitive algorithm", e); }
+                    if (data.choices) {
+                        const jsonStr = data.choices[0].message.content.match(/\[.*\]/s);
+                        if (jsonStr) {
+                            const parsed = JSON.parse(jsonStr[0]);
+                            let curMin = startMins;
+                            plan.sessions = parsed.map(s => {
+                                const stTime = minsToTime(curMin);
+                                curMin += s.duration_mins;
+                                return { ...s, start_time: stTime, end_time: minsToTime(curMin) };
+                            });
+                        }
+                    }
+                } catch(e) { console.log("API fallback to Local AI"); }
             }
 
-            if (!planData) {
-                planData = generateLocalScientificPlan(task, st, totalDiffMins, focus, app, notes);
-            }
-
-            currentGeneratedPlan = planData;
-            renderRichAIPlan(planData);
-
-            btn.innerHTML = originalBtnText;
+            currentGeneratedPlan = plan;
+            renderRichAIPlan(plan);
+            document.getElementById('home-ai-result').style.display = 'block';
+            btn.innerHTML = '<i class="fa-solid fa-brain"></i> 自分だけのAI戦略プランを生成';
             btn.disabled = false;
             
             setTimeout(() => {
                 const anchor = document.getElementById('ai-scroll-anchor');
-                if(anchor) window.scrollTo({ top: anchor.offsetTop - 30, behavior: 'smooth' });
+                if (anchor) window.scrollTo({ top: anchor.offsetTop - 30, behavior: 'smooth' });
             }, 150);
         }
 
@@ -764,9 +812,9 @@
 
             if (focus === "低い" && remaining > 25) {
                 sessions.push({
-                    type: "prep", start_time: minsToTime(currentMin), end_time: minsToTime(currentMin + 5), duration_mins: 5,
-                    title: `【アイドリング】${task}の準備・見出し確認`,
-                    advice: `${app !== 'なし' ? app+'を完全に閉じ、' : ''}まずは5分だけハードルの低い作業を開始し、作業興奮を呼び起こします。`
+                    type: "prep", start_time: minsToTime(currentMin), end_time: minsToTime(currentMin + 5),
+                    duration_mins: 5, title: `【アイドリング】${task}の準備・見出し確認`,
+                    advice: `${app !== 'なし' ? app+'を完全に閉じ、' : ''}まずは5分だけハードルの低い作業から開始し、作業興奮を呼び起こします。`
                 });
                 currentMin += 5; remaining -= 5;
             }
@@ -776,19 +824,18 @@
                 loopGuard++;
                 if (remaining <= 20) {
                     sessions.push({
-                        type: "focus", start_time: minsToTime(currentMin), end_time: minsToTime(currentMin + remaining), duration_mins: remaining,
-                        title: `【ラストスパート】${task}のまとめと見直し`,
-                        advice: `残りの集中力を使い切り、今日進めた部分の確認・整理を行います。${notes ? '('. + notes + ')' : ''}`
+                        type: "focus", start_time: minsToTime(currentMin), end_time: minsToTime(currentMin + remaining),
+                        duration_mins: remaining, title: `【ラストスパート】${task}のまとめと見直し`,
+                        advice: `残りの集中力を使い切り、今日進めた部分の確認・整理を行います。${notes ? '(' + notes + ')' : ''}`
                     });
                     break;
                 }
-
                 let focusChunk = totalMins >= 120 ? 45 : 25;
                 if (remaining < focusChunk + 5) focusChunk = remaining;
 
                 sessions.push({
-                    type: "focus", start_time: minsToTime(currentMin), end_time: minsToTime(currentMin + focusChunk), duration_mins: focusChunk,
-                    title: `【ディープフォーカス】${task}の実践演習`,
+                    type: "focus", start_time: minsToTime(currentMin), end_time: minsToTime(currentMin + focusChunk),
+                    duration_mins: focusChunk, title: `【ディープフォーカス】${task}の実践演習`,
                     advice: `気温${weatherCache.temp}℃。スマホを視界から外し、シングルタスクで極限まで集中力を高めます。`
                 });
                 currentMin += focusChunk; remaining -= focusChunk;
@@ -796,106 +843,87 @@
                 if (remaining >= 10) {
                     let breakChunk = focusChunk >= 45 ? 10 : 5;
                     sessions.push({
-                        type: "break", start_time: minsToTime(currentMin), end_time: minsToTime(currentMin + breakChunk), duration_mins: breakChunk,
-                        title: "【脳の冷却・リセット】マインドフルネス休憩",
+                        type: "break", start_time: minsToTime(currentMin), end_time: minsToTime(currentMin + breakChunk),
+                        duration_mins: breakChunk, title: "【脳の冷却・リセット】マインドフルネス休憩",
                         advice: "目を閉じて深呼吸し、脳のワーキングメモリを整理します。※画面は見ず、水を一杯飲みましょう。"
                     });
                     currentMin += breakChunk; remaining -= breakChunk;
                 }
             }
-
-            return {
-                strategy_summary: `「${focus}」な状態に最適化した、疲労を溜めずに記憶定着率を高めるセッション分割戦略です。`,
-                sessions: sessions
-            };
+            return { sessions: sessions };
         }
 
         // 🚀 次世代アクションカードUI描画
         function renderRichAIPlan(plan) {
             const container = document.getElementById('ai-plan-content');
-            let html = `<div style="font-size:13px; color:var(--text-main); font-weight:700; margin-bottom:14px; background:rgba(168,85,247,0.15); padding:10px 14px; border-radius:12px; border:1px solid rgba(168,85,247,0.3); line-height:1.5;">
-                <i class="fa-solid fa-lightbulb" style="color:var(--color-ai); margin-right:6px;"></i> ${plan.strategy_summary}
-            </div>`;
-
+            let html = "";
             plan.sessions.forEach((s, idx) => {
-                let badgeClass = "badge-focus", badgeText = "FOCUS SESSION", btnText = '<i class="fa-solid fa-play"></i> このセッションを開始', btnClass = "";
-                if (s.type === "break") { badgeClass = "badge-break"; badgeText = "SHORT BREAK"; btnText = '<i class="fa-solid fa-mug-hot"></i> 休憩タイマーを起動'; btnClass = "break-mode"; }
-                else if (s.type === "prep") { badgeClass = "badge-prep"; badgeText = "WARM UP"; }
+                let badgeClass = "badge-focus";
+                let badgeText = "🔥 FOCUS";
+                let btnText = "<i class='fa-solid fa-play'></i> この集中セッションを開始";
+                let btnClass = "";
+                
+                if (s.type === "break") { badgeClass = "badge-break"; badgeText = "💤 BREAK"; btnText = "<i class='fa-solid fa-mug-hot'></i> 休憩タイマーを開始"; btnClass = "break-mode"; }
+                else if (s.type === "prep") { badgeClass = "badge-prep"; badgeText = "⚡ PREP"; btnText = "<i class='fa-solid fa-play'></i> 準備セッションを開始"; }
 
                 html += `
                 <div class="plan-session-card">
-                    <span class="plan-badge ${badgeClass}">${badgeText}</span>
-                    <div class="plan-session-header"><span class="plan-time-range">${s.start_time} - ${s.end_time}</span><span class="plan-duration"><i class="fa-regular fa-clock"></i> ${s.duration_mins}分</span></div>
+                    <div class="plan-session-header">
+                        <span class="plan-badge ${badgeClass}">${badgeText}</span>
+                        <span class="plan-time-range">${s.start_time} - ${s.end_time}</span>
+                    </div>
                     <div class="plan-title">${s.title}</div>
+                    <div class="plan-duration"><i class="fa-regular fa-clock"></i> 実行時間: ${s.duration_mins}分間</div>
                     <div class="plan-advice">${s.advice}</div>
                     <button class="btn-session-start ${btnClass}" onclick="startSpecificSession(${idx})">${btnText}</button>
                 </div>`;
             });
-
-            // 🚀 一括スケジュール登録ボタン！
-            html += `<button class="btn-primary" style="margin-top: 14px; background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);" onclick="applyPlanToCalendar()"><i class="fa-solid fa-calendar-check"></i> このプランを今日のスケジュールに全て組み込む</button>`;
             container.innerHTML = html;
-            document.getElementById('home-ai-result').style.display = 'block';
         }
 
-        // 🚀 個別カードのボタンを押した時にタイマーを即起動
         function startSpecificSession(index) {
             if (!currentGeneratedPlan || !currentGeneratedPlan.sessions[index]) return;
             const session = currentGeneratedPlan.sessions[index];
             timerDuration = session.duration_mins * 60;
+            timerRemaining = timerDuration;
             document.getElementById('timer-title').innerText = session.title;
             openTimerModal();
             toggleTimer();
-        }
-
-        // 🚀 生成されたプランを今日のミッションへ一括追加
-        function applyPlanToCalendar() {
-            if (!currentGeneratedPlan || !currentGeneratedPlan.sessions) return;
-            if (!appState.calendar) appState.calendar = {};
-            if (!Array.isArray(appState.calendar[todayKey])) appState.calendar[todayKey] = [];
-
-            let addedCount = 0;
-            currentGeneratedPlan.sessions.forEach(s => {
-                if (s.type !== "break") {
-                    appState.calendar[todayKey].push({ time: s.start_time, title: `${s.title} (${s.duration_mins}分)`, color: 'ai', checked: false });
-                    addedCount++;
-                }
-            });
-
-            appState.calendar[todayKey].sort((a,b) => a.time.localeCompare(b.time));
-            safeStorage.set('tp_cal_v600', JSON.stringify(appState.calendar));
-            renderHomeChecklist(); renderCalendar();
-            alert(`✅ ${addedCount}個の学習セッションを今日のスケジュールに組み込みました！上部のリストから確認できます。`);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // =========================================
         // CHAT & TIMER
         // =========================================
         async function sendChat() {
-            const input = document.getElementById('chat-input'), text = input.value.trim(); if(!text) return;
+            const input = document.getElementById('chat-input'), text = input.value.trim(); if (!text) return;
             const w = document.getElementById('chat-window');
             w.innerHTML += `<div style="align-self:flex-end; background:var(--color-study); color:white; padding:12px; border-radius:12px; font-size:14px; max-width:85%;">${text}</div>`;
             input.value = ''; w.scrollTop = w.scrollHeight;
             
             let reply = "";
-            if(appState.apiKey) {
+            if (appState.apiKey) {
                 try {
-                    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${appState.apiKey}` }, body: JSON.stringify({ model: "llama3-8b-8192", messages: [{role: "user", content: text}] }) });
+                    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${appState.apiKey}` },
+                        body: JSON.stringify({ model: "llama3-8b-8192", messages: [{role: "user", content: text}] })
+                    });
                     const data = await res.json(); 
-                    if(data.choices) reply = data.choices[0].message.content;
+                    if (data.choices) reply = data.choices[0].message.content;
                     else throw new Error("API Limit");
                 } catch(e) { reply = getLocalFallbackReply(text); }
-            } else { reply = getLocalFallbackReply(text); }
+            } else {
+                reply = getLocalFallbackReply(text);
+            }
             
             w.innerHTML += `<div style="align-self:flex-start; background:rgba(168,85,247,0.15); padding:12px; border-radius:12px; font-size:14px; max-width:85%; border: 1px solid rgba(168,85,247,0.3);">${reply}</div>`;
             w.scrollTop = w.scrollHeight;
         }
 
         function getLocalFallbackReply(text) {
-            if(text.includes('疲') || text.includes('眠')) return "お疲れ様です。<strong style='color:var(--color-sleep)'>15分間の仮眠</strong>をとるか、今日は早めに休んで明日のパフォーマンスに投資しましょう！";
-            if(text.includes('集中') || text.includes('できない')) return "スマホを別の部屋に置いて、まずは<strong style='color:var(--color-study)'>「5分だけ」</strong>と決めて作業を始めてみてください。作業興奮が訪れますよ。";
-            return "なるほど、記録しました。AIプラン生成機能を使って、具体的なタイムラインを作ってみるのもおすすめですよ。";
+            if (text.includes('疲') || text.includes('眠')) return "お疲れ様です。<strong style='color:var(--color-sleep)'>15分間の仮眠</strong>をとるか、今日は早めに休んで明日のパフォーマンスに投資しましょう！";
+            if (text.includes('集中') || text.includes('できない')) return "スマホを別の部屋に置いて、まずは<strong style='color:var(--color-study)'>「5分だけ」</strong>と決めて作業を始めてみてください。作業興奮が訪れますよ。";
+            return "なるほど、状況を記録しました。Homeタブの「AIプラン生成」機能を使って、具体的なセッションに分割してみるのがおすすめですよ。";
         }
 
         function openTimerModal() {
@@ -906,24 +934,26 @@
         }
         function toggleTimer() {
             const btn = document.getElementById('btn-timer-start');
-            if(isRunning) { clearInterval(timerInterval); isRunning = false; btn.innerText = "RESUME"; }
-            else {
+            if (isRunning) {
+                clearInterval(timerInterval); isRunning = false; btn.innerText = "RESUME";
+            } else {
                 isRunning = true; btn.innerText = "PAUSE";
                 timerInterval = setInterval(() => {
                     timerRemaining--; updateTimerDisplay();
-                    if(timerRemaining <= 0) {
+                    if (timerRemaining <= 0) {
                         clearInterval(timerInterval);
-                        playSE('clear'); // 🎮 ファンファーレ音！
+                        playSE('clear'); // 🎮 完了ファンファーレ！
                         alert("完了！EXP獲得！");
-                        addExp(Math.floor((timerDuration||1500)/60)*10); closeModals();
+                        addExp(Math.floor((timerDuration || 1500) / 60) * 10);
+                        closeModals();
                     }
                 }, 1000);
             }
         }
         function updateTimerDisplay() {
             const safeDuration = timerDuration || 1500;
-            document.getElementById('time-text').innerText = `${String(Math.floor(timerRemaining/60)).padStart(2,'0')}:${String(timerRemaining%60).padStart(2,'0')}`;
-            document.getElementById('timer-progress').style.strokeDashoffset = 628 - (timerRemaining/safeDuration)*628;
+            document.getElementById('time-text').innerText = `${String(Math.floor(timerRemaining / 60)).padStart(2,'0')}:${String(timerRemaining % 60).padStart(2,'0')}`;
+            document.getElementById('timer-progress').style.strokeDashoffset = 628 - (timerRemaining / safeDuration) * 628;
             document.getElementById('timer-progress').style.stroke = timerRemaining < 60 ? "var(--color-phone)" : "var(--color-study)";
         }
     </script>
