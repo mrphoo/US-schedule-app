@@ -41,8 +41,6 @@
         .blob-1 { top: -10%; left: -10%; width: 350px; height: 350px; background: var(--color-ai); }
         .blob-2 { bottom: 10%; right: -10%; width: 450px; height: 450px; background: var(--color-study); animation-delay: -5s; }
         .blob-3 { top: 40%; left: 50%; width: 300px; height: 300px; background: var(--color-sleep); animation-delay: -10s; }
-        body.weather-rain .blob-1 { background: #334155; } body.weather-rain .blob-2 { background: #2563eb; } body.weather-rain .blob-3 { background: #475569; }
-        body.weather-sunny .blob-1 { background: #f59e0b; } body.weather-sunny .blob-2 { background: #0ea5e9; } body.weather-sunny .blob-3 { background: #10b981; }
         @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(40px, 60px) scale(1.15); } }
 
         .app-container { width: 100%; max-width: 560px; padding: 20px; z-index: 1; flex: 1; }
@@ -174,7 +172,6 @@
             <div class="tut-title">分析とレベルアップ</div>
             <div class="tut-desc">Analysisタブで日々のバランスを可視化。<br>作戦を完遂するたびにEXPが貯まり、<br>ゲーム感覚でレベルアップを楽しめます。</div>
         </div>
-        
         <div class="tut-dots">
             <div class="tut-dot active" id="dot-1"></div><div class="tut-dot" id="dot-2"></div><div class="tut-dot" id="dot-3"></div>
         </div>
@@ -365,9 +362,6 @@
             <div class="glass-card">
                 <button class="btn-primary" style="background: transparent; border: 1px solid var(--text-muted); color: var(--text-main);" onclick="resetTutorial()">チュートリアルをもう一度見る</button>
             </div>
-            <div style="text-align: center; color: var(--text-muted); font-size: 11px; margin-top: 20px;">
-                TimePilot v7.0.1 (Crash-Proof Edition)
-            </div>
         </div>
     </div>
 
@@ -383,26 +377,17 @@
 
     <script>
         // =========================================
-        // 🛡️ CRASH-PROOF STORAGE WRAPPER (硬直防止コア)
+        // 🛡️ CRASH-PROOF STORAGE WRAPPER (硬直防止シールド)
         // =========================================
         const safeStorage = {
-            get: (key, fallback) => {
-                try { return localStorage.getItem(key) || fallback; } catch(e) { return fallback; }
-            },
-            set: (key, val) => {
-                try { localStorage.setItem(key, val); } catch(e) {}
-            },
-            remove: (key) => {
-                try { localStorage.removeItem(key); } catch(e) {}
-            }
+            get: (key, fallback) => { try { return localStorage.getItem(key) || fallback; } catch(e) { return fallback; } },
+            set: (key, val) => { try { localStorage.setItem(key, val); } catch(e) {} },
+            remove: (key) => { try { localStorage.removeItem(key); } catch(e) {} }
         };
 
         function safeJSONParse(str, fallback) {
             if (!str) return fallback;
-            try {
-                const val = JSON.parse(str);
-                return (val !== null && typeof val === 'object') ? val : fallback;
-            } catch(e) { return fallback; }
+            try { const val = JSON.parse(str); return (val !== null && typeof val === 'object') ? val : fallback; } catch(e) { return fallback; }
         }
 
         // =========================================
@@ -434,7 +419,7 @@
         const colors = { study: 'var(--color-study)', ai: 'var(--color-ai)', exercise: 'var(--color-exercise)', phone: 'var(--color-phone)' };
         let selectedEventColor = 'study';
 
-        // 🛡️ グローバル領域でのエラーでJS全体が死ぬのを防ぐ安全読み込み
+        // 🛡️ 例外でJSが即死しない安全読み込み
         let appState = {
             exp: parseInt(safeStorage.get('tp_exp_v600', '0')) || 0,
             calendar: safeJSONParse(safeStorage.get('tp_cal_v600', '{}'), {}),
@@ -457,12 +442,12 @@
         // INIT & TUTORIAL
         // =========================================
         window.onload = () => {
-            try { initSettings(); } catch(e) { console.error(e); }
-            try { updateLevelUI(); } catch(e) { console.error(e); }
-            try { fetchWeatherAndApplyTheme(); } catch(e) { console.error(e); }
-            try { renderCalendar(); } catch(e) { console.error(e); }
-            try { renderHomeChecklist(); } catch(e) { console.error(e); }
-            try { updateAnalysis(); } catch(e) { console.error(e); }
+            try { initSettings(); } catch(e) {}
+            try { updateLevelUI(); } catch(e) {}
+            try { fetchWeatherAndApplyTheme(); } catch(e) {}
+            try { renderCalendar(); } catch(e) {}
+            try { renderHomeChecklist(); } catch(e) {}
+            try { updateAnalysis(); } catch(e) {}
             
             if(!appState.tutorialDone) {
                 const tutModal = document.getElementById('tutorial-modal');
@@ -470,10 +455,7 @@
             }
         };
 
-        function resetTutorial() {
-            safeStorage.remove('tp_tut_v600');
-            location.reload();
-        }
+        function resetTutorial() { safeStorage.remove('tp_tut_v600'); location.reload(); }
 
         function nextTutorial() {
             try {
@@ -505,7 +487,7 @@
                 btn.classList.add('active');
                 if(tabId === 'calendar') renderCalendar();
                 if(tabId === 'home') renderHomeChecklist();
-            } catch(e) { console.error("Tab switch error", e); }
+            } catch(e) {}
         }
 
         // =========================================
@@ -517,30 +499,22 @@
                 document.body.classList.add('light-theme');
                 document.getElementById('theme-btn-icon').innerHTML = '<i class="fa-solid fa-sun"></i>';
             }
-            const pSel = document.getElementById('pref-select');
-            pSel.innerHTML = "";
+            const pSel = document.getElementById('pref-select'); pSel.innerHTML = "";
             allPrefs.forEach(p => { let o = document.createElement('option'); o.value = p; o.innerText = p; pSel.appendChild(o); });
             pSel.value = geoMaster[appState.pref] ? appState.pref : "東京都";
             updateCities();
         }
         function updateCities() {
-            const pSel = document.getElementById('pref-select');
-            const p = geoMaster[pSel.value] ? pSel.value : "東京都";
-            const cSel = document.getElementById('city-select'); 
-            cSel.innerHTML = "";
+            const pSel = document.getElementById('pref-select'); const p = geoMaster[pSel.value] ? pSel.value : "東京都";
+            const cSel = document.getElementById('city-select'); cSel.innerHTML = "";
             geoMaster[p].forEach(c => { let o = document.createElement('option'); o.value = JSON.stringify(c); o.innerText = c.name; cSel.appendChild(o); });
-            try {
-                cSel.value = appState.city;
-                if(!cSel.value) cSel.selectedIndex = 0;
-            } catch(e) { cSel.selectedIndex = 0; }
+            try { cSel.value = appState.city; if(!cSel.value) cSel.selectedIndex = 0; } catch(e) { cSel.selectedIndex = 0; }
         }
         function saveSettings() {
             appState.apiKey = document.getElementById('api-key').value.trim();
             appState.pref = document.getElementById('pref-select').value;
             appState.city = document.getElementById('city-select').value;
-            safeStorage.set('tp_api_v600', appState.apiKey);
-            safeStorage.set('tp_pref_v600', appState.pref);
-            safeStorage.set('tp_city_v600', appState.city);
+            safeStorage.set('tp_api_v600', appState.apiKey); safeStorage.set('tp_pref_v600', appState.pref); safeStorage.set('tp_city_v600', appState.city);
             fetchWeatherAndApplyTheme();
         }
         function toggleTheme() {
@@ -560,19 +534,13 @@
                 const data = await res.json(); 
                 weatherCache.temp = data.current_weather ? data.current_weather.temperature : 25;
                 document.getElementById('home-weather-text').innerText = `${appState.pref} ${city.name} ${weatherCache.temp}℃`;
-            } catch(e) {
-                document.getElementById('home-weather-text').innerText = `${appState.pref} 25℃ (オフライン)`;
-            }
+            } catch(e) { document.getElementById('home-weather-text').innerText = `${appState.pref} 25℃ (オフライン)`; }
         }
 
         // =========================================
         // EXP / ANALYSIS
         // =========================================
-        function addExp(amount) {
-            appState.exp += amount;
-            safeStorage.set('tp_exp_v600', appState.exp);
-            updateLevelUI();
-        }
+        function addExp(amount) { appState.exp += amount; safeStorage.set('tp_exp_v600', appState.exp); updateLevelUI(); }
         function updateLevelUI() {
             document.getElementById('ui-level').innerText = `Lv. ${Math.floor(appState.exp/100)+1}`;
             document.getElementById('ui-exp-bar').style.width = `${appState.exp%100}%`;
@@ -583,25 +551,17 @@
                 const phone = parseFloat(document.getElementById('slide-phone').value) || 0;
                 const study = parseFloat(document.getElementById('slide-study').value) || 0;
                 const sleep = parseFloat(document.getElementById('slide-sleep').value) || 0;
-                
-                document.getElementById('val-phone').innerText = phone.toFixed(1) + ' h';
-                document.getElementById('val-study').innerText = study.toFixed(1) + ' h';
-                document.getElementById('val-sleep').innerText = sleep.toFixed(1) + ' h';
-
+                document.getElementById('val-phone').innerText = phone.toFixed(1) + ' h'; document.getElementById('val-study').innerText = study.toFixed(1) + ' h'; document.getElementById('val-sleep').innerText = sleep.toFixed(1) + ' h';
                 const total = phone + study + sleep;
                 document.getElementById('total-val').innerText = total > 24 ? "! 24h over" : total.toFixed(1) + "h";
-
-                const pP = total > 0 ? (phone / total) * 100 : 0;
-                const pSt = total > 0 ? (study / total) * 100 : 0;
-                const pSl = total > 0 ? (sleep / total) * 100 : 0;
+                const pP = total > 0 ? (phone / total) * 100 : 0, pSt = total > 0 ? (study / total) * 100 : 0, pSl = total > 0 ? (sleep / total) * 100 : 0;
                 document.getElementById('analysis-pie').style.background = `conic-gradient(var(--color-phone) 0% ${pP}%, var(--color-study) ${pP}% ${pP+pSt}%, var(--color-sleep) ${pP+pSt}% 100%)`;
-
                 const fb = document.getElementById('analysis-feedback');
                 if(phone > 5) fb.innerHTML = `<span style="color:var(--color-phone)"><i class="fa-solid fa-triangle-exclamation"></i> スマホ時間が長すぎます。睡眠の質が落ちる危険があります。</span>`;
                 else if(sleep < 6) fb.innerHTML = `<span style="color:var(--color-sleep)"><i class="fa-solid fa-bed"></i> 睡眠不足です。最低6時間は確保しましょう。</span>`;
                 else if(study > 6) fb.innerHTML = `<span style="color:var(--color-study)"><i class="fa-solid fa-fire"></i> 凄い集中力！明日は少し休む時間も作りましょう。</span>`;
                 else fb.innerHTML = `<span style="color:var(--color-ai)"><i class="fa-solid fa-check"></i> パーフェクトなバランスです！</span>`;
-            } catch(e) { console.error("Analysis update error", e); }
+            } catch(e) {}
         }
 
         // =========================================
@@ -626,7 +586,7 @@
                     cell.innerHTML = html; cell.onclick = () => openDrawer(dKey, `${m+1}月${d}日`);
                     grid.appendChild(cell);
                 }
-            } catch(e) { console.error("Calendar render error", e); }
+            } catch(e) {}
         }
         function openDrawer(dKey, title) {
             activeCalDateKey = dKey; document.getElementById('drawer-date-title').innerText = title;
@@ -677,7 +637,7 @@
                 let html = `<div style="font-size: 11px; font-weight: 800; color: var(--text-muted); margin-bottom:8px;">TODAY'S MISSION</div>`;
                 events.sort((a,b)=>a.time.localeCompare(b.time)).forEach((ev, i) => { html += `<div class="mission-item ${ev.checked?'checked':''}"><div class="mission-color" style="background:${colors[ev.color]}"></div><div class="mission-time">${ev.time}</div><div class="mission-text">${ev.title}</div><div class="check-circle" onclick="toggleCheck(${i})"><i class="fa-solid fa-check"></i></div></div>`; });
                 area.innerHTML = html;
-            } catch(e) { console.error("Checklist error", e); }
+            } catch(e) {}
         }
         function toggleCheck(i) {
             if(appState.calendar && Array.isArray(appState.calendar[todayKey]) && appState.calendar[todayKey][i]) {
@@ -688,7 +648,7 @@
             }
         }
 
-        // 🛡️ iOS/Safariでもクラッシュしない安全な時間計算関数
+        // 🛡️ 絶対にクラッシュしない安全な時間計算
         function timeToMins(timeStr) {
             if (!timeStr || !timeStr.includes(':')) return 0;
             const parts = timeStr.split(':').map(Number);
@@ -734,7 +694,7 @@
                     const rawText = data.choices[0].message.content.trim();
                     const jsonStr = rawText.substring(rawText.indexOf('{'), rawText.lastIndexOf('}') + 1);
                     planData = JSON.parse(jsonStr);
-                } catch(e) { console.warn("API Error, using fallback...", e); }
+                } catch(e) {}
             }
 
             if (!planData) {
@@ -753,11 +713,11 @@
             }, 150);
         }
 
-        // 🛡️ 無限ループ防止ガード（loopGuard）搭載アルゴリズム
+        // 🛡️ フリーズゼロの自動計算エンジン
         function generateLocalScientificPlan(task, startTimeStr, totalMins, focus, app, notes) {
             let currentMin = timeToMins(startTimeStr);
             const sessions = [];
-            let remaining = Math.max(10, totalMins); // 最低10分は確保
+            let remaining = Math.max(10, totalMins);
 
             if (focus === "低い" && remaining > 25) {
                 sessions.push({
@@ -768,7 +728,7 @@
                 currentMin += 5; remaining -= 5;
             }
 
-            let loopGuard = 0; // 🛡️ フリーズ防止用ループカウンタ
+            let loopGuard = 0;
             while (remaining > 0 && loopGuard < 50) {
                 loopGuard++;
                 if (remaining <= 20) {
@@ -894,7 +854,7 @@
         function openTimerModal() {
             document.getElementById('main-overlay').classList.add('show');
             document.getElementById('timer-modal').classList.add('show');
-            timerRemaining = timerDuration || 1500; // デフォルト25分安全ガード
+            timerRemaining = timerDuration || 1500;
             updateTimerDisplay();
         }
         function toggleTimer() {
