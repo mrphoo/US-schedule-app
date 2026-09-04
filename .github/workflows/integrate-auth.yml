@@ -1,0 +1,56 @@
+name: Integrate TimePilot Auth
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Add Supabase auth scripts to index.html
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path('index.html')
+          text = path.read_text(encoding='utf-8')
+          marker = '<!-- TIMEPILOT_AUTH_BOOTSTRAP -->'
+
+          if marker in text:
+              print('Auth bootstrap already installed.')
+              raise SystemExit(0)
+
+          if '</body>' not in text:
+              raise SystemExit('index.html does not contain </body>')
+
+          block = '''
+          <!-- TIMEPILOT_AUTH_BOOTSTRAP -->
+          <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+          <script src="supabase-config.js"></script>
+          <script src="auth.js"></script>
+          '''
+
+          text = text.replace('</body>', block + '\n</body>', 1)
+          path.write_text(text, encoding='utf-8')
+          print('Auth bootstrap installed.')
+
+      - name: Commit integration
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Integrate Supabase authentication"
+          git push
