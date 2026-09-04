@@ -15,32 +15,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Add Supabase auth scripts to index.html
+      - name: Integrate authentication into index.html
         shell: python
         run: |
           from pathlib import Path
 
           path = Path('index.html')
           text = path.read_text(encoding='utf-8')
-          marker = '<!-- TIMEPILOT_AUTH_BOOTSTRAP -->'
 
-          if marker in text:
-              print('Auth bootstrap already installed.')
-              raise SystemExit(0)
+          # Authentication UI is a login-related change, so it may be integrated automatically.
+          if 'src="auth-ui.js"' not in text:
+              if '</body>' not in text:
+                  raise SystemExit('index.html does not contain </body>')
+              block = '''
+          <script src="auth-ui.js"></script>
+              '''
+              text = text.replace('</body>', block + '\n</body>', 1)
 
-          if '</body>' not in text:
-              raise SystemExit('index.html does not contain </body>')
-
-          block = '''
-          <!-- TIMEPILOT_AUTH_BOOTSTRAP -->
-          <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-          <script src="supabase-config.js"></script>
-          <script src="auth.js"></script>
-          '''
-
-          text = text.replace('</body>', block + '\n</body>', 1)
+          # Keep the app version visible whenever this authentication milestone changes.
+          text = text.replace('TimePilot v8.0 - Apex Engine', 'TimePilot v8.1 - Apex Engine', 1)
           path.write_text(text, encoding='utf-8')
-          print('Auth bootstrap installed.')
+          print('Authentication UI and version 8.1 integrated.')
 
       - name: Commit integration
         shell: bash
@@ -52,5 +47,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Integrate Supabase authentication"
+          git commit -m "Integrate TimePilot authentication UI v8.1"
           git push
