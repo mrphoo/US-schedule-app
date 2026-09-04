@@ -1,13 +1,14 @@
 // ========================================
-// TimePilot v8.4 - Secure AI Gateway
+// TimePilot v8.4.1 - Secure AI Gateway
 // Browser never stores or sends the Groq API key.
+// AI features require an authenticated session.
 // ========================================
 
 const TIMEPILOT_AI_FUNCTION = 'timepilot-ai';
 
 async function invokeTimePilotAI(body) {
     if (typeof supabaseClient === 'undefined') throw new Error('Supabase client unavailable');
-    if (typeof currentUser === 'undefined' || !currentUser) throw new Error('Login required');
+    if (typeof currentUser === 'undefined' || !currentUser) throw new Error('LOGIN_REQUIRED');
 
     const { data, error } = await supabaseClient.functions.invoke(TIMEPILOT_AI_FUNCTION, { body });
     if (error) throw error;
@@ -34,6 +35,22 @@ function updateAISettingsUI() {
         <div style="margin-top:14px;padding:10px 12px;border-radius:10px;background:rgba(16,185,129,0.08);color:var(--color-sleep);font-size:11px;font-weight:700;">
             <i class="fa-solid fa-circle-check"></i> ログイン後すぐにAI機能を利用できます
         </div>`;
+}
+
+function requireAILogin() {
+    if (typeof currentUser !== 'undefined' && currentUser) return true;
+    alert('AI機能を利用するにはログインしてください。');
+    if (typeof openAuthModal === 'function') openAuthModal();
+    return false;
+}
+
+function escapeAIHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }
 
 function initSettings() {
@@ -70,6 +87,8 @@ function saveSettings() {
 }
 
 async function generateAIPlan() {
+    if (!requireAILogin()) return;
+
     const task = document.getElementById('input-task').value.trim() || '総合学習・集中セッション';
     const st = document.getElementById('input-start').value || '16:00';
     const et = document.getElementById('input-end').value || '18:00';
@@ -104,9 +123,15 @@ async function generateAIPlan() {
                     return { ...s, duration_mins: duration, start_time: stTime, end_time: minsToTime(curMin) };
                 });
             if (!plan.sessions.length) throw new Error('Invalid AI plan');
+        } else {
+            throw new Error('Invalid AI response');
         }
     } catch (e) {
-        console.log('Secure AI unavailable; using Local AI fallback.');
+        console.error('Secure AI error:', e);
+        alert(e?.message === 'LOGIN_REQUIRED' ? 'AI機能を利用するにはログインしてください。' : 'AIに接続できませんでした。SupabaseのAI設定を確認してください。');
+        btn.innerHTML = '<i class="fa-solid fa-brain"></i> 自分だけのAI戦略プランを生成';
+        btn.disabled = false;
+        return;
     }
 
     currentGeneratedPlan = plan;
@@ -122,12 +147,14 @@ async function generateAIPlan() {
 }
 
 async function sendChat() {
+    if (!requireAILogin()) return;
+
     const input = document.getElementById('chat-input');
     const text = input.value.trim();
     if (!text) return;
 
     const w = document.getElementById('chat-window');
-    w.innerHTML += `<div style="align-self:flex-end; background:var(--color-study); color:white; padding:12px; border-radius:12px; font-size:14px; max-width:85%;">${text}</div>`;
+    w.innerHTML += `<div style="align-self:flex-end; background:var(--color-study); color:white; padding:12px; border-radius:12px; font-size:14px; max-width:85%;">${escapeAIHtml(text)}</div>`;
     input.value = '';
     w.scrollTop = w.scrollHeight;
 
@@ -137,14 +164,16 @@ async function sendChat() {
         reply = data?.reply || '';
         if (!reply) throw new Error('Empty AI response');
     } catch (e) {
-        reply = getLocalFallbackReply(text);
+        console.error('Secure AI chat error:', e);
+        reply = 'AIに接続できませんでした。SupabaseのAI設定を確認してください。';
     }
 
-    w.innerHTML += `<div style="align-self:flex-start; background:rgba(168,85,247,0.15); padding:12px; border-radius:12px; font-size:14px; max-width:85%; border: 1px solid rgba(168,85,247,0.3);">${reply}</div>`;
+    w.innerHTML += `<div style="align-self:flex-start; background:rgba(168,85,247,0.15); padding:12px; border-radius:12px; font-size:14px; max-width:85%; border: 1px solid rgba(168,85,247,0.3);">${escapeAIHtml(reply)}</div>`;
     w.scrollTop = w.scrollHeight;
 }
 
 window.addEventListener('DOMContentLoaded', () => {
     // index.htmlの既存UIを壊さず、APIキー入力欄だけ安全なステータス表示へ置換
+    safeStorage.remove('tp_api_v800');
     updateAISettingsUI();
 });
