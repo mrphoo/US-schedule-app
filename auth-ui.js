@@ -102,7 +102,7 @@
                 font-size: 12px;
                 font-weight: 800;
             }
-            #auth-email, #auth-password {
+            #auth-email, #auth-password, #auth-email-reset, #auth-new-password, #auth-new-password-confirm {
                 width: 100%;
                 padding: 12px 14px;
                 border-radius: 12px;
@@ -118,7 +118,7 @@
                 gap: 9px;
                 margin-top: 18px;
             }
-            #auth-submit, #auth-signup {
+            #auth-submit, #auth-signup, #auth-reset-request, #auth-password-update {
                 border: 0;
                 border-radius: 12px;
                 padding: 12px;
@@ -126,9 +126,9 @@
                 font-weight: 800;
                 cursor: pointer;
             }
-            #auth-submit { background: linear-gradient(135deg, var(--color-ai,#a855f7), var(--color-study,#3b82f6)); color: white; }
-            #auth-signup { background: rgba(128,128,128,.14); color: var(--text-main,#f8fafc); border: 1px solid var(--glass-border, rgba(255,255,255,.12)); }
-            #auth-submit:disabled, #auth-signup:disabled { opacity: .55; cursor: wait; }
+            #auth-submit, #auth-password-update { background: linear-gradient(135deg, var(--color-ai,#a855f7), var(--color-study,#3b82f6)); color: white; }
+            #auth-signup, #auth-reset-request { background: rgba(128,128,128,.14); color: var(--text-main,#f8fafc); border: 1px solid var(--glass-border, rgba(255,255,255,.12)); }
+            #auth-submit:disabled, #auth-signup:disabled, #auth-reset-request:disabled, #auth-password-update:disabled { opacity: .55; cursor: wait; }
             #auth-message {
                 min-height: 18px;
                 margin-top: 13px;
@@ -136,9 +136,20 @@
                 line-height: 1.5;
                 text-align: center;
             }
+            .tp-auth-link {
+                display: block;
+                width: 100%;
+                margin-top: 12px;
+                border: 0;
+                background: transparent;
+                color: var(--color-study, #3b82f6);
+                cursor: pointer;
+                font-size: 11px;
+                font-weight: 700;
+            }
             #auth-close-button {
                 width: 100%;
-                margin-top: 10px;
+                margin-top: 8px;
                 padding: 9px;
                 border: 0;
                 background: transparent;
@@ -146,6 +157,9 @@
                 cursor: pointer;
                 font-size: 12px;
             }
+            .tp-auth-reset-only { display: none; }
+            .tp-auth-reset-request-only { display: none; }
+            .tp-auth-login-only { display: block; }
             @media (max-width: 600px) {
                 #timepilot-auth-ui { top: 8px; right: 8px; }
                 #auth-user-email { max-width: 110px; }
@@ -173,17 +187,41 @@
             <div class="tp-auth-card" role="dialog" aria-modal="true" aria-labelledby="tp-auth-title">
                 <div class="tp-auth-brand" id="tp-auth-title">
                     <i class="fa-solid fa-shield-halved" style="color:var(--color-ai)"></i>
-                    TimePilot Account
+                    <span id="auth-modal-title">TimePilot Account</span>
                 </div>
-                <div class="tp-auth-subtitle">予定や学習データをあなたのアカウントで管理</div>
-                <label class="tp-auth-label" for="auth-email">メールアドレス</label>
-                <input id="auth-email" type="email" autocomplete="email" placeholder="you@example.com">
-                <label class="tp-auth-label" for="auth-password">パスワード</label>
-                <input id="auth-password" type="password" autocomplete="current-password" placeholder="6文字以上">
-                <div class="tp-auth-actions">
-                    <button id="auth-submit" type="button" onclick="signIn()">ログイン</button>
-                    <button id="auth-signup" type="button" onclick="signUp()">新規登録</button>
+                <div class="tp-auth-subtitle" id="auth-modal-subtitle">予定や学習データをあなたのアカウントで管理</div>
+
+                <div class="tp-auth-login-only">
+                    <label class="tp-auth-label" for="auth-email">メールアドレス</label>
+                    <input id="auth-email" type="email" autocomplete="email" placeholder="you@example.com">
+                    <label class="tp-auth-label" for="auth-password">パスワード</label>
+                    <input id="auth-password" type="password" autocomplete="current-password" placeholder="6文字以上">
+                    <div class="tp-auth-actions">
+                        <button id="auth-submit" type="button" onclick="signIn()">ログイン</button>
+                        <button id="auth-signup" type="button" onclick="signUp()">新規登録</button>
+                    </div>
+                    <button class="tp-auth-link" type="button" onclick="showPasswordResetRequestMode()">パスワードを忘れた場合</button>
                 </div>
+
+                <div class="tp-auth-reset-request-only">
+                    <label class="tp-auth-label" for="auth-email-reset">メールアドレス</label>
+                    <input id="auth-email-reset" type="email" autocomplete="email" placeholder="you@example.com">
+                    <div class="tp-auth-actions">
+                        <button id="auth-reset-request" type="button" onclick="requestPasswordResetFromUI()">再設定メールを送る</button>
+                    </div>
+                    <button class="tp-auth-link" type="button" onclick="showLoginMode()">ログイン画面に戻る</button>
+                </div>
+
+                <div class="tp-auth-reset-only">
+                    <label class="tp-auth-label" for="auth-new-password">新しいパスワード</label>
+                    <input id="auth-new-password" type="password" autocomplete="new-password" placeholder="6文字以上">
+                    <label class="tp-auth-label" for="auth-new-password-confirm">新しいパスワード（確認）</label>
+                    <input id="auth-new-password-confirm" type="password" autocomplete="new-password" placeholder="もう一度入力">
+                    <div class="tp-auth-actions">
+                        <button id="auth-password-update" type="button" onclick="updatePassword()">パスワードを変更</button>
+                    </div>
+                </div>
+
                 <div id="auth-message" aria-live="polite"></div>
                 <button id="auth-close-button" type="button" onclick="closeAuthModal()">閉じる</button>
             </div>
@@ -191,13 +229,63 @@
         document.body.appendChild(modal);
 
         modal.addEventListener('click', function (event) {
-            if (event.target === modal) closeAuthModal();
+            if (event.target === modal && !modal.classList.contains('reset-mode')) closeAuthModal();
         });
 
         document.getElementById('auth-password').addEventListener('keydown', function (event) {
             if (event.key === 'Enter') signIn();
         });
+        document.getElementById('auth-new-password-confirm').addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') updatePassword();
+        });
+
+        if (typeof updateAuthUI === 'function') updateAuthUI(currentUser);
     }
+
+    window.showLoginMode = function () {
+        const modal = document.getElementById('auth-modal');
+        if (!modal) return;
+        modal.classList.remove('reset-mode');
+        document.querySelector('.tp-auth-login-only').style.display = 'block';
+        document.querySelector('.tp-auth-reset-request-only').style.display = 'none';
+        document.querySelector('.tp-auth-reset-only').style.display = 'none';
+        document.getElementById('auth-modal-title').innerText = 'TimePilot Account';
+        document.getElementById('auth-modal-subtitle').innerText = '予定や学習データをあなたのアカウントで管理';
+        showAuthMessage('');
+    };
+
+    window.showPasswordResetRequestMode = function () {
+        const modal = document.getElementById('auth-modal');
+        if (!modal) return;
+        modal.classList.remove('reset-mode');
+        document.querySelector('.tp-auth-login-only').style.display = 'none';
+        document.querySelector('.tp-auth-reset-request-only').style.display = 'block';
+        document.querySelector('.tp-auth-reset-only').style.display = 'none';
+        document.getElementById('auth-modal-title').innerText = 'パスワード再設定';
+        document.getElementById('auth-modal-subtitle').innerText = '登録メールアドレスに再設定用メールを送ります';
+        document.getElementById('auth-email-reset').value = document.getElementById('auth-email').value;
+        showAuthMessage('');
+        document.getElementById('auth-email-reset').focus();
+    };
+
+    window.requestPasswordResetFromUI = function () {
+        const source = document.getElementById('auth-email-reset');
+        const target = document.getElementById('auth-email');
+        if (target) target.value = source?.value || '';
+        requestPasswordReset();
+    };
+
+    window.showPasswordResetMode = function () {
+        const modal = document.getElementById('auth-modal');
+        if (!modal) return;
+        modal.classList.add('reset-mode');
+        document.querySelector('.tp-auth-login-only').style.display = 'none';
+        document.querySelector('.tp-auth-reset-request-only').style.display = 'none';
+        document.querySelector('.tp-auth-reset-only').style.display = 'block';
+        document.getElementById('auth-modal-title').innerText = '新しいパスワード';
+        document.getElementById('auth-modal-subtitle').innerText = '新しいパスワードを設定してください';
+        showAuthMessage('');
+    };
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', installAuthUI, { once: true });
