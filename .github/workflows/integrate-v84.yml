@@ -6,6 +6,7 @@ on:
     paths:
       - 'ai-v84.js'
       - 'supabase/functions/timepilot-ai/index.ts'
+      - '.github/workflows/integrate-v84.yml'
 
 permissions:
   contents: write
