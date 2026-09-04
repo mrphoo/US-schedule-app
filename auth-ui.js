@@ -1,0 +1,207 @@
+// ========================================
+// TimePilot Authentication UI
+// Login-related UI only. App layout is untouched.
+// ========================================
+
+(function () {
+    const STYLE_ID = 'timepilot-auth-ui-style';
+
+    function installAuthUI() {
+        if (document.getElementById('timepilot-auth-ui')) return;
+
+        const style = document.createElement('style');
+        style.id = STYLE_ID;
+        style.textContent = `
+            #timepilot-auth-ui {
+                position: fixed;
+                top: 12px;
+                right: 12px;
+                z-index: 2200;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            }
+            #auth-login-button,
+            #auth-user-area {
+                border: 1px solid var(--glass-border, rgba(255,255,255,.12));
+                background: var(--glass-bg, rgba(30,41,59,.78));
+                color: var(--text-main, #f8fafc);
+                backdrop-filter: blur(18px);
+                -webkit-backdrop-filter: blur(18px);
+                border-radius: 12px;
+                box-shadow: 0 8px 24px rgba(0,0,0,.18);
+            }
+            #auth-login-button {
+                padding: 9px 13px;
+                cursor: pointer;
+                font-size: 12px;
+                font-weight: 800;
+            }
+            #auth-user-area {
+                display: none;
+                align-items: center;
+                gap: 8px;
+                padding: 6px 7px 6px 10px;
+                max-width: min(260px, calc(100vw - 24px));
+            }
+            #auth-user-email {
+                max-width: 160px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                font-size: 11px;
+                font-weight: 700;
+                color: var(--text-muted, #94a3b8);
+            }
+            #auth-logout-button {
+                border: 0;
+                border-radius: 8px;
+                padding: 7px 9px;
+                background: rgba(239,68,68,.14);
+                color: var(--color-phone, #ef4444);
+                font-size: 11px;
+                font-weight: 800;
+                cursor: pointer;
+            }
+            #auth-modal {
+                position: fixed;
+                inset: 0;
+                z-index: 2300;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+                background: rgba(0,0,0,.62);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+            }
+            #auth-modal.show { display: flex; }
+            .tp-auth-card {
+                width: min(390px, 100%);
+                padding: 26px;
+                border: 1px solid var(--glass-border, rgba(255,255,255,.12));
+                border-radius: 24px;
+                background: var(--bg-base, #0f172a);
+                color: var(--text-main, #f8fafc);
+                box-shadow: 0 24px 80px rgba(0,0,0,.38);
+            }
+            .tp-auth-brand {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 6px;
+                font-size: 20px;
+                font-weight: 900;
+            }
+            .tp-auth-subtitle {
+                margin-bottom: 20px;
+                color: var(--text-muted, #94a3b8);
+                font-size: 12px;
+            }
+            .tp-auth-label {
+                display: block;
+                margin: 12px 0 7px;
+                font-size: 12px;
+                font-weight: 800;
+            }
+            #auth-email, #auth-password {
+                width: 100%;
+                padding: 12px 14px;
+                border-radius: 12px;
+                border: 1px solid var(--glass-border, rgba(255,255,255,.12));
+                background: rgba(255,255,255,.06);
+                color: var(--text-main, #f8fafc);
+                outline: none;
+                font-size: 14px;
+            }
+            .tp-auth-actions {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 9px;
+                margin-top: 18px;
+            }
+            #auth-submit, #auth-signup {
+                border: 0;
+                border-radius: 12px;
+                padding: 12px;
+                font-size: 13px;
+                font-weight: 800;
+                cursor: pointer;
+            }
+            #auth-submit { background: linear-gradient(135deg, var(--color-ai,#a855f7), var(--color-study,#3b82f6)); color: white; }
+            #auth-signup { background: rgba(128,128,128,.14); color: var(--text-main,#f8fafc); border: 1px solid var(--glass-border, rgba(255,255,255,.12)); }
+            #auth-submit:disabled, #auth-signup:disabled { opacity: .55; cursor: wait; }
+            #auth-message {
+                min-height: 18px;
+                margin-top: 13px;
+                font-size: 11px;
+                line-height: 1.5;
+                text-align: center;
+            }
+            #auth-close-button {
+                width: 100%;
+                margin-top: 10px;
+                padding: 9px;
+                border: 0;
+                background: transparent;
+                color: var(--text-muted,#94a3b8);
+                cursor: pointer;
+                font-size: 12px;
+            }
+            @media (max-width: 600px) {
+                #timepilot-auth-ui { top: 8px; right: 8px; }
+                #auth-user-email { max-width: 110px; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        const root = document.createElement('div');
+        root.id = 'timepilot-auth-ui';
+        root.innerHTML = `
+            <button id="auth-login-button" type="button" onclick="openAuthModal()">
+                <i class="fa-solid fa-user"></i> ログイン
+            </button>
+            <div id="auth-user-area">
+                <i class="fa-solid fa-circle-user" style="color:var(--color-study)"></i>
+                <span id="auth-user-email"></span>
+                <button id="auth-logout-button" type="button" onclick="signOut()">ログアウト</button>
+            </div>
+        `;
+        document.body.appendChild(root);
+
+        const modal = document.createElement('div');
+        modal.id = 'auth-modal';
+        modal.innerHTML = `
+            <div class="tp-auth-card" role="dialog" aria-modal="true" aria-labelledby="tp-auth-title">
+                <div class="tp-auth-brand" id="tp-auth-title">
+                    <i class="fa-solid fa-shield-halved" style="color:var(--color-ai)"></i>
+                    TimePilot Account
+                </div>
+                <div class="tp-auth-subtitle">予定や学習データをあなたのアカウントで管理</div>
+                <label class="tp-auth-label" for="auth-email">メールアドレス</label>
+                <input id="auth-email" type="email" autocomplete="email" placeholder="you@example.com">
+                <label class="tp-auth-label" for="auth-password">パスワード</label>
+                <input id="auth-password" type="password" autocomplete="current-password" placeholder="6文字以上">
+                <div class="tp-auth-actions">
+                    <button id="auth-submit" type="button" onclick="signIn()">ログイン</button>
+                    <button id="auth-signup" type="button" onclick="signUp()">新規登録</button>
+                </div>
+                <div id="auth-message" aria-live="polite"></div>
+                <button id="auth-close-button" type="button" onclick="closeAuthModal()">閉じる</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        modal.addEventListener('click', function (event) {
+            if (event.target === modal) closeAuthModal();
+        });
+
+        document.getElementById('auth-password').addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') signIn();
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', installAuthUI, { once: true });
+    } else {
+        installAuthUI();
+    }
+})();
