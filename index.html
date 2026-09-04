@@ -138,152 +138,344 @@
 
         .timer-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -45%) scale(0.9); opacity: 0; background: var(--bg-base); border: 1px solid var(--glass-border); border-radius: 24px; padding: 30px; width: 90%; max-width: 360px; z-index: 2100; text-align: center; transition: all 0.3s; pointer-events: none; }
         .timer-modal.show { transform: translate(-50%, -50%) scale(1); opacity: 1; pointer-events: auto; }
-        .timer-ring { position: relative; width: 200px; height: 200px; margin: 10px auto 20px; }
-        .timer-ring svg { transform: rotate(-90deg); width: 100%; height: 100%; }
-        .timer-ring circle { fill: none; stroke-width: 8; }
-        .timer-bg { stroke: rgba(128,128,128,0.2); }
-        .timer-progress { stroke: var(--color-study); stroke-linecap: round; transition: stroke-dashoffset 0.5s linear, stroke 0.3s; }
-        .timer-time { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 36px; font-weight: 900; font-family: monospace; }
-        .timer-controls { display: flex; justify-content: center; gap: 10px; }
-        .timer-btn { width: 50px; height: 50px; border-radius: 50%; border: 1px solid var(--glass-border); background: rgba(128,128,128,0.1); color: var(--text-main); font-size: 18px; cursor: pointer; }
+        .timer-circle-wrap { position: relative; width: 220px; height: 220px; margin: 0 auto 20px auto; }
+        .timer-progress { fill: none; stroke: var(--color-study); stroke-width: 10; stroke-dasharray: 628; stroke-dashoffset: 0; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
 
-        /* NAVIGATION */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: var(--glass-bg); backdrop-filter: var(--glass-blur); border-top: 1px solid var(--glass-border); display: flex; justify-content: center; z-index: 1000; }
-        .nav-inner { width: 100%; max-width: 560px; display: flex; justify-content: space-around; align-items: center; }
-        .nav-item { flex: 1; max-width: 100px; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; color: var(--text-muted); font-size: 10px; font-weight: 700; cursor: pointer; transition: color 0.2s; }
+        /* TUTORIAL ONBOARDING */
+        .tutorial-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-base); z-index: 9999; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 40px 20px; text-align: center; transition: opacity 0.4s; pointer-events: none; opacity: 0; }
+        .tutorial-modal.show { display: flex; pointer-events: auto; opacity: 1; }
+        .tut-slide { display: none; animation: fadeIn 0.4s; }
+        .tut-slide.active { display: block; }
+        .tut-img-wrap { margin-bottom: 25px; }
+        .tut-icon-img { width: 100px; height: 100px; border-radius: 24px; box-shadow: 0 10px 30px rgba(168, 85, 247, 0.4); object-fit: cover; }
+        .tut-icon { font-size: 80px; margin-bottom: 30px; background: -webkit-linear-gradient(45deg, var(--color-ai), var(--color-study)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .tut-title { font-size: 24px; font-weight: 900; margin-bottom: 15px; }
+        .tut-desc { font-size: 15px; color: var(--text-muted); line-height: 1.6; margin-bottom: 40px; }
+        .tut-highlight { color: var(--color-ai); font-weight: 800; background: rgba(168, 85, 247, 0.1); padding: 4px 8px; border-radius: 8px; }
+        .tut-dots { display: flex; gap: 8px; justify-content: center; margin-bottom: 30px; }
+        .tut-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(128,128,128,0.3); }
+        .tut-dot.active { background: var(--color-study); }
+
+        /* BOTTOM NAV */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; background: var(--glass-bg); backdrop-filter: var(--glass-blur); border-top: 1px solid var(--glass-border); display: flex; justify-content: center; z-index: 1000; }
+        .nav-wrapper { width: 100%; max-width: 560px; display: flex; padding-bottom: 10px; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; background: none; border: none; color: var(--text-muted); cursor: pointer; padding-top: 10px; transition: color 0.2s, transform 0.1s; }
+        .nav-item:active { transform: scale(0.9); }
+        .nav-item i { font-size: 20px; margin-bottom: 4px; pointer-events: none; }
+        .nav-item span { font-size: 10px; font-weight: 800; pointer-events: none; }
         .nav-item.active { color: var(--color-ai); }
-        .nav-item i { font-size: 20px; }
-
-        /* RESPONSIVE */
-        @media (max-width: 480px) {
-            .app-container { padding: 12px; }
-            header { padding: 12px 15px; }
-            .glass-card { padding: 16px; border-radius: 16px; }
-            .cal-grid { gap: 3px; }
-            .cal-cell { min-height: 60px; }
-        }
     </style>
 </head>
 <body>
-    <div class="bg-blobs">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
+    <div class="bg-blobs"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
+
+    <div class="tutorial-modal" id="tutorial-modal">
+        <div class="tut-slide active" id="slide-1">
+            <div class="tut-img-wrap"><img src="icon.png" class="tut-icon-img" alt="App Icon" onerror="this.style.display='none'"></div>
+            <div class="tut-title">TimePilot v8.0</div>
+            <div class="tut-desc">AIがあなたの学習戦略を構築する<br>次世代の集中支援アシスタントです。</div>
+        </div>
+        <div class="tut-slide" id="slide-2">
+            <i class="fa-solid fa-brain tut-icon"></i>
+            <div class="tut-title">科学的プランニング</div>
+            <div class="tut-desc">ただタイマーを回すだけではありません。<br>集中度・予定・天候を分析し、<br><span class="tut-highlight">「疲労を溜めないセッション戦略」</span><br>を毎回自動で設計します。</div>
+        </div>
+        <div class="tut-slide" id="slide-3">
+            <i class="fa-solid fa-chart-line tut-icon"></i>
+            <div class="tut-title">分析とレベルアップ</div>
+            <div class="tut-desc">Analysisで日々のバランスを可視化。<br>タスクやセッションを完遂するたびにEXPが貯まり、<br>ゲーム感覚で成長できます。</div>
+        </div>
+        <div class="tut-dots">
+            <div class="tut-dot active" id="dot-1"></div><div class="tut-dot" id="dot-2"></div><div class="tut-dot" id="dot-3"></div>
+        </div>
+        <button class="btn-primary" style="max-width: 300px;" id="tut-btn" onclick="nextTutorial()">次へ</button>
     </div>
 
     <header>
         <div class="brand-logo">
-            <img src="icon.png" class="brand-icon-img" alt="TimePilot">
-            <span>TimePilot</span>
+            <img src="icon.png" class="brand-icon-img" alt="logo" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<i class=\'fa-solid fa-microchip\'></i>');">
+            TimePilot
         </div>
         <div class="header-actions">
-            <button class="theme-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="テーマ切替"><i class="fa-solid fa-moon"></i></button>
+            <button class="theme-btn" onclick="toggleTheme()" id="theme-btn-icon"><i class="fa-solid fa-moon"></i></button>
             <div class="level-badge">
-                <div class="lvl-text" id="level-text">Lv.1</div>
-                <div class="exp-bar-bg"><div class="exp-bar-fill" id="exp-fill"></div></div>
+                <div class="lvl-text" id="ui-level">Lv. 1</div>
+                <div class="exp-bar-bg"><div class="exp-bar-fill" id="ui-exp-bar"></div></div>
             </div>
         </div>
     </header>
 
-    <main class="app-container">
-        <section class="app-page active-page" id="page-home">
-            <div class="section-title">TODAY</div>
-            <div class="glass-card">
-                <div id="home-date" style="font-size:12px;color:var(--text-muted);font-weight:700;margin-bottom:8px;"></div>
-                <div id="today-missions"></div>
-                <div id="empty-mission" style="display:none;text-align:center;color:var(--text-muted);font-size:12px;padding:20px 0;">今日の予定はありません</div>
-            </div>
-            <div class="section-title">QUICK ACTION</div>
-            <div class="glass-card">
-                <button class="btn-primary" onclick="openTimerModal(1500)"><i class="fa-solid fa-stopwatch"></i> 集中タイマー</button>
-            </div>
-        </section>
+    <div class="overlay" id="main-overlay" onclick="closeModals()"></div>
 
-        <section class="app-page" id="page-calendar">
-            <div class="section-title">CALENDAR</div>
-            <div class="glass-card">
-                <div class="cal-header-nav">
-                    <button class="timer-btn" onclick="changeMonth(-1)" style="width:40px;height:40px;font-size:14px;"><i class="fa-solid fa-chevron-left"></i></button>
-                    <strong id="cal-month-title"></strong>
-                    <button class="timer-btn" onclick="changeMonth(1)" style="width:40px;height:40px;font-size:14px;"><i class="fa-solid fa-chevron-right"></i></button>
-                </div>
-                <div id="calendar-grid" class="cal-grid"></div>
+    <div class="bottom-drawer" id="cal-drawer">
+        <div class="drawer-handle"></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div style="font-size: 18px; font-weight: 800;" id="drawer-date-title"></div>
+            <button style="background:none;border:none;color:var(--text-muted);font-size:22px;cursor:pointer;padding:4px;" onclick="closeModals()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div style="flex: 1; overflow-y: auto; margin-bottom: 20px;" id="drawer-event-list"></div>
+        <div style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 16px;">
+            <div class="form-row-twin" style="margin-bottom: 10px;">
+                <input type="time" id="event-time" value="16:00">
+                <input type="text" id="event-title" placeholder="予定のタイトル">
             </div>
-        </section>
-
-        <section class="app-page" id="page-ai">
-            <div class="section-title">AI PLANNER</div>
-            <div class="glass-card">
-                <div class="form-group">
-                    <label for="ai-goal">今日の目標</label>
-                    <input id="ai-goal" type="text" placeholder="例：数学を2時間進める">
-                </div>
-                <button class="btn-primary" onclick="generateAIPlan()"><i class="fa-solid fa-wand-magic-sparkles"></i> AIプランを作成</button>
-                <div id="ai-result" style="margin-top:16px;"></div>
+            <div class="color-selector" style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <div class="color-opt selected" style="background: var(--color-study);" onclick="selectColor(this, 'study')"></div>
+                <div class="color-opt" style="background: var(--color-ai);" onclick="selectColor(this, 'ai')"></div>
+                <div class="color-opt" style="background: var(--color-exercise);" onclick="selectColor(this, 'exercise')"></div>
+                <div class="color-opt" style="background: var(--color-phone);" onclick="selectColor(this, 'phone')"></div>
             </div>
-        </section>
-
-        <section class="app-page" id="page-settings">
-            <div class="section-title">SETTINGS</div>
-            <div class="glass-card">
-                <div class="form-group">
-                    <label for="pref-select">都道府県</label>
-                    <select id="pref-select" onchange="onPrefChange()"></select>
-                </div>
-                <div class="form-group">
-                    <label for="city-select">市区町村</label>
-                    <select id="city-select" onchange="onCityChange()"></select>
-                </div>
-                <div class="form-group">
-                    <label for="api-key">Groq API Key</label>
-                    <input id="api-key" type="password" placeholder="gsk_...">
-                </div>
-                <button class="btn-primary" onclick="saveSettings()"><i class="fa-solid fa-floppy-disk"></i> 設定を保存</button>
-            </div>
-        </section>
-    </main>
-
-    <div class="overlay" id="global-overlay" onclick="closeAllModals()"></div>
+            <button class="btn-primary" style="padding: 12px; font-size: 14px;" onclick="addCalendarEvent()">予定を登録</button>
+        </div>
+    </div>
 
     <div class="timer-modal" id="timer-modal">
-        <h2 style="font-size:18px;">集中タイマー</h2>
-        <div class="timer-ring">
-            <svg viewBox="0 0 220 220">
-                <circle class="timer-bg" cx="110" cy="110" r="100"></circle>
-                <circle class="timer-progress" id="timer-progress" cx="110" cy="110" r="100" stroke-dasharray="628" stroke-dashoffset="0"></circle>
+        <h2 style="margin-bottom: 5px; font-size: 20px;" id="timer-title">集中セッション</h2>
+        <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 12px;">スマホを視界から外して集中しましょう</p>
+        <div class="timer-circle-wrap">
+            <svg class="timer-svg" viewBox="0 0 220 220">
+                <circle cx="110" cy="110" r="100" fill="none" stroke="rgba(128,128,128,0.15)" stroke-width="10"></circle>
+                <circle class="timer-progress" id="timer-progress" cx="110" cy="110" r="100"></circle>
             </svg>
-            <div class="timer-time" id="time-text">25:00</div>
+            <div class="time-display" style="position: absolute; top:50%; left:50%; transform:translate(-50%,-50%);"><div class="time-text" id="time-text" style="font-family: monospace; font-size:48px; font-weight:900;">00:00</div></div>
         </div>
-        <div class="timer-controls">
-            <button class="timer-btn" onclick="toggleTimer()" aria-label="開始・停止"><i class="fa-solid fa-play" id="timer-play-icon"></i></button>
-            <button class="timer-btn" onclick="resetTimer()" aria-label="リセット"><i class="fa-solid fa-rotate-left"></i></button>
-            <button class="timer-btn" onclick="closeTimerModal()" aria-label="閉じる"><i class="fa-solid fa-xmark"></i></button>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-primary" id="btn-timer-start" onclick="toggleTimer()">START</button>
+            <button class="btn-primary" style="background: transparent; border: 2px solid var(--text-muted); color: var(--text-muted); width: 60px;" onclick="closeModals()"><i class="fa-solid fa-stop"></i></button>
         </div>
     </div>
 
-    <div class="bottom-nav">
-        <div class="nav-inner">
-            <div class="nav-item active" onclick="switchPage('home', this)"><i class="fa-solid fa-house"></i><span>ホーム</span></div>
-            <div class="nav-item" onclick="switchPage('calendar', this)"><i class="fa-solid fa-calendar-days"></i><span>カレンダー</span></div>
-            <div class="nav-item" onclick="switchPage('ai', this)"><i class="fa-solid fa-wand-magic-sparkles"></i><span>AI</span></div>
-            <div class="nav-item" onclick="switchPage('settings', this)"><i class="fa-solid fa-gear"></i><span>設定</span></div>
+    <div class="app-container">
+        <div id="page-home" class="app-page active-page">
+            <div class="glass-card" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px;">
+                <div style="font-size: 12px; font-weight: 700; color: var(--color-study);" id="home-weather-text">同期中...</div>
+                <i class="fa-solid fa-cloud-sun" id="home-weather-icon" style="font-size: 24px; color: var(--color-exercise);"></i>
+            </div>
+
+            <div id="home-checklist-area" style="margin-bottom: 20px;"></div>
+
+            <div class="glass-card">
+                <div class="form-group">
+                    <label>今日の主要タスク</label>
+                    <input type="text" id="input-task" placeholder="例: 英語の長文読解・数学演習">
+                </div>
+                <div class="form-row-twin">
+                    <div class="form-group"><label>開始時間</label><input type="time" id="input-start" value="16:00"></div>
+                    <div class="form-group"><label>終了時間</label><input type="time" id="input-end" value="18:00"></div>
+                </div>
+                <div class="form-row-twin">
+                    <div class="form-group">
+                        <label>制限したいアプリ</label>
+                        <select id="input-app">
+                            <option>Instagram</option><option>TikTok</option><option>YouTube</option><option>なし</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>現在の集中度</label>
+                        <select id="input-focus">
+                            <option>高い</option><option selected>普通</option><option>低い</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>メモ・補足</label>
+                    <input type="text" id="input-notes" placeholder="例: スマホを机の引き出しに入れる">
+                </div>
+                <button class="btn-primary" onclick="generateAIPlan()">
+                    <i class="fa-solid fa-brain"></i> 自分だけのAI戦略プランを生成
+                </button>
+            </div>
+
+            <div id="ai-scroll-anchor" style="height:1px;"></div>
+
+            <div id="home-ai-result" style="display: none;">
+                <div class="glass-card" style="border-color: var(--color-ai);">
+                    <div style="font-size: 14px; font-weight: 900; color: var(--color-ai); margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-microchip"></i> AI Strategist Plan
+                    </div>
+                    <div id="ai-plan-content"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-analysis" class="app-page">
+            <div class="glass-card">
+                <div style="font-size: 14px; font-weight: 800; margin-bottom: 15px; color: var(--color-ai);"><i class="fa-solid fa-chart-pie"></i> パーソナル分析</div>
+                
+                <div style="display: flex; justify-content: center; margin: 20px 0;">
+                    <div id="analysis-pie" style="width: 160px; height: 160px; border-radius: 50%; background: conic-gradient(var(--color-phone) 0% 40%, var(--color-study) 40% 70%, var(--color-sleep) 70% 100%); display: flex; justify-content: center; align-items: center; position: relative; transition: background 0.5s;">
+                        <div style="position: absolute; width: 100px; height: 100px; background: var(--glass-bg); backdrop-filter: blur(10px); border-radius: 50%;"></div>
+                        <div style="position: relative; z-index: 1; text-align: center; font-weight: 900; font-size: 20px;" id="total-val">24h</div>
+                    </div>
+                </div>
+
+                <div class="slider-group">
+                    <label><span>📱 スマホ時間</span><span id="val-phone">4.0 h</span></label>
+                    <input type="range" id="slide-phone" min="0" max="12" step="0.5" value="4" oninput="updateAnalysis()">
+                </div>
+                <div class="slider-group">
+                    <label><span>📖 勉強・作業時間</span><span id="val-study">3.0 h</span></label>
+                    <input type="range" id="slide-study" min="0" max="12" step="0.5" value="3" oninput="updateAnalysis()">
+                </div>
+                <div class="slider-group">
+                    <label><span>💤 睡眠時間</span><span id="val-sleep">7.0 h</span></label>
+                    <input type="range" id="slide-sleep" min="0" max="12" step="0.5" value="7" oninput="updateAnalysis()">
+                </div>
+                
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--glass-border);">
+                    <div style="font-size: 12px; color: var(--text-muted); font-weight: 700; margin-bottom: 8px;">AI フィードバック</div>
+                    <div id="analysis-feedback" style="font-size: 14px; font-weight: 700; color: var(--color-study);">バランス良好です！この調子で進めましょう。</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-chat" class="app-page">
+            <div class="glass-card" style="height: 450px; display: flex; flex-direction: column;">
+                <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px;" id="chat-window">
+                    <div style="align-self: flex-start; background: rgba(168,85,247,0.15); padding: 12px; border-radius: 12px; font-size: 14px; border: 1px solid rgba(168,85,247,0.3);">
+                        AIコーチです。学習の悩みや今の気分を教えてください。あなたに最適化したアドバイスを返答します。
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="chat-input" placeholder="例: 疲れて集中できない..." style="margin:0;" onkeypress="if(event.key==='Enter') sendChat()">
+                    <button class="btn-primary" style="width: 50px; padding: 0;" onclick="sendChat()"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-calendar" class="app-page">
+            <div class="cal-header-nav">
+                <button class="btn-primary" style="width:40px; height:40px; padding:0; background:rgba(255,255,255,0.05);" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                <div class="cal-month-title" id="cal-month-title" style="font-weight:900;">2026.07</div>
+                <button class="btn-primary" style="width:40px; height:40px; padding:0; background:rgba(255,255,255,0.05);" onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+            <div class="glass-card" style="padding: 16px;">
+                <div class="cal-grid" style="margin-bottom: 6px;">
+                    <div class="cal-weekday">SUN</div><div class="cal-weekday">MON</div><div class="cal-weekday">TUE</div><div class="cal-weekday">WED</div><div class="cal-weekday">THU</div><div class="cal-weekday">FRI</div><div class="cal-weekday">SAT</div>
+                </div>
+                <div class="cal-grid" id="calendar-grid"></div>
+            </div>
+        </div>
+
+        <div id="page-settings" class="app-page">
+            <div class="section-title">AI Engine & API</div>
+            <div class="glass-card">
+                <label style="font-size: 12px; font-weight: 700;">Groq API Key (オプション)</label>
+                <input type="password" id="api-key" placeholder="gsk_..." onchange="saveSettings()" style="margin-top:8px;">
+                <p style="font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top:4px;">※空欄でもローカル科学的AIエンジンがフル稼働します。</p>
+            </div>
+            <div class="section-title">Location (47都道府県対応)</div>
+            <div class="glass-card">
+                <div class="form-row-twin">
+                    <select id="pref-select" onchange="updateCities()"></select>
+                    <select id="city-select" onchange="saveSettings()"></select>
+                </div>
+            </div>
+            <div class="section-title">Tutorial & System</div>
+            <div class="glass-card">
+                <button class="btn-primary" style="background: transparent; border: 1px solid var(--text-muted); color: var(--text-main); margin-bottom: 10px;" onclick="resetTutorial()">チュートリアルをもう一度見る</button>
+                <div style="font-size: 11px; color: var(--text-muted); text-align: center; font-family: monospace;">TimePilot v8.0.0 (Apex Bulletproof Engine)</div>
+            </div>
         </div>
     </div>
+
+    <nav class="bottom-nav">
+        <div class="nav-wrapper">
+            <button class="nav-item active" onclick="switchTab('home', this)"><i class="fa-solid fa-house"></i><span>Home</span></button>
+            <button class="nav-item" onclick="switchTab('analysis', this)"><i class="fa-solid fa-chart-pie"></i><span>Analysis</span></button>
+            <button class="nav-item" onclick="switchTab('chat', this)"><i class="fa-solid fa-message"></i><span>Chat</span></button>
+            <button class="nav-item" onclick="switchTab('calendar', this)"><i class="fa-solid fa-calendar-days"></i><span>Calendar</span></button>
+            <button class="nav-item" onclick="switchTab('settings', this)"><i class="fa-solid fa-gear"></i><span>Settings</span></button>
+        </div>
+    </nav>
 
     <script>
-        const geoMaster = {
-            "東京都": [{name:"新宿区", lat:35.6938, lon:139.7034}],
-            "大阪府": [{name:"大阪市", lat:34.6937, lon:135.5023}],
-            "京都府": [{name:"京都市", lat:35.0116, lon:135.7681}],
-            "愛知県": [{name:"名古屋市", lat:35.1815, lon:136.9066}],
-            "石川県": [{name:"金沢市", lat:36.5613, lon:136.6562}]
+        // =========================================================
+        // 🛡️ 究極の安全ストレージエンジン（絶対にクラッシュしない）
+        // =========================================================
+        const safeStorage = {
+            memory: {},
+            get: function(key) {
+                try { return localStorage.getItem(key) || this.memory[key] || null; }
+                catch(e) { return this.memory[key] || null; }
+            },
+            set: function(key, val) {
+                try { localStorage.setItem(key, val); }
+                catch(e) {}
+                this.memory[key] = val;
+            },
+            remove: function(key) {
+                try { localStorage.removeItem(key); }
+                catch(e) {}
+                delete this.memory[key];
+            }
         };
 
-        const safeStorage = {
-            get(key) { try { return localStorage.getItem(key); } catch(e) { return null; } },
-            set(key, value) { try { localStorage.setItem(key, value); } catch(e) {} },
-            remove(key) { try { localStorage.removeItem(key); } catch(e) {} }
+        // =========================================================
+        // 🎮 Web Audio API 音響ジェネレーター（外部ファイル不要）
+        // =========================================================
+        function playSE(type) {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                if (ctx.state === 'suspended') ctx.resume();
+
+                if (type === 'check') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+                    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.08); // A5
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+                    osc.start(); osc.stop(ctx.currentTime + 0.2);
+                } else if (type === 'clear') {
+                    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                    notes.forEach((freq, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.connect(gain); gain.connect(ctx.destination);
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.12);
+                        gain.gain.setValueAtTime(0.25, ctx.currentTime + idx * 0.12);
+                        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + idx * 0.12 + 0.4);
+                        osc.start(ctx.currentTime + idx * 0.12);
+                        osc.stop(ctx.currentTime + idx * 0.12 + 0.4);
+                    });
+                }
+            } catch(e) {}
+        }
+
+        // =========================================
+        // DATA: 47都道府県マスタ
+        // =========================================
+        const geoMaster = {
+            "北海道":[{name:"札幌市",lat:43.06,lon:141.35},{name:"函館市",lat:41.77,lon:140.73},{name:"旭川市",lat:43.77,lon:142.36}],
+            "青森県":[{name:"青森市",lat:40.82,lon:140.74}], "岩手県":[{name:"盛岡市",lat:39.70,lon:141.15}], "宮城県":[{name:"仙台市",lat:38.27,lon:140.87}],
+            "秋田県":[{name:"秋田市",lat:39.72,lon:140.10}], "山形県":[{name:"山形市",lat:38.26,lon:140.34}], "福島県":[{name:"福島市",lat:37.76,lon:140.47}],
+            "茨城県":[{name:"水戸市",lat:36.37,lon:140.47}], "栃木県":[{name:"宇都宮市",lat:36.57,lon:139.88}], "群馬県":[{name:"前橋市",lat:36.39,lon:139.06}],
+            "埼玉県":[{name:"さいたま市",lat:35.86,lon:139.65}], "千葉県":[{name:"千葉市",lat:35.61,lon:140.12}], 
+            "東京都":[{name:"新宿区",lat:35.69,lon:139.70},{name:"渋谷区",lat:35.66,lon:139.70},{name:"八王子市",lat:35.66,lon:139.34}],
+            "神奈川県":[{name:"横浜市",lat:35.44,lon:139.64},{name:"川崎市",lat:35.53,lon:139.70}], 
+            "新潟県":[{name:"新潟市",lat:37.92,lon:139.04}], "富山県":[{name:"富山市",lat:36.70,lon:137.21}], 
+            "石川県":[{name:"金沢市",lat:36.56,lon:136.66},{name:"小松市",lat:36.40,lon:136.45}], "福井県":[{name:"福井市",lat:36.06,lon:136.22}],
+            "山梨県":[{name:"甲府市",lat:35.66,lon:138.57}], "長野県":[{name:"長野市",lat:36.65,lon:138.18}], "岐阜県":[{name:"岐阜市",lat:35.42,lon:136.76}],
+            "静岡県":[{name:"静岡市",lat:34.98,lon:138.38},{name:"浜松市",lat:34.71,lon:137.73}], "愛知県":[{name:"名古屋市",lat:35.18,lon:136.91}],
+            "三重県":[{name:"津市",lat:34.72,lon:136.51}], "滋賀県":[{name:"大津市",lat:35.02,lon:135.87}], "京都府":[{name:"京都市",lat:35.01,lon:135.77}],
+            "大阪府":[{name:"大阪市",lat:34.69,lon:135.50},{name:"堺市",lat:34.57,lon:135.48}], "兵庫県":[{name:"神戸市",lat:34.69,lon:135.19}],
+            "奈良県":[{name:"奈良市",lat:34.69,lon:135.83}], "和歌山県":[{name:"和歌山市",lat:34.23,lon:135.17}],
+            "鳥取県":[{name:"鳥取市",lat:35.50,lon:134.24}], "島根県":[{name:"松江市",lat:35.47,lon:133.05}], "岡山県":[{name:"岡山市",lat:34.66,lon:133.92}],
+            "広島県":[{name:"広島市",lat:34.39,lon:132.46}], "山口県":[{name:"山口市",lat:34.18,lon:131.47}], "徳島県":[{name:"徳島市",lat:34.07,lon:134.56}],
+            "香川県":[{name:"高松市",lat:34.34,lon:134.04}], "愛媛県":[{name:"松山市",lat:33.84,lon:132.77}], "高知県":[{name:"高知市",lat:33.56,lon:133.53}],
+            "福岡県":[{name:"福岡市",lat:33.61,lon:130.42},{name:"北九州市",lat:33.88,lon:130.88}], "佐賀県":[{name:"佐賀市",lat:33.26,lon:130.30}],
+            "長崎県":[{name:"長崎市",lat:32.75,lon:129.88}], "熊本県":[{name:"熊本市",lat:32.80,lon:130.71}], "大分県":[{name:"大分市",lat:33.24,lon:131.61}],
+            "宮崎県":[{name:"宮崎市",lat:31.91,lon:131.42}], "鹿児島県":[{name:"鹿児島市",lat:31.56,lon:130.56}], "沖縄県":[{name:"那覇市",lat:26.21,lon:127.68}]
         };
+        const allPrefs = Object.keys(geoMaster);
+        const colors = { study: 'var(--color-study)', ai: 'var(--color-ai)', exercise: 'var(--color-exercise)', phone: 'var(--color-phone)' };
+        let selectedEventColor = 'study';
 
         let appState = {
             exp: parseInt(safeStorage.get('tp_exp_v800')) || 0,
@@ -295,222 +487,484 @@
             tutorialDone: safeStorage.get('tp_tut_v800') === 'true'
         };
 
+        let weatherCache = { condition: "晴れ", temp: 25 };
         let currentDate = new Date();
-        let timerDuration = 1500;
-        let timerRemaining = 1500;
-        let timerInterval = null;
-        let timerRunning = false;
+        let todayKey = `${currentDate.getFullYear()}-${String(currentDate.getMonth()+1).padStart(2,'0')}-${String(currentDate.getDate()).padStart(2,'0')}`;
+        let activeCalDateKey = "";
+        let timerDuration = 1500, timerRemaining = 1500, timerInterval = null, isRunning = false;
+        let tutStep = 1;
+        let currentGeneratedPlan = null;
 
-        function switchPage(page, el) {
-            document.querySelectorAll('.app-page').forEach(p => p.classList.remove('active-page'));
-            document.getElementById('page-' + page).classList.add('active-page');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            el.classList.add('active');
+        // =========================================
+        // INIT & ONLOAD
+        // =========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            initSettings();
+            updateLevelUI();
+            fetchWeatherAndApplyTheme();
+            renderCalendar();
+            renderHomeChecklist();
+            updateAnalysis();
+            
+            if (!appState.tutorialDone) {
+                const modal = document.getElementById('tutorial-modal');
+                modal.classList.add('show');
+            }
+        });
+
+        function resetTutorial() {
+            safeStorage.remove('tp_tut_v800');
+            location.reload();
         }
 
-        function toggleTheme() {
-            appState.theme = appState.theme === 'dark' ? 'light' : 'dark';
-            document.body.classList.toggle('light-theme', appState.theme === 'light');
-            safeStorage.set('tp_theme_v800', appState.theme);
-            document.getElementById('theme-toggle').innerHTML = appState.theme === 'dark' ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
-        }
-
-        function initTheme() {
-            document.body.classList.toggle('light-theme', appState.theme === 'light');
-            document.getElementById('theme-toggle').innerHTML = appState.theme === 'dark' ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
-        }
-
-        function updateLevel() {
-            const level = Math.floor(appState.exp / 100) + 1;
-            const progress = appState.exp % 100;
-            document.getElementById('level-text').innerText = `Lv.${level}`;
-            document.getElementById('exp-fill').style.width = progress + '%';
-        }
-
-        function renderHome() {
-            const now = new Date();
-            document.getElementById('home-date').innerText = now.toLocaleDateString('ja-JP', {year:'numeric', month:'long', day:'numeric', weekday:'long'});
-            const key = now.toISOString().slice(0,10);
-            const missions = appState.calendar[key] || [];
-            const container = document.getElementById('today-missions');
-            container.innerHTML = '';
-            document.getElementById('empty-mission').style.display = missions.length ? 'none' : 'block';
-            missions.forEach((m, i) => {
-                const item = document.createElement('div');
-                item.className = 'mission-item' + (m.done ? ' checked' : '');
-                item.innerHTML = `<div class="mission-color" style="background:${m.color || 'var(--color-study)'}"></div><div class="mission-text">${m.title || '予定'}</div><div class="mission-time">${m.time || ''}</div><div class="check-circle" onclick="toggleMission('${key}', ${i})"><i class="fa-solid fa-check"></i></div>`;
-                container.appendChild(item);
-            });
-        }
-
-        function toggleMission(key, index) {
-            if (!appState.calendar[key]?.[index]) return;
-            appState.calendar[key][index].done = !appState.calendar[key][index].done;
-            safeStorage.set('tp_cal_v800', JSON.stringify(appState.calendar));
-            renderHome();
-        }
-
-        function renderCalendar() {
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            document.getElementById('cal-month-title').innerText = `${year}年${month + 1}月`;
-            const grid = document.getElementById('calendar-grid');
-            grid.innerHTML = '';
-            ['日','月','火','水','木','金','土'].forEach(d => {
-                const el = document.createElement('div');
-                el.className = 'cal-weekday';
-                el.innerText = d;
-                grid.appendChild(el);
-            });
-            const first = new Date(year, month, 1).getDay();
-            const days = new Date(year, month + 1, 0).getDate();
-            for (let i = 0; i < first; i++) grid.appendChild(document.createElement('div'));
-            for (let day = 1; day <= days; day++) {
-                const el = document.createElement('div');
-                el.className = 'cal-cell';
-                const key = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-                const today = new Date();
-                if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) el.classList.add('today');
-                el.innerHTML = `<div class="cal-date-num">${day}</div>`;
-                (appState.calendar[key] || []).slice(0,3).forEach(m => {
-                    const bar = document.createElement('div');
-                    bar.className = 'cal-event-bar';
-                    bar.style.background = m.color || 'var(--color-study)';
-                    bar.innerText = m.title || '予定';
-                    el.appendChild(bar);
-                });
-                grid.appendChild(el);
+        function nextTutorial() {
+            try {
+                document.getElementById(`slide-${tutStep}`).classList.remove('active');
+                document.getElementById(`dot-${tutStep}`).classList.remove('active');
+                tutStep++;
+                if (tutStep <= 3) {
+                    document.getElementById(`slide-${tutStep}`).classList.add('active');
+                    document.getElementById(`dot-${tutStep}`).classList.add('active');
+                    if (tutStep === 3) document.getElementById('tut-btn').innerText = "はじめる";
+                } else {
+                    document.getElementById('tutorial-modal').classList.remove('show');
+                    safeStorage.set('tp_tut_v800', 'true');
+                }
+            } catch(e) {
+                document.getElementById('tutorial-modal').classList.remove('show');
+                safeStorage.set('tp_tut_v800', 'true');
             }
         }
 
-        function changeMonth(delta) {
-            currentDate.setMonth(currentDate.getMonth() + delta);
-            renderCalendar();
+        function switchTab(tabId, btn) {
+            try {
+                document.querySelectorAll('.app-page').forEach(p => p.classList.remove('active-page'));
+                document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
+                document.getElementById(`page-${tabId}`).classList.add('active-page');
+                btn.classList.add('active');
+                if (tabId === 'calendar') renderCalendar();
+                if (tabId === 'home') renderHomeChecklist();
+            } catch(e) {}
         }
 
-        function openTimerModal(duration = 1500) {
-            timerDuration = duration;
-            timerRemaining = duration;
-            timerRunning = false;
-            clearInterval(timerInterval);
-            document.getElementById('timer-modal').classList.add('show');
-            updateTimerDisplay();
-            document.getElementById('timer-play-icon').className = 'fa-solid fa-play';
+        // =========================================
+        // SETTINGS & THEME
+        // =========================================
+        function initSettings() {
+            document.getElementById('api-key').value = appState.apiKey || "";
+            if (appState.theme === 'light') {
+                document.body.classList.add('light-theme');
+                document.getElementById('theme-btn-icon').innerHTML = '<i class="fa-solid fa-sun"></i>';
+            }
+            const pSel = document.getElementById('pref-select');
+            pSel.innerHTML = "";
+            allPrefs.forEach(p => { let o = document.createElement('option'); o.value = p; o.innerText = p; pSel.appendChild(o); });
+            pSel.value = geoMaster[appState.pref] ? appState.pref : "東京都";
+            updateCities();
+        }
+        function updateCities() {
+            const pSel = document.getElementById('pref-select');
+            const p = geoMaster[pSel.value] ? pSel.value : "東京都";
+            const cSel = document.getElementById('city-select');
+            cSel.innerHTML = "";
+            geoMaster[p].forEach(c => { let o = document.createElement('option'); o.value = JSON.stringify(c); o.innerText = c.name; cSel.appendChild(o); });
+            try { cSel.value = appState.city; if(!cSel.value) cSel.selectedIndex = 0; } catch(e) { cSel.selectedIndex = 0; }
+        }
+        function saveSettings() {
+            appState.apiKey = document.getElementById('api-key').value.trim();
+            appState.pref = document.getElementById('pref-select').value;
+            appState.city = document.getElementById('city-select').value;
+            safeStorage.set('tp_api_v800', appState.apiKey);
+            safeStorage.set('tp_pref_v800', appState.pref);
+            safeStorage.set('tp_city_v800', appState.city);
+            fetchWeatherAndApplyTheme();
+        }
+        function toggleTheme() {
+            if (appState.theme === 'dark') {
+                appState.theme = 'light';
+                document.body.classList.add('light-theme');
+                document.getElementById('theme-btn-icon').innerHTML = '<i class="fa-solid fa-sun"></i>';
+            } else {
+                appState.theme = 'dark';
+                document.body.classList.remove('light-theme');
+                document.getElementById('theme-btn-icon').innerHTML = '<i class="fa-solid fa-moon"></i>';
+            }
+            safeStorage.set('tp_theme_v800', appState.theme);
+        }
+        async function fetchWeatherAndApplyTheme() {
+            try {
+                const city = JSON.parse(appState.city);
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current_weather=true&timezone=Asia%2FTokyo`);
+                const data = await res.json();
+                weatherCache.temp = data.current_weather.temperature;
+                document.getElementById('home-weather-text').innerText = `${appState.pref} ${city.name} ${weatherCache.temp}℃`;
+            } catch(e) {
+                document.getElementById('home-weather-text').innerText = `${appState.pref} (オフライン稼働中)`;
+            }
         }
 
-        function closeTimerModal() {
+        // =========================================
+        // EXP & ANALYSIS
+        // =========================================
+        function addExp(amount) {
+            appState.exp += amount;
+            safeStorage.set('tp_exp_v800', appState.exp);
+            updateLevelUI();
+        }
+        function updateLevelUI() {
+            document.getElementById('ui-level').innerText = `Lv. ${Math.floor(appState.exp / 100) + 1}`;
+            document.getElementById('ui-exp-bar').style.width = `${appState.exp % 100}%`;
+        }
+        function updateAnalysis() {
+            try {
+                const phone = parseFloat(document.getElementById('slide-phone').value);
+                const study = parseFloat(document.getElementById('slide-study').value);
+                const sleep = parseFloat(document.getElementById('slide-sleep').value);
+                
+                document.getElementById('val-phone').innerText = phone.toFixed(1) + ' h';
+                document.getElementById('val-study').innerText = study.toFixed(1) + ' h';
+                document.getElementById('val-sleep').innerText = sleep.toFixed(1) + ' h';
+
+                const total = phone + study + sleep;
+                document.getElementById('total-val').innerText = total > 24 ? "! 24h over" : total.toFixed(1) + "h";
+
+                const pP = total > 0 ? (phone / total) * 100 : 0;
+                const pSt = total > 0 ? (study / total) * 100 : 0;
+                const pSl = total > 0 ? (sleep / total) * 100 : 0;
+                document.getElementById('analysis-pie').style.background = `conic-gradient(var(--color-phone) 0% ${pP}%, var(--color-study) ${pP}% ${pP+pSt}%, var(--color-sleep) ${pP+pSt}% 100%)`;
+
+                const fb = document.getElementById('analysis-feedback');
+                if (phone > 5) fb.innerHTML = `<span style="color:var(--color-phone)"><i class="fa-solid fa-triangle-exclamation"></i> スマホ時間が長すぎます。睡眠の質が落ちる危険があります。</span>`;
+                else if (sleep < 6) fb.innerHTML = `<span style="color:var(--color-sleep)"><i class="fa-solid fa-bed"></i> 睡眠不足です。最低6時間は確保しましょう。</span>`;
+                else if (study > 6) fb.innerHTML = `<span style="color:var(--color-study)"><i class="fa-solid fa-fire"></i> 凄い集中力！明日は少し休む時間も作りましょう。</span>`;
+                else fb.innerHTML = `<span style="color:var(--color-ai)"><i class="fa-solid fa-check"></i> パーフェクトなバランスです！</span>`;
+            } catch(e) {}
+        }
+
+        // =========================================
+        // CALENDAR
+        // =========================================
+        function changeMonth(dir) { currentDate.setMonth(currentDate.getMonth() + dir); renderCalendar(); }
+        function renderCalendar() {
+            try {
+                const grid = document.getElementById('calendar-grid'); grid.innerHTML = "";
+                const y = currentDate.getFullYear(), m = currentDate.getMonth();
+                document.getElementById('cal-month-title').innerText = `${y}.${String(m+1).padStart(2,'0')}`;
+                const firstDay = new Date(y, m, 1).getDay(), days = new Date(y, m+1, 0).getDate();
+
+                for (let i=0; i<firstDay; i++) grid.innerHTML += `<div class="cal-cell" style="opacity:0"></div>`;
+                for (let d=1; d<=days; d++) {
+                    const dKey = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                    let html = `<div class="cal-date-num">${d}</div>`;
+                    if (appState.calendar && Array.isArray(appState.calendar[dKey])) {
+                        appState.calendar[dKey].forEach(ev => html += `<div class="cal-event-bar" style="background:${colors[ev.color]}; opacity:${ev.checked?0.4:1}">${ev.time} ${ev.title}</div>`);
+                    }
+                    let cell = document.createElement('div'); cell.className = `cal-cell ${dKey===todayKey?'today':''}`;
+                    cell.innerHTML = html; cell.onclick = () => openDrawer(dKey, `${m+1}月${d}日`);
+                    grid.appendChild(cell);
+                }
+            } catch(e) {}
+        }
+        function openDrawer(dKey, title) {
+            activeCalDateKey = dKey;
+            document.getElementById('drawer-date-title').innerText = title;
+            document.getElementById('main-overlay').classList.add('show');
+            document.getElementById('cal-drawer').classList.add('open');
+            renderDrawerList();
+        }
+        function closeModals() {
+            document.getElementById('main-overlay').classList.remove('show');
             document.getElementById('timer-modal').classList.remove('show');
+            document.getElementById('cal-drawer').classList.remove('open');
             clearInterval(timerInterval);
-            timerRunning = false;
+            isRunning = false;
+        }
+        function renderDrawerList() {
+            const area = document.getElementById('drawer-event-list');
+            const events = (appState.calendar && Array.isArray(appState.calendar[activeCalDateKey])) ? appState.calendar[activeCalDateKey] : [];
+            if (events.length === 0) { area.innerHTML = `<div style="text-align:center; color:var(--text-muted); font-size:12px;">予定なし</div>`; return; }
+            let html = "";
+            events.sort((a,b)=>a.time.localeCompare(b.time)).forEach((ev, i) => {
+                html += `<div class="mission-item"><div class="mission-color" style="background:${colors[ev.color]}"></div><div class="mission-time">${ev.time}</div><div class="mission-text">${ev.title}</div><i class="fa-solid fa-trash" style="color:var(--color-phone); cursor:pointer; padding:8px;" onclick="delEvent(${i})"></i></div>`;
+            });
+            area.innerHTML = html;
+        }
+        function selectColor(el, c) { document.querySelectorAll('.color-opt').forEach(o=>o.classList.remove('selected')); el.classList.add('selected'); selectedEventColor = c; }
+        function addCalendarEvent() {
+            const t = document.getElementById('event-time').value, title = document.getElementById('event-title').value.trim();
+            if (!t || !title) return;
+            if (!appState.calendar) appState.calendar = {};
+            if (!Array.isArray(appState.calendar[activeCalDateKey])) appState.calendar[activeCalDateKey] = [];
+            appState.calendar[activeCalDateKey].push({ time: t, title: title, color: selectedEventColor, checked: false });
+            safeStorage.set('tp_cal_v800', JSON.stringify(appState.calendar));
+            document.getElementById('event-title').value = "";
+            renderDrawerList(); renderCalendar();
+            if (activeCalDateKey === todayKey) renderHomeChecklist();
+        }
+        function delEvent(i) {
+            appState.calendar[activeCalDateKey].splice(i,1);
+            if (appState.calendar[activeCalDateKey].length === 0) delete appState.calendar[activeCalDateKey];
+            safeStorage.set('tp_cal_v800', JSON.stringify(appState.calendar));
+            renderDrawerList(); renderCalendar();
+            if (activeCalDateKey === todayKey) renderHomeChecklist();
         }
 
+        // =========================================
+        // HOME CHECKLIST & AI PLANNER
+        // =========================================
+        function renderHomeChecklist() {
+            try {
+                const area = document.getElementById('home-checklist-area');
+                const events = (appState.calendar && Array.isArray(appState.calendar[todayKey])) ? appState.calendar[todayKey] : [];
+                if (events.length === 0) { area.innerHTML = ""; return; }
+                let html = `<div style="font-size: 11px; font-weight: 800; color: var(--text-muted); margin-bottom:8px;">TODAY'S MISSION</div>`;
+                events.sort((a,b)=>a.time.localeCompare(b.time)).forEach((ev, i) => {
+                    html += `<div class="mission-item ${ev.checked?'checked':''}"><div class="mission-color" style="background:${colors[ev.color]}"></div><div class="mission-time">${ev.time}</div><div class="mission-text">${ev.title}</div><div class="check-circle" onclick="toggleCheck(${i})"><i class="fa-solid fa-check"></i></div></div>`;
+                });
+                area.innerHTML = html;
+            } catch(e) {}
+        }
+        function toggleCheck(i) {
+            if (appState.calendar && Array.isArray(appState.calendar[todayKey]) && appState.calendar[todayKey][i]) {
+                appState.calendar[todayKey][i].checked = !appState.calendar[todayKey][i].checked;
+                safeStorage.set('tp_cal_v800', JSON.stringify(appState.calendar));
+                renderHomeChecklist(); renderCalendar();
+                if (appState.calendar[todayKey][i].checked) {
+                    playSE('check');
+                    addExp(5);
+                }
+            }
+        }
+
+        // 🛡️ Safari等でも絶対にバグらない純粋整数時間計算
+        function timeToMins(timeStr) {
+            if (!timeStr || typeof timeStr !== 'string' || !timeStr.includes(':')) return 0;
+            const parts = timeStr.split(':').map(Number);
+            return (isNaN(parts[0]) ? 0 : parts[0]) * 60 + (isNaN(parts[1]) ? 0 : parts[1]);
+        }
+        function minsToTime(totalMins) {
+            const m = ((totalMins % 1440) + 1440) % 1440;
+            const hours = Math.floor(m / 60);
+            const mins = m % 60;
+            return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+        }
+
+        async function generateAIPlan() {
+            const task = document.getElementById('input-task').value.trim() || "総合学習・集中セッション";
+            const st = document.getElementById('input-start').value || "16:00";
+            const et = document.getElementById('input-end').value || "18:00";
+            const app = document.getElementById('input-app').value;
+            const focus = document.getElementById('input-focus').value;
+            const notes = document.getElementById('input-notes').value.trim();
+            
+            let startMins = timeToMins(st);
+            let endMins = timeToMins(et);
+            if (endMins <= startMins) endMins += 1440; // 日またぎ対応
+            const totalDiffMins = Math.max(10, endMins - startMins);
+
+            const btn = document.querySelector('#page-home .btn-primary');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> AI分析・戦略構築中...';
+            btn.disabled = true;
+
+            let plan = generateLocalScientificPlan(task, st, totalDiffMins, focus, app, notes);
+
+            if (appState.apiKey) {
+                try {
+                    const prompt = `あなたはプロの学習戦略アドバイザーです。以下の条件でセッションを分割し、必ずJSON配列のみを出力してください。\nタスク:${task}\n時間:${totalDiffMins}分\n集中度:${focus}\n天候:${weatherCache.temp}度\nフォーマット:[{"type":"focus"|"break"|"prep", "duration_mins":数字, "title":"タイトル", "advice":"アドバイス"}]`;
+                    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${appState.apiKey}` },
+                        body: JSON.stringify({ model: "llama3-8b-8192", messages: [{role: "user", content: prompt}], temperature: 0.3 })
+                    });
+                    const data = await res.json();
+                    if (data.choices) {
+                        const jsonStr = data.choices[0].message.content.match(/\[.*\]/s);
+                        if (jsonStr) {
+                            const parsed = JSON.parse(jsonStr[0]);
+                            let curMin = startMins;
+                            plan.sessions = parsed.map(s => {
+                                const stTime = minsToTime(curMin);
+                                curMin += s.duration_mins;
+                                return { ...s, start_time: stTime, end_time: minsToTime(curMin) };
+                            });
+                        }
+                    }
+                } catch(e) { console.log("API fallback to Local AI"); }
+            }
+
+            currentGeneratedPlan = plan;
+            renderRichAIPlan(plan);
+            document.getElementById('home-ai-result').style.display = 'block';
+            btn.innerHTML = '<i class="fa-solid fa-brain"></i> 自分だけのAI戦略プランを生成';
+            btn.disabled = false;
+            
+            setTimeout(() => {
+                const anchor = document.getElementById('ai-scroll-anchor');
+                if (anchor) window.scrollTo({ top: anchor.offsetTop - 30, behavior: 'smooth' });
+            }, 150);
+        }
+
+        // 🛡️ フリーズゼロの科学的自動分割エンジン
+        function generateLocalScientificPlan(task, startTimeStr, totalMins, focus, app, notes) {
+            let currentMin = timeToMins(startTimeStr);
+            const sessions = [];
+            let remaining = Math.max(10, totalMins);
+
+            if (focus === "低い" && remaining > 25) {
+                sessions.push({
+                    type: "prep", start_time: minsToTime(currentMin), end_time: minsToTime(currentMin + 5),
+                    duration_mins: 5, title: `【アイドリング】${task}の準備・見出し確認`,
+                    advice: `${app !== 'なし' ? app+'を完全に閉じ、' : ''}まずは5分だけハードルの低い作業から開始し、作業興奮を呼び起こします。`
+                });
+                currentMin += 5; remaining -= 5;
+            }
+
+            let loopGuard = 0;
+            while (remaining > 0 && loopGuard < 50) {
+                loopGuard++;
+                if (remaining <= 20) {
+                    sessions.push({
+                        type: "focus", start_time: minsToTime(currentMin), end_time: minsToTime(currentMin + remaining),
+                        duration_mins: remaining, title: `【ラストスパート】${task}のまとめと見直し`,
+                        advice: `残りの集中力を使い切り、今日進めた部分の確認・整理を行います。${notes ? '(' + notes + ')' : ''}`
+                    });
+                    break;
+                }
+                let focusChunk = totalMins >= 120 ? 45 : 25;
+                if (remaining < focusChunk + 5) focusChunk = remaining;
+
+                sessions.push({
+                    type: "focus", start_time: minsToTime(currentMin), end_time: minsToTime(currentMin + focusChunk),
+                    duration_mins: focusChunk, title: `【ディープフォーカス】${task}の実践演習`,
+                    advice: `気温${weatherCache.temp}℃。スマホを視界から外し、シングルタスクで極限まで集中力を高めます。`
+                });
+                currentMin += focusChunk; remaining -= focusChunk;
+
+                if (remaining >= 10) {
+                    let breakChunk = focusChunk >= 45 ? 10 : 5;
+                    sessions.push({
+                        type: "break", start_time: minsToTime(currentMin), end_time: minsToTime(currentMin + breakChunk),
+                        duration_mins: breakChunk, title: "【脳の冷却・リセット】マインドフルネス休憩",
+                        advice: "目を閉じて深呼吸し、脳のワーキングメモリを整理します。※画面は見ず、水を一杯飲みましょう。"
+                    });
+                    currentMin += breakChunk; remaining -= breakChunk;
+                }
+            }
+            return { sessions: sessions };
+        }
+
+        // 🚀 次世代アクションカードUI描画
+        function renderRichAIPlan(plan) {
+            const container = document.getElementById('ai-plan-content');
+            let html = "";
+            plan.sessions.forEach((s, idx) => {
+                let badgeClass = "badge-focus";
+                let badgeText = "🔥 FOCUS";
+                let btnText = "<i class='fa-solid fa-play'></i> この集中セッションを開始";
+                let btnClass = "";
+                
+                if (s.type === "break") { badgeClass = "badge-break"; badgeText = "💤 BREAK"; btnText = "<i class='fa-solid fa-mug-hot'></i> 休憩タイマーを開始"; btnClass = "break-mode"; }
+                else if (s.type === "prep") { badgeClass = "badge-prep"; badgeText = "⚡ PREP"; btnText = "<i class='fa-solid fa-play'></i> 準備セッションを開始"; }
+
+                html += `
+                <div class="plan-session-card">
+                    <div class="plan-session-header">
+                        <span class="plan-badge ${badgeClass}">${badgeText}</span>
+                        <span class="plan-time-range">${s.start_time} - ${s.end_time}</span>
+                    </div>
+                    <div class="plan-title">${s.title}</div>
+                    <div class="plan-duration"><i class="fa-regular fa-clock"></i> 実行時間: ${s.duration_mins}分間</div>
+                    <div class="plan-advice">${s.advice}</div>
+                    <button class="btn-session-start ${btnClass}" onclick="startSpecificSession(${idx})">${btnText}</button>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function startSpecificSession(index) {
+            if (!currentGeneratedPlan || !currentGeneratedPlan.sessions[index]) return;
+            const session = currentGeneratedPlan.sessions[index];
+            timerDuration = session.duration_mins * 60;
+            timerRemaining = timerDuration;
+            document.getElementById('timer-title').innerText = session.title;
+            openTimerModal();
+            toggleTimer();
+        }
+
+        // =========================================
+        // CHAT & TIMER
+        // =========================================
+        async function sendChat() {
+            const input = document.getElementById('chat-input'), text = input.value.trim(); if (!text) return;
+            const w = document.getElementById('chat-window');
+            w.innerHTML += `<div style="align-self:flex-end; background:var(--color-study); color:white; padding:12px; border-radius:12px; font-size:14px; max-width:85%;">${text}</div>`;
+            input.value = ''; w.scrollTop = w.scrollHeight;
+            
+            let reply = "";
+            if (appState.apiKey) {
+                try {
+                    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${appState.apiKey}` },
+                        body: JSON.stringify({ model: "llama3-8b-8192", messages: [{role: "user", content: text}] })
+                    });
+                    const data = await res.json(); 
+                    if (data.choices) reply = data.choices[0].message.content;
+                    else throw new Error("API Limit");
+                } catch(e) { reply = getLocalFallbackReply(text); }
+            } else {
+                reply = getLocalFallbackReply(text);
+            }
+            
+            w.innerHTML += `<div style="align-self:flex-start; background:rgba(168,85,247,0.15); padding:12px; border-radius:12px; font-size:14px; max-width:85%; border: 1px solid rgba(168,85,247,0.3);">${reply}</div>`;
+            w.scrollTop = w.scrollHeight;
+        }
+
+        function getLocalFallbackReply(text) {
+            if (text.includes('疲') || text.includes('眠')) return "お疲れ様です。<strong style='color:var(--color-sleep)'>15分間の仮眠</strong>をとるか、今日は早めに休んで明日のパフォーマンスに投資しましょう！";
+            if (text.includes('集中') || text.includes('できない')) return "スマホを別の部屋に置いて、まずは<strong style='color:var(--color-study)'>「5分だけ」</strong>と決めて作業を始めてみてください。作業興奮が訪れますよ。";
+            return "なるほど、状況を記録しました。Homeタブの「AIプラン生成」機能を使って、具体的なセッションに分割してみるのがおすすめですよ。";
+        }
+
+        function openTimerModal() {
+            document.getElementById('main-overlay').classList.add('show');
+            document.getElementById('timer-modal').classList.add('show');
+            timerRemaining = timerDuration || 1500;
+            updateTimerDisplay();
+        }
         function toggleTimer() {
-            timerRunning = !timerRunning;
-            document.getElementById('timer-play-icon').className = timerRunning ? 'fa-solid fa-pause' : 'fa-solid fa-play';
-            if (timerRunning) {
-                clearInterval(timerInterval);
+            const btn = document.getElementById('btn-timer-start');
+            if (isRunning) {
+                clearInterval(timerInterval); isRunning = false; btn.innerText = "RESUME";
+            } else {
+                isRunning = true; btn.innerText = "PAUSE";
                 timerInterval = setInterval(() => {
+                    timerRemaining--; updateTimerDisplay();
                     if (timerRemaining <= 0) {
                         clearInterval(timerInterval);
-                        timerRunning = false;
-                        document.getElementById('timer-play-icon').className = 'fa-solid fa-play';
-                        return;
+                        playSE('clear'); // 🎮 完了ファンファーレ！
+                        alert("完了！EXP獲得！");
+                        addExp(Math.floor((timerDuration || 1500) / 60) * 10);
+                        closeModals();
                     }
-                    timerRemaining--;
-                    updateTimerDisplay();
                 }, 1000);
-            } else {
-                clearInterval(timerInterval);
             }
         }
-
-        function resetTimer() {
-            clearInterval(timerInterval);
-            timerRunning = false;
-            timerRemaining = timerDuration;
-            document.getElementById('timer-play-icon').className = 'fa-solid fa-play';
-            updateTimerDisplay();
-        }
-
-        function closeAllModals() {
-            closeTimerModal();
-        }
-
         function updateTimerDisplay() {
             const safeDuration = timerDuration || 1500;
             document.getElementById('time-text').innerText = `${String(Math.floor(timerRemaining / 60)).padStart(2,'0')}:${String(timerRemaining % 60).padStart(2,'0')}`;
             document.getElementById('timer-progress').style.strokeDashoffset = 628 - (timerRemaining / safeDuration) * 628;
             document.getElementById('timer-progress').style.stroke = timerRemaining < 60 ? "var(--color-phone)" : "var(--color-study)";
         }
-
-        function initSettings() {
-            const pref = document.getElementById('pref-select');
-            pref.innerHTML = Object.keys(geoMaster).map(p => `<option value="${p}">${p}</option>`).join('');
-            pref.value = appState.pref;
-            onPrefChange();
-            document.getElementById('api-key').value = appState.apiKey;
-        }
-
-        function onPrefChange() {
-            const pref = document.getElementById('pref-select').value;
-            const city = document.getElementById('city-select');
-            city.innerHTML = (geoMaster[pref] || []).map(c => `<option value='${JSON.stringify(c)}'>${c.name}</option>`).join('');
-            const saved = JSON.parse(appState.city || '{}');
-            const found = (geoMaster[pref] || []).find(c => c.name === saved.name);
-            city.value = JSON.stringify(found || geoMaster[pref][0]);
-        }
-
-        function onCityChange() {
-            appState.city = document.getElementById('city-select').value;
-        }
-
-        function saveSettings() {
-            appState.pref = document.getElementById('pref-select').value;
-            appState.city = document.getElementById('city-select').value;
-            appState.apiKey = document.getElementById('api-key').value.trim();
-            safeStorage.set('tp_pref_v800', appState.pref);
-            safeStorage.set('tp_city_v800', appState.city);
-            safeStorage.set('tp_api_v800', appState.apiKey);
-            alert('設定を保存しました。');
-        }
-
-        async function generateAIPlan() {
-            const goal = document.getElementById('ai-goal').value.trim();
-            const result = document.getElementById('ai-result');
-            if (!goal) return;
-            if (!appState.apiKey) {
-                result.innerHTML = '<div style="color:var(--color-phone);font-size:12px;">設定からGroq API Keyを登録してください。</div>';
-                return;
-            }
-            result.innerHTML = '<div style="color:var(--text-muted);font-size:12px;">AIが計画を作成中...</div>';
-            try {
-                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {'Content-Type':'application/json','Authorization':`Bearer ${appState.apiKey}`},
-                    body: JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:`高校生向けに、次の目標を今日の具体的な学習計画にしてください。目標: ${goal}`}],temperature:0.4})
-                });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error?.message || 'AI request failed');
-                result.innerHTML = `<div class="plan-session-card"><div class="plan-title">AIプラン</div><div class="plan-advice">${String(data.choices?.[0]?.message?.content || '計画を取得できませんでした。').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}</div></div>`;
-            } catch (e) {
-                console.error(e);
-                result.innerHTML = '<div style="color:var(--color-phone);font-size:12px;">AIプランの作成に失敗しました。</div>';
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            initTheme();
-            updateLevel();
-            renderHome();
-            renderCalendar();
-            initSettings();
-        });
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-config.js"></script>
-    <script src="auth.js"></script>
-    <script src="auth-ui.js"></script>
+<!-- TIMEPILOT_AUTH_BOOTSTRAP -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="auth.js"></script>
+
+
+<script src="auth-ui.js"></script>
     
 </body>
 </html>
