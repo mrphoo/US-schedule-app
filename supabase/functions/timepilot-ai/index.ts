@@ -3,15 +3,28 @@ import { withSupabase } from "npm:@supabase/server";
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_MODEL = "llama-3.1-8b-instant";
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "application/json",
+    },
   });
 }
 
-Deno.serve(
-  withSupabase({ auth: "user" }, async (req, ctx) => {
+export default {
+  fetch: withSupabase({ auth: "user" }, async (req) => {
+    if (req.method === "OPTIONS") {
+      return new Response("ok", { status: 204, headers: corsHeaders });
+    }
+
     if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
     const groqKey = Deno.env.get("GROQ_API_KEY");
@@ -97,4 +110,4 @@ Deno.serve(
       return json({ error: "Invalid request" }, 400);
     }
   }),
-);
+};
