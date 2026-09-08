@@ -1,9 +1,10 @@
-/* TimePilot v8.3 - Home & Calendar UX improvements */
+/* TimePilot v8.4.3 - Home & Calendar UX + AI Today Suggestion */
 (() => {
   'use strict';
 
-  const STYLE_ID = 'tp-v83-style';
+  const STYLE_ID = 'tp-v84-style';
   const CARD_ID = 'tp-v83-overview';
+  const AI_CARD_ID = 'tp-v84-ai-today';
 
   function injectStyles() {
     if (document.getElementById(STYLE_ID)) return;
@@ -22,12 +23,30 @@
       .tp-v83-next span { color:var(--text-muted); font-weight:600; }
       .tp-v83-today-btn { margin-left:auto; border:1px solid var(--glass-border); background:rgba(255,255,255,.05); color:var(--text-main); border-radius:10px; padding:7px 10px; font-size:11px; font-weight:800; cursor:pointer; }
       .tp-v83-today-btn:active { transform:scale(.96); }
+
+      .tp-v84-ai-card { margin-bottom:20px; border-color:rgba(168,85,247,.28); background:linear-gradient(135deg,rgba(168,85,247,.09),rgba(59,130,246,.06)); }
+      .tp-v84-ai-head { display:flex; align-items:center; gap:11px; margin-bottom:12px; }
+      .tp-v84-ai-icon { width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:rgba(168,85,247,.16); color:var(--color-ai); font-size:17px; flex-shrink:0; }
+      .tp-v84-ai-title { font-size:15px; font-weight:900; }
+      .tp-v84-ai-sub { font-size:10px; color:var(--text-muted); margin-top:3px; }
+      .tp-v84-ai-result { padding:13px; border-radius:14px; background:rgba(0,0,0,.12); border:1px solid var(--glass-border); margin-bottom:10px; display:none; }
+      body.light-theme .tp-v84-ai-result { background:rgba(0,0,0,.035); }
+      .tp-v84-ai-label { font-size:10px; color:var(--text-muted); font-weight:800; margin-bottom:4px; }
+      .tp-v84-ai-next { font-size:18px; font-weight:900; line-height:1.3; }
+      .tp-v84-ai-time { margin-top:8px; font-size:12px; font-weight:800; color:var(--color-study); }
+      .tp-v84-ai-reason { margin-top:9px; font-size:12px; line-height:1.55; color:var(--text-muted); }
+      .tp-v84-ai-action { margin-top:10px; padding:9px 11px; border-radius:10px; background:rgba(16,185,129,.08); border:1px solid rgba(16,185,129,.16); font-size:11px; font-weight:800; }
+      .tp-v84-ai-btn { width:100%; padding:12px; border:0; border-radius:12px; background:linear-gradient(135deg,var(--color-ai),var(--color-study)); color:#fff; font-size:13px; font-weight:900; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:7px; }
+      .tp-v84-ai-btn:disabled { opacity:.6; cursor:not-allowed; }
+      .tp-v84-ai-empty { color:var(--text-muted); font-size:12px; line-height:1.5; padding:2px 0 10px; }
+
       .cal-cell { touch-action: manipulation; transition: transform .12s, background .2s, border-color .2s; }
       .cal-cell:active { transform:scale(.97); }
       @media (max-width:420px) {
         .tp-v83-stats { gap:6px; }
         .tp-v83-stat { padding:11px 6px; }
         .tp-v83-value { font-size:18px; }
+        .tp-v84-ai-next { font-size:16px; }
       }
     `;
     document.head.appendChild(style);
@@ -41,15 +60,17 @@
 
   function getTasks() {
     const area = document.getElementById('home-checklist-area');
-    if (!area) return { total: 0, done: 0, next: null };
+    if (!area) return { total: 0, done: 0, next: null, all: [] };
     const items = [...area.querySelectorAll('.mission-item')];
-    const total = items.length;
-    const done = items.filter(el => el.classList.contains('checked')).length;
-    const next = items.find(el => !el.classList.contains('checked'));
-    if (!next) return { total, done, next: null };
-    const time = next.querySelector('.mission-time')?.textContent?.trim() || '';
-    const text = next.querySelector('.mission-text')?.textContent?.trim() || '次のタスク';
-    return { total, done, next: { time, text } };
+    const tasks = items.map(el => ({
+      time: el.querySelector('.mission-time')?.textContent?.trim() || '',
+      text: el.querySelector('.mission-text')?.textContent?.trim() || 'タスク',
+      done: el.classList.contains('checked')
+    }));
+    const total = tasks.length;
+    const done = tasks.filter(t => t.done).length;
+    const next = tasks.find(t => !t.done);
+    return { total, done, next: next || null, all: tasks };
   }
 
   function ensureOverview() {
@@ -93,6 +114,100 @@
       : (tasks.total ? '今日のタスク完了' : 'まず予定を作成');
   }
 
+  function ensureAIToday() {
+    const home = document.getElementById('page-home');
+    const overview = document.getElementById(CARD_ID);
+    if (!home || !overview) return null;
+
+    let card = document.getElementById(AI_CARD_ID);
+    if (!card) {
+      card = document.createElement('div');
+      card.id = AI_CARD_ID;
+      card.className = 'glass-card tp-v84-ai-card';
+      card.innerHTML = `
+        <div class="tp-v84-ai-head">
+          <div class="tp-v84-ai-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+          <div><div class="tp-v84-ai-title">今日のAI提案</div><div class="tp-v84-ai-sub">今日の予定から「次にやること」を提案</div></div>
+        </div>
+        <div class="tp-v84-ai-empty" data-ai-empty>予定を分析して、今やるべきことをAIに決めてもらえます。</div>
+        <div class="tp-v84-ai-result" data-ai-result>
+          <div class="tp-v84-ai-label">次にやること</div>
+          <div class="tp-v84-ai-next" data-ai-next>-</div>
+          <div class="tp-v84-ai-time" data-ai-time></div>
+          <div class="tp-v84-ai-reason" data-ai-reason></div>
+          <div class="tp-v84-ai-action" data-ai-action></div>
+        </div>
+        <button class="tp-v84-ai-btn" type="button" data-ai-button><i class="fa-solid fa-brain"></i> 今日をAI分析</button>
+      `;
+      overview.insertAdjacentElement('afterend', card);
+      card.querySelector('[data-ai-button]').addEventListener('click', analyzeToday);
+    }
+    return card;
+  }
+
+  function safeJson(text) {
+    try { return JSON.parse(text); } catch (_) {}
+    const match = String(text || '').match(/\{[\s\S]*\}/);
+    if (!match) return null;
+    try { return JSON.parse(match[0]); } catch (_) { return null; }
+  }
+
+  async function analyzeToday() {
+    const card = ensureAIToday();
+    if (!card) return;
+    const tasks = getTasks();
+    const button = card.querySelector('[data-ai-button]');
+    const empty = card.querySelector('[data-ai-empty]');
+    const result = card.querySelector('[data-ai-result]');
+
+    if (!tasks.all.length) {
+      empty.textContent = '今日の予定がありません。まず予定を作成してください。';
+      result.style.display = 'none';
+      return;
+    }
+
+    if (typeof requireAILogin === 'function' && !requireAILogin()) return;
+    if (typeof invokeTimePilotAI !== 'function') {
+      empty.textContent = 'AI機能を読み込めませんでした。';
+      return;
+    }
+
+    button.disabled = true;
+    button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 今日の予定を分析中...';
+    empty.style.display = 'block';
+    empty.textContent = '予定・完了状況・現在時刻を分析しています。';
+    result.style.display = 'none';
+
+    const now = new Date();
+    const currentTime = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+    const taskText = tasks.all.map((t, i) => `${i + 1}. ${t.time || '時間未設定'} / ${t.text} / ${t.done ? '完了' : '未完了'}`).join('\n');
+
+    const prompt = `あなたはTimePilotの時間管理AIです。ユーザーの今日の予定から、現在時刻以降で「次にやるべきこと」を1つだけ提案してください。完了済みタスクは除外し、時間が決まっている予定はその時間を優先してください。JSONのみで回答してください。\n現在時刻:${currentTime}\n今日の予定:\n${taskText}\n形式:{"next_task":"タスク名","recommended_time":"HH:MM","reason":"理由を1〜2文","action":"今すぐできる具体的な一歩"}`;
+
+    try {
+      const data = await invokeTimePilotAI({ mode: 'chat', text: prompt });
+      const parsed = safeJson(data?.reply || data?.content || '');
+      if (!parsed?.next_task) throw new Error('Invalid AI response');
+
+      card.querySelector('[data-ai-next]').textContent = String(parsed.next_task);
+      card.querySelector('[data-ai-time]').textContent = parsed.recommended_time ? `おすすめ開始：${parsed.recommended_time}` : '';
+      card.querySelector('[data-ai-reason]').textContent = String(parsed.reason || '今日の予定状況をもとに提案しています。');
+      card.querySelector('[data-ai-action]').textContent = `最初の一歩：${String(parsed.action || parsed.next_task)}`;
+      empty.style.display = 'none';
+      result.style.display = 'block';
+    } catch (e) {
+      console.error('Today AI error:', e);
+      empty.style.display = 'block';
+      empty.textContent = e?.message === 'LOGIN_REQUIRED'
+        ? 'AI機能を使うにはログインしてください。'
+        : 'AI分析に失敗しました。もう一度試してください。';
+      result.style.display = 'none';
+    } finally {
+      button.disabled = false;
+      button.innerHTML = '<i class="fa-solid fa-brain"></i> 今日をAI分析';
+    }
+  }
+
   function addCalendarTodayButton() {
     const header = document.querySelector('.cal-header-nav');
     if (!header || header.querySelector('.tp-v83-today-btn')) return;
@@ -110,15 +225,20 @@
   function boot() {
     injectStyles();
     updateOverview();
+    ensureAIToday();
     addCalendarTodayButton();
 
     const area = document.getElementById('home-checklist-area');
     if (area) {
-      new MutationObserver(updateOverview).observe(area, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+      new MutationObserver(() => {
+        updateOverview();
+        ensureAIToday();
+      }).observe(area, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
     }
 
     setInterval(() => {
       updateOverview();
+      ensureAIToday();
       addCalendarTodayButton();
     }, 1500);
   }
