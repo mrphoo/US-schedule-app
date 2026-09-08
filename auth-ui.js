@@ -292,4 +292,48 @@
     } else {
         installAuthUI();
     }
+
+    // Prevent browser account autofill from leaking the saved email into memo/notes.
+    // The memo field is intentionally not touched unless its value is an exact saved email.
+    function protectMemoField() {
+        const memo = document.getElementById('input-notes');
+        if (!memo || memo.dataset.tpMemoProtected === 'true') return;
+        memo.dataset.tpMemoProtected = 'true';
+        memo.setAttribute('autocomplete', 'off');
+        memo.setAttribute('autocorrect', 'off');
+        memo.setAttribute('autocapitalize', 'sentences');
+        memo.setAttribute('spellcheck', 'true');
+        memo.setAttribute('name', 'timepilot-notes');
+        memo.setAttribute('data-form-type', 'other');
+        memo.setAttribute('data-lpignore', 'true');
+
+        let lastUserValue = memo.value;
+        memo.addEventListener('input', () => { lastUserValue = memo.value; });
+        memo.addEventListener('change', () => { lastUserValue = memo.value; });
+
+        const cleanUnexpectedAutofill = () => {
+            const email = String(currentUser?.email || '').trim();
+            if (!email || !memo.value || memo.value === lastUserValue) return;
+            if (memo.value.trim().toLowerCase() === email.toLowerCase()) {
+                memo.value = lastUserValue;
+            }
+        };
+        memo.addEventListener('focus', cleanUnexpectedAutofill);
+        memo.addEventListener('blur', cleanUnexpectedAutofill);
+        setTimeout(cleanUnexpectedAutofill, 300);
+        setTimeout(cleanUnexpectedAutofill, 1000);
+        setTimeout(cleanUnexpectedAutofill, 2000);
+    }
+
+    function watchMemoField() {
+        protectMemoField();
+        const observer = new MutationObserver(protectMemoField);
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', watchMemoField, { once: true });
+    } else {
+        watchMemoField();
+    }
 })();
