@@ -245,14 +245,10 @@ async function tpAnalyzeToday() {
 
 // ========================================
 // v8.4.4 - Notes field autofill protection
-// Browser password managers sometimes insert the saved account email into
-// unrelated fields. Make the notes field explicitly non-login and clear only
-// an exact account-email autofill value.
 // ========================================
 function protectTimePilotNotesField() {
     const notes = document.getElementById('input-notes');
     if (!notes) return;
-
     notes.setAttribute('autocomplete', 'off');
     notes.setAttribute('autocorrect', 'off');
     notes.setAttribute('autocapitalize', 'sentences');
@@ -260,10 +256,7 @@ function protectTimePilotNotesField() {
     notes.setAttribute('name', 'timepilot-notes');
     notes.setAttribute('data-lpignore', 'true');
     notes.setAttribute('data-1p-ignore', 'true');
-
-    const email = typeof currentUser !== 'undefined' && currentUser?.email
-        ? String(currentUser.email).trim()
-        : '';
+    const email = typeof currentUser !== 'undefined' && currentUser?.email ? String(currentUser.email).trim() : '';
     if (email && notes.value.trim() === email) notes.value = '';
 }
 
@@ -277,3 +270,16 @@ window.addEventListener('DOMContentLoaded', () => {
     }, 300);
     setTimeout(protectTimePilotNotesField, 1000);
 });
+
+// ========================================
+// v8.8 - Dynamic AI Rescheduler loader
+// Keep index.html unchanged to protect the existing single-file UI.
+// ========================================
+(function loadTimePilotV88Rescheduler() {
+    if (document.querySelector('script[data-timepilot-v88]')) return;
+    const script = document.createElement('script');
+    script.src = 'reschedule-v88.js';
+    script.dataset.timepilotV88 = 'true';
+    script.async = false;
+    document.head.appendChild(script);
+})();
