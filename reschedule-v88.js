@@ -1,5 +1,6 @@
 /* TimePilot v8.8 - AI Dynamic Rescheduler
  * Safe standalone module. AI proposes changes first; user explicitly applies them.
+ * Adaptive recovery: propose -> review -> apply.
  */
 (() => {
   'use strict';
@@ -94,7 +95,7 @@
         applied++;
       } else if (action === 'postpone') {
         event.time = '';
-        event.title = `${event.title}（延期）`;
+        if (!String(event.title).endsWith('（延期）')) event.title = `${event.title}（延期）`;
         applied++;
       }
     });
@@ -104,7 +105,7 @@
     if (typeof renderCalendar === 'function') { try { renderCalendar(); } catch (_) {} }
     if (typeof renderHome === 'function') { try { renderHome(); } catch (_) {} }
     const result = document.getElementById('tp-v88-result');
-    if (result) result.innerHTML = `<div class="tp-v88-change tp-v88-success"><b>再計画を適用しました</b><br>${applied}件の予定を更新しました。元に戻したい場合はカレンダーから編集できます。</div>`;
+    if (result) result.innerHTML = `<div class="tp-v88-change tp-v88-success"><b>再計画を適用しました</b><br>${applied}件の予定を更新しました。</div>`;
     latestPlan = null;
   }
 
