@@ -6,6 +6,7 @@ on:
     paths:
       - 'personalization-v88.js'
       - 'reschedule-v88.js'
+      - 'adaptive-v89.js'
       - '.github/workflows/inject-v88.yml'
 
 permissions:
@@ -16,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inject v8.8 modules
+      - name: Inject adaptive modules
         shell: python
         run: |
           from pathlib import Path
@@ -24,7 +25,8 @@ jobs:
           s = p.read_text(encoding='utf-8')
           tags = [
               '<script src="personalization-v88.js"></script>',
-              '<script src="reschedule-v88.js"></script>'
+              '<script src="reschedule-v88.js"></script>',
+              '<script src="adaptive-v89.js"></script>'
           ]
           for tag in tags:
               if tag not in s:
@@ -42,6 +44,6 @@ jobs:
           if git diff --cached --quiet; then
             echo 'No changes to commit'
           else
-            git commit -m 'chore: inject TimePilot v8.8 modules'
+            git commit -m 'feat: enable adaptive learning metrics'
             git push
           fi
