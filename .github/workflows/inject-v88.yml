@@ -10,6 +10,7 @@ on:
       - 'app-options-v89.js'
       - 'auth-hardening-v90.js'
       - 'cloud-sync-v90.js'
+      - 'cloud-sync-trigger-v90.js'
       - '.github/workflows/inject-v88.yml'
 
 permissions:
