@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inject v8.8 modules once and unify typography
+      - name: Inject v8.8 modules and compact adaptive learning
         shell: python
         run: |
           from pathlib import Path
@@ -36,11 +36,20 @@ jobs:
           s = s.replace('<title>TimePilot v8.4.2 - Apex Engine</title>', '<title>TimePilot v8.8 - Adaptive Engine</title>', 1)
           p.write_text(s, encoding='utf-8')
 
-          # Keep both personalization states visually consistent with the AI recovery card.
           p = Path('personalization-v88.js')
           s = p.read_text(encoding='utf-8')
           s = s.replace('.tp88-title{font-size:15px;font-weight:900}', '.tp88-title{font-size:15px;font-weight:900;line-height:1.35;font-family:inherit}')
           s = s.replace('<div class="tp88-title">初期設定</div>', '<div class="tp88-title">あなた専用AIの初期設定</div>')
+
+          marker = "  function behaviorSummary() {"
+          engine = '''  function adaptiveLearning(records) {\n    const tasks = {}, hours = {};\n    records.forEach(r => {\n      const title = String(r.title || '').replace(/\\s*（\\d+分）/g, '').replace(/\\s*（延期）/g, '').trim().slice(0, 24);\n      const minutes = Number(r.minutes) || 0;\n      if (title && minutes > 0) {\n        const x = tasks[title] || { count: 0, total: 0 };\n        x.count++; x.total += minutes; tasks[title] = x;\n      }\n      const h = String(r.time || '').slice(0, 2);\n      if (/^\\d\\d$/.test(h)) hours[h] = (hours[h] || 0) + 1;\n    });\n    const task_profiles = Object.entries(tasks)\n      .sort((a,b) => (b[1].count-a[1].count) || (b[1].total-a[1].total))\n      .slice(0, 8)\n      .map(([title,x]) => ({ title, count:x.count, avg_minutes:Math.round(x.total/x.count) }));\n    const best_hour = Object.entries(hours).sort((a,b)=>b[1]-a[1])[0];\n    return { task_profiles, best_hour: best_hour ? `${best_hour[0]}時台` : null };\n  }\n\n'''
+          if marker in s and 'function adaptiveLearning(records)' not in s:
+              s = s.replace(marker, engine + marker, 1)
+
+          old = "    return {record_count:records.length,total_minutes:records.reduce((s,r)=>s+(Number(r.minutes)||0),0),recent:records.slice(-8).map(r=>({time:r.time,title:r.title,minutes:r.minutes,type:r.type})),strongest_hour:strongest?`${strongest[0]}時台`:'まだ判定できない',record_types:byType};"
+          new = "    return {record_count:records.length,total_minutes:records.reduce((s,r)=>s+(Number(r.minutes)||0),0),recent:records.slice(-8).map(r=>({time:r.time,title:r.title,minutes:r.minutes,type:r.type})),strongest_hour:strongest?`${strongest[0]}時台`:'まだ判定できない',record_types:byType,adaptive:adaptiveLearning(records)};"
+          s = s.replace(old, new, 1)
+
           p.write_text(s, encoding='utf-8')
       - name: Commit only if changed
         run: |
@@ -50,6 +59,6 @@ jobs:
           if git diff --cached --quiet; then
             echo 'No changes to commit'
           else
-            git commit -m 'fix: unify personalization typography in both states'
+            git commit -m 'feat: add compact adaptive learning engine'
             git push
           fi
