@@ -8,6 +8,7 @@ on:
       - 'reschedule-v88.js'
       - 'adaptive-v89.js'
       - 'app-options-v89.js'
+      - 'auth-hardening-v90.js'
       - '.github/workflows/inject-v88.yml'
 
 permissions:
@@ -28,7 +29,8 @@ jobs:
               '<script src="personalization-v88.js"></script>',
               '<script src="reschedule-v88.js"></script>',
               '<script src="adaptive-v89.js"></script>',
-              '<script src="app-options-v89.js"></script>'
+              '<script src="app-options-v89.js"></script>',
+              '<script src="auth-hardening-v90.js"></script>'
           ]
           for tag in tags:
               if tag not in s:
@@ -46,6 +48,6 @@ jobs:
           if git diff --cached --quiet; then
             echo 'No changes to commit'
           else
-            git commit -m 'feat: expand distraction app choices'
+            git commit -m 'chore: inject authentication hardening'
             git push
           fi
