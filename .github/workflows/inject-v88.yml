@@ -41,10 +41,47 @@ jobs:
           s = s.replace('.tp88-title{font-size:15px;font-weight:900}', '.tp88-title{font-size:15px;font-weight:900;line-height:1.35;font-family:inherit}')
           s = s.replace('<div class="tp88-title">初期設定</div>', '<div class="tp88-title">あなた専用AIの初期設定</div>')
 
-          marker = "  function behaviorSummary() {"
-          engine = '''  function adaptiveLearning(records) {\n    const tasks = {}, hours = {};\n    records.forEach(r => {\n      const title = String(r.title || '').replace(/\\s*（\\d+分）/g, '').replace(/\\s*（延期）/g, '').trim().slice(0, 24);\n      const minutes = Number(r.minutes) || 0;\n      if (title && minutes > 0) {\n        const x = tasks[title] || { count: 0, total: 0 };\n        x.count++; x.total += minutes; tasks[title] = x;\n      }\n      const h = String(r.time || '').slice(0, 2);\n      if (/^\\d\\d$/.test(h)) hours[h] = (hours[h] || 0) + 1;\n    });\n    const task_profiles = Object.entries(tasks)\n      .sort((a,b) => (b[1].count-a[1].count) || (b[1].total-a[1].total))\n      .slice(0, 8)\n      .map(([title,x]) => ({ title, count:x.count, avg_minutes:Math.round(x.total/x.count) }));\n    const best_hour = Object.entries(hours).sort((a,b)=>b[1]-a[1])[0];\n    return { task_profiles, best_hour: best_hour ? `${best_hour[0]}時台` : null };\n  }\n\n'''
-          if marker in s and 'function adaptiveLearning(records)' not in s:
-              s = s.replace(marker, engine + marker, 1)
+          start = s.find('  function adaptiveLearning(records) {')
+          end = s.find('  function behaviorSummary() {')
+          if start >= 0 and end > start:
+              engine = '''  function adaptiveLearning(records) {
+    const tasks = {}, hours = {};
+    records.forEach(r => {
+      const title = String(r.title || '').replace(/\\s*（\\d+分）/g, '').replace(/\\s*（延期）/g, '').trim().slice(0, 24);
+      const minutes = Number(r.minutes) || 0;
+      if (title && minutes > 0) {
+        const x = tasks[title] || { count: 0, total: 0, values: [] };
+        x.count++; x.total += minutes; x.values.push(minutes); tasks[title] = x;
+      }
+      const h = String(r.time || '').slice(0, 2);
+      if (/^\\d\\d$/.test(h)) {
+        const x = hours[h] || { count: 0, minutes: 0 };
+        x.count++; x.minutes += minutes; hours[h] = x;
+      }
+    });
+    const task_profiles = Object.entries(tasks)
+      .sort((a,b) => (b[1].count-a[1].count) || (b[1].total-a[1].total))
+      .slice(0, 8)
+      .map(([title,x]) => {
+        const avg = x.total / x.count;
+        const variance = x.values.reduce((sum,v) => sum + Math.pow(v-avg,2), 0) / x.count;
+        return {
+          title,
+          count: x.count,
+          avg_minutes: Math.round(avg),
+          consistency: Math.max(0, Math.round(100 - (Math.sqrt(variance) / Math.max(avg, 1)) * 100))
+        };
+      });
+    const bestHour = Object.entries(hours).sort((a,b) => (b[1].minutes-a[1].minutes) || (b[1].count-a[1].count))[0];
+    return {
+      task_profiles,
+      best_hour: bestHour ? `${bestHour[0]}時台` : null,
+      sample_size: records.length
+    };
+  }
+
+'''
+              s = s[:start] + engine + s[end:]
 
           old = "    return {record_count:records.length,total_minutes:records.reduce((s,r)=>s+(Number(r.minutes)||0),0),recent:records.slice(-8).map(r=>({time:r.time,title:r.title,minutes:r.minutes,type:r.type})),strongest_hour:strongest?`${strongest[0]}時台`:'まだ判定できない',record_types:byType};"
           new = "    return {record_count:records.length,total_minutes:records.reduce((s,r)=>s+(Number(r.minutes)||0),0),recent:records.slice(-8).map(r=>({time:r.time,title:r.title,minutes:r.minutes,type:r.type})),strongest_hour:strongest?`${strongest[0]}時台`:'まだ判定できない',record_types:byType,adaptive:adaptiveLearning(records)};"
@@ -59,6 +96,6 @@ jobs:
           if git diff --cached --quiet; then
             echo 'No changes to commit'
           else
-            git commit -m 'feat: add compact adaptive learning engine'
+            git commit -m 'feat: strengthen compact adaptive learning'
             git push
           fi
