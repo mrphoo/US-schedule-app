@@ -21,6 +21,26 @@
   function getRecords() { const raw=load('tp_execution_v850',[]); return Array.isArray(raw)?raw.slice(-60):[]; }
   function getTodayEvents() { const cal=typeof appState!=='undefined'&&appState?.calendar?appState.calendar:{}; return Array.isArray(cal[todayKey()])?cal[todayKey()]:[]; }
 
+  function adaptiveLearning(records) {
+    const tasks = {}, hours = {};
+    records.forEach(r => {
+      const title = String(r.title || '').replace(/\s*（\d+分）/g, '').replace(/\s*（延期）/g, '').trim().slice(0, 24);
+      const minutes = Number(r.minutes) || 0;
+      if (title && minutes > 0) {
+        const x = tasks[title] || { count: 0, total: 0 };
+        x.count++; x.total += minutes; tasks[title] = x;
+      }
+      const h = String(r.time || '').slice(0, 2);
+      if (/^\d\d$/.test(h)) hours[h] = (hours[h] || 0) + 1;
+    });
+    const task_profiles = Object.entries(tasks)
+      .sort((a,b) => (b[1].count-a[1].count) || (b[1].total-a[1].total))
+      .slice(0, 8)
+      .map(([title,x]) => ({ title, count:x.count, avg_minutes:Math.round(x.total/x.count) }));
+    const best_hour = Object.entries(hours).sort((a,b)=>b[1]-a[1])[0];
+    return { task_profiles, best_hour: best_hour ? `${best_hour[0]}時台` : null };
+  }
+
   function behaviorSummary() {
     const records=getRecords(), byHour={}, byType={};
     records.forEach(r=>{
@@ -29,7 +49,7 @@
       const t=String(r.type||'unknown'); byType[t]=(byType[t]||0)+1;
     });
     const strongest=Object.entries(byHour).sort((a,b)=>(b[1].minutes-a[1].minutes)||(b[1].count-a[1].count))[0];
-    return {record_count:records.length,total_minutes:records.reduce((s,r)=>s+(Number(r.minutes)||0),0),recent:records.slice(-8).map(r=>({time:r.time,title:r.title,minutes:r.minutes,type:r.type})),strongest_hour:strongest?`${strongest[0]}時台`:'まだ判定できない',record_types:byType};
+    return {record_count:records.length,total_minutes:records.reduce((s,r)=>s+(Number(r.minutes)||0),0),recent:records.slice(-8).map(r=>({time:r.time,title:r.title,minutes:r.minutes,type:r.type})),strongest_hour:strongest?`${strongest[0]}時台`:'まだ判定できない',record_types:byType,adaptive:adaptiveLearning(records)};
   }
   function context(){ return getTodayEvents().map((e,i)=>({index:i,time:String(e?.time||''),title:String(e?.title||'予定'),completed:!!e?.checked})); }
 
