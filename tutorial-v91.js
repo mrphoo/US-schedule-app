@@ -1,69 +1,68 @@
-/* TimePilot v9.1 — First-use interactive tutorial
+/* TimePilot v9.1 — Interactive first-use tutorial
+ * Guides the user on the real app UI instead of showing a separate manual.
  * Additive module: does not modify existing app logic.
  */
 (function () {
     'use strict';
 
     const STORAGE_KEY = 'tp_tutorial_v910_completed';
-    const PROFILE_KEY = 'tp_tutorial_v910_version';
-    const VERSION = '1';
+    const VERSION_KEY = 'tp_tutorial_v910_version';
+    const VERSION = '2';
 
     const steps = [
         {
             title: 'TimePilotへようこそ',
-            text: 'TimePilotは、予定を作るだけでなく、実際の行動をもとに時間の使い方を改善していくアプリです。まずは基本的な使い方を確認しましょう。'
+            text: 'このチュートリアルでは、実際の画面を使ってTimePilotの基本操作を体験します。まずは予定を1つ登録してみましょう。',
+            target: () => findTarget(['予定を追加', '予定追加', '予定を登録', '予定を作成', '追加']),
+            action: 'click'
         },
         {
             title: '① 予定を登録する',
-            text: 'まずは今日やることを登録します。時間と内容を入力するだけでOKです。予定を具体的にするほど、AIがより適切な提案をしやすくなります。'
+            text: 'ここから予定を登録できます。時間と内容を入力して保存してみましょう。入力画面が開いたら、実際に予定を1つ作ってみてください。',
+            target: () => findTarget(['保存', '登録', '予定を保存', '追加']),
+            action: 'click',
+            optional: true
         },
         {
             title: '② AIに予定を作ってもらう',
-            text: 'AI機能では、予定ややることをもとに、その日のスケジュールを提案できます。AIを使う機能はログイン後に利用できます。'
+            text: '予定を自分で組むだけでなく、AIにその日のスケジュールを考えてもらえます。AI機能はログインすると利用できます。',
+            target: () => findTarget(['AI予定', 'AIプラン', 'AIで予定', 'AIスケジュール', 'AIに予定']),
+            action: 'click',
+            optional: true
         },
         {
             title: '③ 予定が崩れても大丈夫',
-            text: '「数学に30分多くかかった」「急な予定が入った」など、予定の変更をAIに伝えると、残りの予定を状況に合わせて組み直せます。'
+            text: '急な予定や作業時間のズレが起きたら、AI予定リカバリー。残りの予定を状況に合わせて組み直せます。',
+            target: () => findTarget(['AI予定リカバリー', '予定リカバリー', 'リカバリー', '予定を組み直す']),
+            action: 'click',
+            optional: true
         },
         {
             title: '④ 実際の行動を記録する',
-            text: 'タスクを完了したり、実際にかかった時間を記録することで、TimePilotがあなたの時間の使い方を分析するためのデータがたまります。'
+            text: '予定を実行したら、完了や実際の時間を記録します。このデータが、あなた専用のAIを作る材料になります。',
+            target: () => findTarget(['実行記録', '行動記録', '記録する', '実績', '完了']),
+            action: 'click',
+            optional: true
         },
         {
             title: '⑤ 使うほど自分向けに',
-            text: '集中しやすい時間帯や作業にかかる時間など、実際の行動データをもとに、今後の予定や集中方法をより自分に合う形へ改善していきます。'
+            text: '実際の行動データがたまるほど、集中しやすい時間帯や作業時間などを分析できます。AIはその情報を次の提案に活用します。',
+            target: () => findTarget(['パーソナル分析', '個人分析', '学習', 'AI分析', '分析']),
+            action: 'click',
+            optional: true
         },
         {
             title: '準備完了',
-            text: '基本操作はこれでOKです。まずは今日の予定を1つ登録して、TimePilotを使ってみましょう。チュートリアルは設定からいつでも見直せます。'
+            text: '基本の流れは、予定を作る → 実行する → 記録する → AIが学ぶ、です。まずは今日の予定を1つ登録して使ってみましょう。',
+            target: null
         }
     ];
 
     let index = 0;
     let overlay = null;
-
-    function injectStyles() {
-        if (document.getElementById('tp91-tutorial-style')) return;
-        const style = document.createElement('style');
-        style.id = 'tp91-tutorial-style';
-        style.textContent = `
-            #tp91-overlay{position:fixed;inset:0;z-index:2147483000;background:rgba(2,6,23,.72);display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(5px)}
-            #tp91-card{width:min(520px,100%);background:#fff;color:#0f172a;border-radius:22px;box-shadow:0 24px 80px rgba(0,0,0,.35);overflow:hidden;font-family:inherit}
-            #tp91-top{padding:24px 24px 10px}
-            #tp91-badge{font-size:12px;font-weight:800;letter-spacing:.04em;color:#64748b;margin-bottom:8px}
-            #tp91-title{font-size:23px;font-weight:900;line-height:1.3;margin:0 0 12px}
-            #tp91-text{font-size:15px;line-height:1.75;color:#475569;margin:0;white-space:pre-wrap}
-            #tp91-progress{display:flex;gap:5px;padding:16px 24px 4px}
-            .tp91-dot{height:4px;flex:1;border-radius:99px;background:#e2e8f0}
-            .tp91-dot.active{background:#0f172a}
-            #tp91-actions{display:flex;justify-content:space-between;align-items:center;padding:18px 24px 24px;gap:10px}
-            #tp91-skip{border:0;background:transparent;color:#64748b;font-weight:700;padding:10px;cursor:pointer}
-            #tp91-next{border:0;background:#0f172a;color:#fff;border-radius:12px;padding:12px 20px;font-weight:800;cursor:pointer;min-width:110px}
-            #tp91-settings{position:fixed;right:14px;bottom:14px;z-index:1000;border:0;border-radius:12px;padding:9px 12px;background:rgba(15,23,42,.9);color:#fff;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.18)}
-            @media(max-width:520px){#tp91-overlay{padding:12px}#tp91-top{padding:20px 18px 8px}#tp91-title{font-size:20px}#tp91-progress{padding-left:18px;padding-right:18px}#tp91-actions{padding:14px 18px 18px}}
-        `;
-        document.head.appendChild(style);
-    }
+    let tooltip = null;
+    let currentTarget = null;
+    let refreshTimer = null;
 
     function safeGet(key) {
         try { return localStorage.getItem(key); } catch (_) { return null; }
@@ -73,25 +72,159 @@
         try { localStorage.setItem(key, value); } catch (_) {}
     }
 
-    function closeTutorial(markComplete) {
-        if (markComplete) {
-            safeSet(STORAGE_KEY, '1');
-            safeSet(PROFILE_KEY, VERSION);
+    function injectStyles() {
+        if (document.getElementById('tp91-tutorial-style')) return;
+        const style = document.createElement('style');
+        style.id = 'tp91-tutorial-style';
+        style.textContent = `
+            #tp91-overlay{position:fixed;inset:0;z-index:2147483000;background:rgba(2,6,23,.54);pointer-events:none}
+            #tp91-tooltip{position:fixed;z-index:2147483002;width:min(390px,calc(100vw - 28px));background:var(--bg-base,#0f172a);color:var(--text-main,#f8fafc);border:1px solid var(--glass-border,rgba(255,255,255,.14));border-radius:18px;padding:18px;box-shadow:0 18px 60px rgba(0,0,0,.45);font-family:inherit;pointer-events:auto}
+            #tp91-tooltip .tp91-count{font-size:11px;font-weight:900;color:var(--text-muted,#94a3b8);margin-bottom:5px}
+            #tp91-tooltip h2{font-size:18px;line-height:1.35;margin:0 0 8px;font-weight:900}
+            #tp91-tooltip p{font-size:13px;line-height:1.65;margin:0;color:var(--text-muted,#94a3b8)}
+            #tp91-tooltip .tp91-hint{margin-top:10px;font-size:12px;font-weight:800;color:#a855f7}
+            #tp91-tooltip .tp91-actions{display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:8px}
+            #tp91-tooltip button{border:0;cursor:pointer;font-family:inherit;font-weight:800}
+            #tp91-skip{background:transparent;color:var(--text-muted,#94a3b8);padding:8px}
+            #tp91-next{background:#fff;color:#0f172a;border-radius:10px;padding:10px 16px;min-width:86px}
+            body.light-theme #tp91-next{background:#0f172a;color:#fff}
+            .tp91-spotlight{position:relative!important;z-index:2147483001!important;box-shadow:0 0 0 4px rgba(168,85,247,.95),0 0 0 9999px rgba(2,6,23,.54),0 0 28px rgba(168,85,247,.55)!important;border-radius:12px!important}
+            .tp91-pulse{animation:tp91pulse 1.2s infinite ease-in-out}
+            @keyframes tp91pulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.2)}}
+            #tp91-help{position:fixed;right:14px;bottom:14px;z-index:1000;border:0;border-radius:12px;padding:9px 12px;background:rgba(15,23,42,.92);color:#fff;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.18)}
+            @media(max-width:520px){#tp91-tooltip{padding:15px;border-radius:16px}#tp91-tooltip h2{font-size:17px}}
+        `;
+        document.head.appendChild(style);
+    }
+
+    function visible(el) {
+        if (!el || el === tooltip || el === overlay) return false;
+        const r = el.getBoundingClientRect();
+        const s = getComputedStyle(el);
+        return r.width > 0 && r.height > 0 && s.display !== 'none' && s.visibility !== 'hidden';
+    }
+
+    function findTarget(words) {
+        const candidates = Array.from(document.querySelectorAll('button,a,[role="button"],label,.glass-card,.section-title'))
+            .filter(visible);
+        let best = null;
+        let bestScore = -1;
+        candidates.forEach(el => {
+            const text = (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim();
+            if (!text || text.length > 100) return;
+            words.forEach((word, wi) => {
+                if (!text.includes(word)) return;
+                let score = 100 - wi * 8;
+                if (el.matches('button,a,[role="button"]')) score += 35;
+                if (text === word) score += 25;
+                if (score > bestScore) { best = el; bestScore = score; }
+            });
+        });
+        return best;
+    }
+
+    function clearTarget() {
+        if (currentTarget) {
+            currentTarget.classList.remove('tp91-spotlight', 'tp91-pulse');
         }
-        if (overlay) overlay.remove();
-        overlay = null;
-        document.body.style.overflow = '';
+        currentTarget = null;
+    }
+
+    function positionTooltip() {
+        if (!tooltip) return;
+        const gap = 14;
+        const tw = Math.min(390, window.innerWidth - 28);
+        tooltip.style.width = tw + 'px';
+        const target = currentTarget;
+        if (!target || !visible(target)) {
+            tooltip.style.left = ((window.innerWidth - tw) / 2) + 'px';
+            tooltip.style.top = Math.max(24, (window.innerHeight - tooltip.offsetHeight) / 2) + 'px';
+            return;
+        }
+        const r = target.getBoundingClientRect();
+        let left = Math.max(14, Math.min(window.innerWidth - tw - 14, r.left + r.width / 2 - tw / 2));
+        let top;
+        const tooltipH = tooltip.offsetHeight;
+        if (r.bottom + gap + tooltipH <= window.innerHeight) top = r.bottom + gap;
+        else if (r.top - gap - tooltipH >= 0) top = r.top - gap - tooltipH;
+        else top = Math.max(14, Math.min(window.innerHeight - tooltipH - 14, window.innerHeight / 2 - tooltipH / 2));
+        tooltip.style.left = left + 'px';
+        tooltip.style.top = top + 'px';
+    }
+
+    function resolveTarget() {
+        clearTarget();
+        const resolver = steps[index].target;
+        currentTarget = typeof resolver === 'function' ? resolver() : null;
+        if (currentTarget) currentTarget.classList.add('tp91-spotlight', 'tp91-pulse');
+        positionTooltip();
+        updateHint();
+    }
+
+    function updateHint() {
+        if (!tooltip) return;
+        const hint = tooltip.querySelector('.tp91-hint');
+        if (!hint) return;
+        if (currentTarget && steps[index].action === 'click') {
+            hint.textContent = '画面の光っている場所をタップしてください';
+        } else if (steps[index].optional) {
+            hint.textContent = 'この機能が表示されない場合は「次へ」で進めます';
+        } else {
+            hint.textContent = '';
+        }
     }
 
     function render() {
-        if (!overlay) return;
+        if (!tooltip) return;
         const step = steps[index];
-        overlay.querySelector('#tp91-badge').textContent = `${index + 1} / ${steps.length}`;
-        overlay.querySelector('#tp91-title').textContent = step.title;
-        overlay.querySelector('#tp91-text').textContent = step.text;
-        overlay.querySelectorAll('.tp91-dot').forEach((dot, i) => dot.classList.toggle('active', i <= index));
-        overlay.querySelector('#tp91-next').textContent = index === steps.length - 1 ? '始める' : '次へ';
-        overlay.querySelector('#tp91-skip').textContent = index === steps.length - 1 ? '閉じる' : 'スキップ';
+        tooltip.querySelector('.tp91-count').textContent = `${index + 1} / ${steps.length}`;
+        tooltip.querySelector('h2').textContent = step.title;
+        tooltip.querySelector('p').textContent = step.text;
+        tooltip.querySelector('#tp91-next').textContent = index === steps.length - 1 ? '始める' : '次へ';
+        resolveTarget();
+    }
+
+    function cleanup() {
+        clearTarget();
+        if (refreshTimer) clearInterval(refreshTimer);
+        refreshTimer = null;
+        document.removeEventListener('click', onDocumentClick, true);
+        window.removeEventListener('resize', positionTooltip);
+        window.removeEventListener('scroll', positionTooltip, true);
+        if (overlay) overlay.remove();
+        if (tooltip) tooltip.remove();
+        overlay = null;
+        tooltip = null;
+        document.body.style.overflow = '';
+    }
+
+    function closeTutorial(markComplete) {
+        if (markComplete) {
+            safeSet(STORAGE_KEY, '1');
+            safeSet(VERSION_KEY, VERSION);
+        }
+        cleanup();
+    }
+
+    function nextStep() {
+        if (index >= steps.length - 1) {
+            closeTutorial(true);
+            return;
+        }
+        index += 1;
+        render();
+    }
+
+    function onDocumentClick(event) {
+        if (!currentTarget || !visible(currentTarget)) return;
+        const clicked = event.target instanceof Element ? event.target.closest('button,a,[role="button"],input,select,textarea') : null;
+        if (!clicked) return;
+        if (clicked === currentTarget || currentTarget.contains(clicked)) {
+            setTimeout(() => {
+                if (!overlay) return;
+                nextStep();
+            }, 450);
+        }
     }
 
     function openTutorial() {
@@ -100,49 +233,43 @@
         index = 0;
         overlay = document.createElement('div');
         overlay.id = 'tp91-overlay';
-        overlay.innerHTML = `
-            <div id="tp91-card" role="dialog" aria-modal="true" aria-labelledby="tp91-title">
-                <div id="tp91-top">
-                    <div id="tp91-badge"></div>
-                    <h2 id="tp91-title"></h2>
-                    <p id="tp91-text"></p>
-                </div>
-                <div id="tp91-progress" aria-hidden="true">
-                    ${steps.map(() => '<span class="tp91-dot"></span>').join('')}
-                </div>
-                <div id="tp91-actions">
-                    <button id="tp91-skip" type="button">スキップ</button>
-                    <button id="tp91-next" type="button">次へ</button>
-                </div>
+        tooltip = document.createElement('div');
+        tooltip.id = 'tp91-tooltip';
+        tooltip.setAttribute('role', 'dialog');
+        tooltip.setAttribute('aria-modal', 'false');
+        tooltip.innerHTML = `
+            <div class="tp91-count"></div>
+            <h2></h2>
+            <p></p>
+            <div class="tp91-hint"></div>
+            <div class="tp91-actions">
+                <button id="tp91-skip" type="button">スキップ</button>
+                <button id="tp91-next" type="button">次へ</button>
             </div>`;
         document.body.appendChild(overlay);
-        document.body.style.overflow = 'hidden';
+        document.body.appendChild(tooltip);
+        document.body.style.overflow = '';
 
-        overlay.querySelector('#tp91-next').addEventListener('click', () => {
-            if (index >= steps.length - 1) closeTutorial(true);
-            else { index += 1; render(); }
-        });
-        overlay.querySelector('#tp91-skip').addEventListener('click', () => closeTutorial(true));
-        overlay.addEventListener('click', (event) => {
-            if (event.target === overlay) closeTutorial(true);
-        });
-        document.addEventListener('keydown', onKeydown);
+        tooltip.querySelector('#tp91-next').addEventListener('click', nextStep);
+        tooltip.querySelector('#tp91-skip').addEventListener('click', () => closeTutorial(true));
+        document.addEventListener('click', onDocumentClick, true);
+        window.addEventListener('resize', positionTooltip);
+        window.addEventListener('scroll', positionTooltip, true);
+        refreshTimer = setInterval(() => {
+            if (!overlay) return;
+            const before = currentTarget;
+            const resolver = steps[index].target;
+            const found = typeof resolver === 'function' ? resolver() : null;
+            if (found !== before) resolveTarget();
+            else positionTooltip();
+        }, 900);
         render();
     }
 
-    function onKeydown(event) {
-        if (!overlay) return;
-        if (event.key === 'Escape') closeTutorial(true);
-        if (event.key === 'ArrowRight' || event.key === 'Enter') {
-            const next = overlay.querySelector('#tp91-next');
-            if (next) next.click();
-        }
-    }
-
     function addHelpButton() {
-        if (document.getElementById('tp91-settings')) return;
+        if (document.getElementById('tp91-help')) return;
         const button = document.createElement('button');
-        button.id = 'tp91-settings';
+        button.id = 'tp91-help';
         button.type = 'button';
         button.textContent = '使い方を見る';
         button.title = 'TimePilotの使い方をもう一度見る';
@@ -152,9 +279,7 @@
 
     function init() {
         addHelpButton();
-        if (safeGet(STORAGE_KEY) !== '1') {
-            setTimeout(openTutorial, 650);
-        }
+        if (safeGet(STORAGE_KEY) !== '1') setTimeout(openTutorial, 650);
     }
 
     window.timePilotTutorial = { open: openTutorial };
