@@ -11,6 +11,7 @@ on:
       - 'auth-hardening-v90.js'
       - 'cloud-sync-v90.js'
       - 'cloud-sync-trigger-v90.js'
+      - 'tutorial-v91.js'
       - '.github/workflows/inject-v88.yml'
 
 permissions:
@@ -33,7 +34,8 @@ jobs:
               '<script src="adaptive-v89.js"></script>',
               '<script src="app-options-v89.js"></script>',
               '<script src="auth-hardening-v90.js"></script>',
-              '<script src="cloud-sync-v90.js"></script>'
+              '<script src="cloud-sync-v90.js"></script>',
+              '<script src="tutorial-v91.js"></script>'
           ]
           for tag in tags:
               if tag not in s:
@@ -51,6 +53,6 @@ jobs:
           if git diff --cached --quiet; then
             echo 'No changes to commit'
           else
-            git commit -m 'chore: inject cloud data sync'
+            git commit -m 'feat: add first-use tutorial'
             git push
           fi
